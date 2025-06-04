@@ -10,9 +10,6 @@ sphinx-external-toc>=1.0.1
 # For API documentation
 sphinx-autodoc-typehints>=1.24.0
 
-# For link checking
-sphinx-linkcheck
-
 # Additional utilities
 requests>=2.31.0
 packaging>=23.0
