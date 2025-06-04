@@ -1,0 +1,42 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "OpenWeedLocator",
+    "Raspberry",
+    "GPIO",
+    "solenoids",
+    "ExG",
+    "HSV",
+    "opencv",
+    "numpy",
+    "picamera",
+    "gpiozero",
+    "sudo",
+    "raspi",
+    "config",
+    "conf",
+    "autodoc",
+    "intersphinx",
+    "autosectionlabel",
+    "copybutton",
+    "furo",
+    "myst",
+    "readthedocs",
+    "github",
+    "linux",
+    "ubuntu",
+    "debian",
+    "chmod",
+    "mkdir",
+    "virtualenv",
+    "workon",
+    "deactivate"
+  ],
+  "ignorePaths": [
+    "_build/**",
+    "_static/**",
+    "_external/**",
+    "*.log"
+  ]
+}

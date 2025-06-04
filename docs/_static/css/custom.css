@@ -1,0 +1,34 @@
+/* Custom styles for OpenWeedLocator documentation */
+
+/* Brand colors and styling */
+:root {
+    --owl-green: #2E7D32;
+    --owl-light-green: #4CAF50;
+    --owl-dark-green: #1B5E20;
+}
+
+/* Custom admonition styling */
+.admonition.important {
+    border-left-color: var(--owl-green);
+}
+
+.admonition.tip {
+    border-left-color: var(--owl-light-green);
+}
+
+/* Grid card hover effects */
+.sd-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+/* Code block styling */
+.highlight pre {
+    border-radius: 6px;
+}
+
+/* Logo spacing */
+.sidebar-brand img {
+    margin-bottom: 1rem;
+}

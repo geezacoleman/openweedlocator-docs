@@ -1,0 +1,3 @@
+# Configuration
+
+*Software configuration guides.*
