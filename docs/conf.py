@@ -139,7 +139,6 @@ epub_copyright = copyright
 # Intersphinx mapping
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'opencv': ('https://docs.opencv.org/4.x/', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
 }
