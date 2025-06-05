@@ -15,6 +15,7 @@ Welcome to the **OpenWeedLocator (OWL)** project documentation! OWL is an open-s
 
 ::::{grid} 1 2 2 2
 :gutter: 3
+
 :::{grid-item-card} 🚀 Quick Start
 :link: getting-started/index
 
