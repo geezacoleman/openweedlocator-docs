@@ -20,6 +20,8 @@ There are two main OWL designs to choose from:
 :::{grid-item-card} 📚 Original OWL (Educational)
 :class-card: sd-border-primary
 
+![Original OWL](https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/accae1b1-b00d-40f9-ab95-743b732df2a0)
+
 **Best for**: Learning, education, experimentation
 
 - Clear component layout for understanding
@@ -32,6 +34,8 @@ There are two main OWL designs to choose from:
 
 :::{grid-item-card} 🏭 Compact OWL (Production)
 :class-card: sd-border-success
+
+![Compact OWL - Extruded Aluminium](https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/a9771aa2-355d-40db-ac15-f6da037b63ed)
 
 **Best for**: Production use, durability, weather resistance
 
@@ -49,8 +53,13 @@ There are two main OWL designs to choose from:
 ### Option A: Quick Software Installation (Recommended)
 
 1. **Flash Raspberry Pi OS** (64-bit) to SD card using [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
+
+   ![Raspberry Pi Imager](https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/a86a6358-3a8c-4f40-94df-9eeba9c17e4d)
+
    - Set username to `owl` during setup
    - Enable SSH and WiFi if needed
+
+   ![Configuring the OWL](https://github.com/user-attachments/assets/10a74429-fc12-49a6-a9df-cc67a55dab0c)
 
 2. **Two-line installation** after first boot:
 
@@ -67,21 +76,37 @@ For detailed step-by-step installation, see our [complete software guide](../sof
 
 ## Step 2: Choose Your Hardware Path
 
-### Compact OWL (Recommended for New Builds)
+### Compact OWL Enclosure Options
 
-```{admonition} Recommended Components
-:class: note
+The Compact OWL comes in two enclosure variants:
 
-**Core Components:**
-- Raspberry Pi 5 (4GB) or Pi 4
-- Raspberry Pi Global Shutter Camera + 6mm lens
-- 64GB SD Card (minimum 16GB)
-- Official OWL driver board (or relay HAT alternative)
+::::{grid} 1 1 2 2
+:gutter: 3
 
-**Enclosure Options:**
-- Official OWL extruded aluminum enclosure, OR
-- 3D printed enclosure with required hardware
-```
+:::{grid-item-card} 🏭 Official Extruded Aluminium
+:img-top: https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/c5d8c4d7-21d0-4987-9691-cd9a8615b65a
+
+**Production Ready**
+- Extruded aluminum construction
+- Rubber seals and glass lens
+- Maximum durability and weather resistance
+- Available for purchase
+
+[Front View] | [Back View](https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/4ddf0538-265e-4e6b-aebd-040336d1562b)
+:::
+
+:::{grid-item-card} 🖨️ 3D Printed Enclosure
+:img-top: https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/beb40fca-723d-4f2b-9555-46bc0587cd8d
+
+**DIY Option**
+- 3D printable design
+- Requires additional hardware (O-rings, UV filter)
+- Cost-effective alternative
+- Good performance for most applications
+
+[3D Printed Back](https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/aa4898ff-5481-4d89-98ba-656302ac70b1)
+:::
+::::
 
 **Essential Parts for Compact OWL:**
 
@@ -206,9 +231,53 @@ Key settings to adjust:
 
 ## Step 6: Mounting & Deployment
 
-### Vehicle Mounting
+OWL systems have been successfully deployed across various platforms:
+
+### Vehicle-Mounted Spot Spraying
 
 ![Vehicle mounted OWL](https://user-images.githubusercontent.com/51358498/130522810-bb19e6ca-5019-4de4-83cc-858eca358ef8.jpg)
+
+**Typical Setup:**
+- 2m spot spraying boom with multiple OWLs
+- Mounted on utility vehicle
+- 12V car battery power
+- Operating speed: 6-8 km/h
+
+### Robot Integration
+
+![OWL on robot](https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/9cb73514-dffc-4c53-969e-c1c816610f1b)
+
+**Field Robot Applications:**
+- Integration with agricultural robots
+- 24V → 12V power conversion
+- Autonomous weed control operations
+- Trial area management
+
+### Alternative Mounting Options
+
+::::{grid} 1 1 3 3
+:gutter: 2
+
+:::{grid-item-card} 🚜 Ute/Vehicle
+:img-top: https://user-images.githubusercontent.com/51358498/130522810-bb19e6ca-5019-4de4-83cc-858eca358ef8.jpg
+
+Standard vehicle mounting with spray boom
+:::
+
+:::{grid-item-card} 🤖 Robot Platform  
+:img-top: https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/99df0188-a850-4753-ac48-ab743c46d563
+
+AgroIntelli Robotti integration
+:::
+
+:::{grid-item-card} 🚲 Bicycle Setup
+:img-top: https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/17ad4ead-429e-4384-9e74-b050a536897f
+
+Small-scale applications
+:::
+::::
+
+### Mounting Requirements
 
 - Mount at appropriate height for your application
 - Ensure stable, vibration-resistant mounting
