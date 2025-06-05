@@ -5,6 +5,8 @@
 
 getting-started/index
 hardware/index
+hardware/compact-owl/index
+hardware/original-owl/index
 software/index
 api/index
 ```
@@ -17,25 +19,25 @@ Welcome to the **OpenWeedLocator (OWL)** project documentation! OWL is an open-s
 :gutter: 3
 
 :::{grid-item-card} 🚀 Quick Start
-:link: getting-started/index
+:link: getting-started/index.html
 
 Get OWL up and running in under 30 minutes with our streamlined installation guide.
 :::
 
 :::{grid-item-card} 🔧 Hardware Assembly
-:link: hardware/index
+:link: hardware/index.html
 
 Complete guides for building both Original and Compact OWL systems with detailed parts lists.
 :::
 
 :::{grid-item-card} 💻 Software Setup
-:link: software/index
+:link: software/index.html
 
 Installation, configuration, and advanced setup options for Raspberry Pi and desktop systems.
 :::
 
 :::{grid-item-card} 📖 Usage & Applications
-:link: hardware/index
+:link: hardware/index.html
 
 Learn about mounting OWL on vehicles, robots, and other platforms for various weed control applications.
 :::
