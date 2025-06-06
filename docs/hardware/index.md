@@ -3,8 +3,9 @@
 
 ```{toctree}
 :maxdepth: 1
-:caption: Hardware variants
+:caption: Hardware
 :titlesonly:
+:hidden:
 
 compact-owl/index
 original-owl/index

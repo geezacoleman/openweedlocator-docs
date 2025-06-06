@@ -4,7 +4,7 @@ myst-parser>=2.0.0
 sphinx-copybutton>=0.5.2
 sphinx-tabs>=3.4.1
 sphinx-design>=0.5.0
-spinx-book-theme
+sphinx-book-theme
 
 # For MyST linkify extension
 linkify-it-py>=2.0.0

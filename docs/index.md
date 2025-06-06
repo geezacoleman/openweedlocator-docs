@@ -4,6 +4,7 @@
 ```{toctree}
 :maxdepth: 2
 :caption: Documentation
+:hidden:
 
 getting-started/index
 hardware/index
