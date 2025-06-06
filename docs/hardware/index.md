@@ -1,6 +1,7 @@
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Hardware variants
+:titlesonly:
 
 compact-owl/index
 original-owl/index
