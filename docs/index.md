@@ -5,8 +5,6 @@
 
 getting-started/index
 hardware/index
-hardware/compact-owl/index
-hardware/original-owl/index
 software/index
 api/index
 ```

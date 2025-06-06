@@ -1,3 +1,11 @@
+```{toctree}
+:maxdepth: 2
+:caption: Hardware variants
+
+compact-owl/index
+original-owl/index
+```
+
 # Hardware Requirements
 
 The specific hardware requirements and details for each OWL format are provided below. There are two designs developed 

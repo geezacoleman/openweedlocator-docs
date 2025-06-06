@@ -2,18 +2,18 @@
 
 /* Brand colors and styling */
 :root {
-    --owl-green: #2E7D32;
-    --owl-light-green: #4CAF50;
-    --owl-dark-green: #1B5E20;
+    --owl-blue: #002574;
+    --owl-light-blue: #0277F8;
+    --owl-dark-blue: #001951;
 }
 
 /* Custom admonition styling */
 .admonition.important {
-    border-left-color: var(--owl-green);
+    border-left-color: var(--owl-blue);
 }
 
 .admonition.tip {
-    border-left-color: var(--owl-light-green);
+    border-left-color: var(--owl-light-blue);
 }
 
 /* Grid card hover effects */
