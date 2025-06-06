@@ -1,3 +1,6 @@
+
+# OpenWeedLocator Documentation
+
 ```{toctree}
 :maxdepth: 2
 :caption: Documentation
@@ -7,8 +10,6 @@ hardware/index
 software/index
 api/index
 ```
-
-# OpenWeedLocator Documentation
 
 Welcome to the **OpenWeedLocator (OWL)** project documentation! OWL is an open-source hardware and software weed detector that uses entirely off-the-shelf components, simple green-detection algorithms, and 3D printable parts for low-cost, site-specific weed control.
 
@@ -39,6 +40,7 @@ Installation, configuration, and advanced setup options for Raspberry Pi and des
 Learn about mounting OWL on vehicles, robots, and other platforms for various weed control applications.
 :::
 ::::
+
 
 ## What is OpenWeedLocator?
 

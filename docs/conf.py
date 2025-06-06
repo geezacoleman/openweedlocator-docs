@@ -18,6 +18,10 @@ copyright = f'{datetime.now().year}, {author}'
 release = '2.0.0'
 version = '2.0'
 
+owl_blue = "002574"
+owl_light_blue = "0277F8"
+owl_dark_blue =  "001951"
+
 # -- General configuration ---------------------------------------------------
 extensions = [
     'myst_parser',                    # Markdown support
@@ -78,12 +82,12 @@ html_theme_options = {
     # 'light_logo': 'images/owl-logo-light.png',
     # 'dark_logo': 'images/owl-logo-dark.png',
     'light_css_variables': {
-        'color-brand-primary': '#2E7D32',
-        'color-brand-content': '#1B5E20',
+        'color-brand-primary': owl_blue,
+        'color-brand-content': owl_light_blue,
     },
     'dark_css_variables': {
-        'color-brand-primary': '#4CAF50',
-        'color-brand-content': '#81C784',
+        'color-brand-primary': owl_dark_blue,
+        'color-brand-content': owl_dark_blue,
     },
     'footer_icons': [
         {
