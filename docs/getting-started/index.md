@@ -1,11 +1,12 @@
 # Quick Start Guide
 
-Get your OpenWeedLocator (OWL) up and running quickly with this streamlined guide. This covers the essential steps to build and deploy your first OWL system.
+Get your OpenWeedLocator (OWL) build up and running in about 30 minutes. This covers the essential steps to build and deploy your first OWL system.
 
 ```{admonition} What You'll Need
 :class: tip
 
-- **Time**: ~2-4 hours for complete setup
+- **Time**: ~30 mins for software setup
+- **Hardware**: A 
 - **Skill Level**: Basic electronics and 3D printing knowledge helpful
 - **Prerequisites**: Raspberry Pi experience recommended
 ```
