@@ -2,11 +2,6 @@
 
 This guide covers setting up OWL units that connect to an existing WiFi network rather than creating their own hotspot. This configuration allows multiple OWLs to communicate over a shared network and optionally be managed by a central controller.
 
-```{contents} On this page
-:local:
-:depth: 2
-```
-
 ## Overview
 
 A networked OWL connects to your existing WiFi infrastructure and communicates via MQTT. This enables:

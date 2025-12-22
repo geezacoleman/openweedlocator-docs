@@ -18,9 +18,11 @@ copyright = f'{datetime.now().year}, {author}'
 release = '2.0.0'
 version = '2.0'
 
-owl_blue = "002574"
-owl_light_blue = "0277F8"
-owl_dark_blue =  "001951"
+# -- Brand colors (matching openweedlocator.org) -----------------------------
+owl_primary = "#114ED1"        # Main brand blue (from website)
+owl_secondary = "#C1E3FF"      # Light blue
+owl_accent = "#2E90DE"         # Medium blue
+owl_dark = "#204BAB"           # Dark blue (hover states)
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -31,8 +33,8 @@ extensions = [
     'sphinx.ext.intersphinx',         # Link to other documentation
     'sphinx.ext.autosectionlabel',    # Auto-generate section labels
     'sphinx_copybutton',              # Copy button for code blocks
-    'sphinx_tabs',                    # Tabbed content
-    'sphinx_design',                  # Modern UI components
+    'sphinx_design',                  # Modern UI components (grids, cards)
+    'sphinxcontrib.mermaid',          # Mermaid diagram support
 ]
 
 # MyST Parser configuration
@@ -78,16 +80,19 @@ html_short_title = 'OWL Docs'
 # Theme options
 html_theme_options = {
     'sidebar_hide_name': False,
-    # Comment out logos until you add them
     # 'light_logo': 'images/owl-logo-light.png',
     # 'dark_logo': 'images/owl-logo-dark.png',
     'light_css_variables': {
-        'color-brand-primary': owl_blue,
-        'color-brand-content': owl_light_blue,
+        'color-brand-primary': owl_primary,
+        'color-brand-content': owl_accent,
+        'color-link': owl_primary,
+        'color-link--hover': owl_dark,
     },
     'dark_css_variables': {
-        'color-brand-primary': owl_dark_blue,
-        'color-brand-content': owl_dark_blue,
+        'color-brand-primary': owl_secondary,
+        'color-brand-content': owl_accent,
+        'color-link': owl_secondary,
+        'color-link--hover': owl_accent,
     },
     'footer_icons': [
         {
@@ -165,3 +170,6 @@ autodoc_default_options = {
 copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
 copybutton_prompt_is_regexp = True
 copybutton_remove_prompts = True
+
+# Mermaid configuration
+mermaid_version = "10.6.0"

@@ -2,22 +2,17 @@
 
 This guide covers setting up a single OWL unit, either as a basic detection system or as a standalone unit with its own WiFi hotspot and dashboard.
 
-```{contents} On this page
-:local:
-:depth: 2
-```
-
 ## Prerequisites
 
 Before starting, ensure you have:
 
-| Requirement | Details |
-|-------------|---------|
-| Hardware | Fully assembled OWL with Raspberry Pi and camera |
-| Operating System | Raspberry Pi OS (64-bit) freshly installed |
-| Camera | Connected and enabled Raspberry Pi camera module |
+| Requirement | Details                                              |
+|-------------|------------------------------------------------------|
+| Hardware | Fully assembled OWL with Raspberry Pi and camera     |
+| Operating System | Raspberry Pi OS (64-bit) freshly installed           |
+| Camera | Connected and enabled Raspberry Pi camera module     |
 | Internet | WiFi or Ethernet connection (for initial setup only) |
-| Time | Approximately 30 minutes |
+| Time | Approximately 20-30 minutes                          |
 
 ## Step 1: Prepare the Raspberry Pi
 

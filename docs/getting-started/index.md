@@ -77,57 +77,6 @@ Joins your WiFi network and connects to an MQTT broker. Can be used with or with
 - **Fleet with central touchscreen control?** → [Networked + Controller](networked-setup.md#adding-a-central-controller)
 ```
 
-## Quick Start
-
-For most users, the setup takes just two commands after flashing the OS.
-
-### Step 1: Flash Raspberry Pi OS
-
-Use [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to flash **Raspberry Pi OS (64-bit)** to your SD card.
-
-```{important}
-During the imaging process, click the settings cog and:
-- Set username to `owl`
-- Enable SSH (recommended)
-- Configure WiFi if needed for initial setup
-```
-
-```{figure} https://github.com/user-attachments/assets/10a74429-fc12-49a6-a9df-cc67a55dab0c
-:alt: Raspberry Pi Imager configuration
-:width: 600px
-
-Configure the username as `owl` during imaging for best compatibility.
-```
-
-### Step 2: Run the Installer
-
-After booting your Raspberry Pi, open a terminal and run:
-
-```bash
-git clone https://github.com/geezacoleman/OpenWeedLocator owl
-bash owl/owl_setup.sh
-```
-
-The installer will guide you through the setup, including an optional dashboard configuration.
-
-```{admonition} Installation Time
-:class: note
-
-The full installation takes approximately **15-30 minutes** depending on your internet connection and SD card speed.
-```
-
-### Step 3: Focus Your Camera
-
-After installation, focus your camera using the desktop icon or:
-
-```bash
-~/owl/./owl.py --focus
-```
-
-Adjust the lens while watching the sharpness value—higher values indicate better focus.
-
----
-
 ## Configuration Comparison
 
 | Feature | Basic | Standalone | Networked |

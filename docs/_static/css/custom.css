@@ -1,34 +1,417 @@
-/* Custom styles for OpenWeedLocator documentation */
+/* ==========================================================================
+   OpenWeedLocator Documentation - Custom Styles for Furo Theme
+   Matches branding from openweedlocator.org
+   ========================================================================== */
 
-/* Brand colors and styling */
+/* --------------------------------------------------------------------------
+   1. Import Quicksand Font (matches OWL website)
+   -------------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+
+/* --------------------------------------------------------------------------
+   2. CSS Custom Properties (Brand Colors)
+   -------------------------------------------------------------------------- */
 :root {
-    --owl-blue: #002574;
-    --owl-light-blue: #0277F8;
-    --owl-dark-blue: #001951;
+    /* Primary brand colors from openweedlocator.org */
+    --owl-primary: #114ED1;
+    --owl-secondary: #C1E3FF;
+    --owl-accent: #2E90DE;
+    --owl-dark: #204BAB;
+    --owl-light: #83C7FF;
+
+    /* Neutrals */
+    --owl-text: #333333;
+    --owl-bg-light: #F6F6F6;
+    --owl-border: #E6E6E6;
+    --owl-white: #FFFFFF;
+
+    /* Status colors */
+    --owl-success: #28a745;
+    --owl-warning: #ffc107;
+    --owl-error: #dc3545;
+    --owl-info: #17a2b8;
 }
 
-/* Custom admonition styling */
+/* --------------------------------------------------------------------------
+   3. Typography - Apply Quicksand Font
+   -------------------------------------------------------------------------- */
+body,
+.sidebar-brand-text,
+.sidebar-tree,
+.toc-tree {
+    font-family: "Quicksand", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6,
+.sidebar-brand-text {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 600;
+}
+
+/* Body text weight */
+body {
+    font-weight: 400;
+}
+
+/* Keep monospace for code */
+code, pre, .highlight {
+    font-family: "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* --------------------------------------------------------------------------
+   4. Furo Theme Variable Overrides (Light Mode)
+   -------------------------------------------------------------------------- */
+body[data-theme="light"] {
+    /* Brand colors */
+    --color-brand-primary: var(--owl-primary);
+    --color-brand-content: var(--owl-accent);
+
+    /* Links */
+    --color-link: var(--owl-primary);
+    --color-link-underline: var(--owl-secondary);
+    --color-link--hover: var(--owl-dark);
+    --color-link-underline--hover: var(--owl-primary);
+
+    /* Sidebar */
+    --color-sidebar-brand-text: var(--owl-primary);
+    --color-sidebar-link-text--top-level: var(--owl-text);
+    --color-sidebar-item-background--current: var(--owl-secondary);
+    --color-sidebar-item-background--hover: rgba(17, 78, 209, 0.1);
+
+    /* Admonitions */
+    --color-admonition-title-background--note: rgba(17, 78, 209, 0.1);
+    --color-admonition-title-background--tip: rgba(46, 144, 222, 0.1);
+    --color-admonition-title-background--important: rgba(32, 75, 171, 0.1);
+    --color-admonition-title-background--warning: rgba(255, 193, 7, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   5. Furo Theme Variable Overrides (Dark Mode)
+   -------------------------------------------------------------------------- */
+body[data-theme="dark"] {
+    /* Brand colors - lighter for dark mode */
+    --color-brand-primary: var(--owl-secondary);
+    --color-brand-content: var(--owl-light);
+
+    /* Links */
+    --color-link: var(--owl-secondary);
+    --color-link--hover: var(--owl-light);
+}
+
+/* --------------------------------------------------------------------------
+   6. Admonition Styling
+   -------------------------------------------------------------------------- */
+.admonition {
+    border-radius: 6px;
+    font-family: "Quicksand", sans-serif;
+}
+
+.admonition-title {
+    font-weight: 600;
+}
+
+/* Note - Primary blue */
+.admonition.note {
+    border-color: var(--owl-primary);
+}
+
+.admonition.note > .admonition-title {
+    background-color: rgba(17, 78, 209, 0.1);
+}
+
+/* Tip - Accent blue */
+.admonition.tip,
+.admonition.hint {
+    border-color: var(--owl-accent);
+}
+
+.admonition.tip > .admonition-title,
+.admonition.hint > .admonition-title {
+    background-color: rgba(46, 144, 222, 0.1);
+}
+
+/* Important - Dark blue */
 .admonition.important {
-    border-left-color: var(--owl-blue);
+    border-color: var(--owl-dark);
 }
 
-.admonition.tip {
-    border-left-color: var(--owl-light-blue);
+.admonition.important > .admonition-title {
+    background-color: rgba(32, 75, 171, 0.1);
 }
 
-/* Grid card hover effects */
-.sd-card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
+/* Warning */
+.admonition.warning,
+.admonition.caution,
+.admonition.attention {
+    border-color: var(--owl-warning);
+}
+
+.admonition.warning > .admonition-title,
+.admonition.caution > .admonition-title,
+.admonition.attention > .admonition-title {
+    background-color: rgba(255, 193, 7, 0.15);
+}
+
+/* Error/Danger */
+.admonition.error,
+.admonition.danger {
+    border-color: var(--owl-error);
+}
+
+.admonition.error > .admonition-title,
+.admonition.danger > .admonition-title {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Success */
+.admonition.success {
+    border-color: var(--owl-success);
+}
+
+.admonition.success > .admonition-title {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+/* See Also */
+.admonition.seealso {
+    border-color: var(--owl-info);
+}
+
+.admonition.seealso > .admonition-title {
+    background-color: rgba(23, 162, 184, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   7. Sphinx-Design Cards
+   -------------------------------------------------------------------------- */
+.sd-card {
+    border-radius: 8px;
     transition: all 0.3s ease;
+    font-family: "Quicksand", sans-serif;
+}
+
+.sd-card:hover {
+    box-shadow: 0 6px 20px rgba(17, 78, 209, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Card border colors */
+.sd-border-primary {
+    border-color: var(--owl-primary) !important;
+}
+
+.sd-border-success {
+    border-color: var(--owl-success) !important;
+}
+
+.sd-border-secondary {
+    border-color: var(--owl-accent) !important;
+}
+
+/* Card header */
+.sd-card-header {
+    font-weight: 600;
+    background-color: var(--owl-bg-light);
+}
+
+/* --------------------------------------------------------------------------
+   8. Code Blocks
+   -------------------------------------------------------------------------- */
+/* Inline code */
+code.literal {
+    background-color: var(--owl-bg-light);
+    border: 1px solid var(--owl-border);
+    border-radius: 4px;
+    padding: 0.1em 0.3em;
+    font-size: 0.9em;
 }
 
 /* Code block styling */
-.highlight pre {
-    border-radius: 6px;
+.highlight {
+    border-radius: 8px;
 }
 
-/* Logo spacing */
-.sidebar-brand img {
-    margin-bottom: 1rem;
+.highlight pre {
+    border-radius: 8px;
+}
+
+/* Code block caption */
+.code-block-caption {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 500;
+    background-color: var(--owl-bg-light);
+    border-radius: 8px 8px 0 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.9em;
+    border: 1px solid var(--owl-border);
+    border-bottom: none;
+}
+
+.code-block-caption + div.highlight pre {
+    border-radius: 0 0 8px 8px;
+}
+
+/* --------------------------------------------------------------------------
+   9. Tables
+   -------------------------------------------------------------------------- */
+table {
+    font-family: "Quicksand", sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.5rem 0;
+}
+
+th {
+    background-color: var(--owl-primary);
+    color: var(--owl-white);
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    text-align: left;
+}
+
+td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--owl-border);
+}
+
+tbody tr:hover {
+    background-color: rgba(17, 78, 209, 0.03);
+}
+
+/* Dark mode table header */
+body[data-theme="dark"] th {
+    background-color: var(--owl-dark);
+}
+
+/* --------------------------------------------------------------------------
+   10. Sidebar Enhancements
+   -------------------------------------------------------------------------- */
+.sidebar-brand-text {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Active navigation item */
+.sidebar-tree .current-page > .reference {
+    font-weight: 600;
+    color: var(--owl-primary);
+}
+
+/* Navigation hover */
+.sidebar-tree a:hover {
+    color: var(--owl-primary);
+}
+
+/* --------------------------------------------------------------------------
+   11. Table of Contents (Right Sidebar)
+   -------------------------------------------------------------------------- */
+.toc-tree a {
+    font-family: "Quicksand", sans-serif;
+}
+
+.toc-tree .active > a {
+    color: var(--owl-primary);
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   12. Figures and Images
+   -------------------------------------------------------------------------- */
+figure {
+    margin: 1.5rem 0;
+}
+
+figure img {
+    border-radius: 8px;
+    border: 1px solid var(--owl-border);
+}
+
+figcaption {
+    font-family: "Quicksand", sans-serif;
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 0.5rem;
+    text-align: center;
+    font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   13. Mermaid Diagrams
+   -------------------------------------------------------------------------- */
+.mermaid {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   14. Search
+   -------------------------------------------------------------------------- */
+.search-button__wrapper {
+    font-family: "Quicksand", sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   15. Footer
+   -------------------------------------------------------------------------- */
+.footer {
+    font-family: "Quicksand", sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   16. Mobile Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .sd-card {
+        margin-bottom: 1rem;
+    }
+
+    .admonition {
+        padding: 0.75rem;
+    }
+
+    table {
+        font-size: 0.9em;
+    }
+
+    th, td {
+        padding: 0.5rem;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   17. Print Styles
+   -------------------------------------------------------------------------- */
+@media print {
+    .sidebar-drawer,
+    .toc-drawer {
+        display: none !important;
+    }
+
+    .main {
+        margin-left: 0 !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   18. Content Area Tweaks
+   -------------------------------------------------------------------------- */
+.content {
+    font-family: "Quicksand", sans-serif;
+    line-height: 1.7;
+}
+
+/* List spacing */
+.content ul,
+.content ol {
+    margin: 1rem 0;
+}
+
+.content li {
+    margin: 0.5rem 0;
+}
+
+/* Paragraph spacing */
+.content p {
+    margin: 1rem 0;
 }
