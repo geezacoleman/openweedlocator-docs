@@ -1,6 +1,9 @@
 # Getting Started
 
-Welcome to the OpenWeedLocator (OWL) software setup guide. This section will help you get your OWL system running after you've completed the hardware build.
+Welcome to the OpenWeedLocator (OWL) software setup guide. This section will help you get your OWL system running using
+our ready-made setup scripts, once you've completed the hardware build.
+
+Alternatively, if you're interested in just exploring the software, you can install this on Raspberry Pi with a camera attached.
 
 ```{admonition} Prerequisites
 :class: tip
@@ -8,8 +11,16 @@ Welcome to the OpenWeedLocator (OWL) software setup guide. This section will hel
 Before proceeding, ensure you have:
 - A fully assembled OWL unit ([Original OWL](../hardware/original-owl.md) or [Compact OWL](../hardware/compact-owl.md))
 - A Raspberry Pi with a fresh installation of **Raspberry Pi OS (64-bit)**
-- A connected Raspberry Pi camera module
+- A connected Raspberry Pi camera module (we currently support USB or Raspberry Pi cameras)
 - SSH access or a connected monitor/keyboard
+```
+```{admonition} Connect a USB Drive
+:class: important
+
+The OWL software requires that you connect a USB drive to the Raspberry Pi for data collection. The software will not 
+start without one connected. 
+
+We recommend the Sandisk Fit or Samsung drives that will fit within the Compact enclosure.
 ```
 
 ## Choose Your Setup Path
@@ -22,15 +33,17 @@ The OWL system supports several deployment configurations. Choose based on your 
 :::{grid-item-card} 🦉 Basic OWL
 :class-card: sd-border-secondary
 
-**Simplest setup — no remote access**
+**Simplest setup, but no remote access**
 
-Runs detection only. Control via connected monitor/keyboard or SSH. No dashboard or WiFi hotspot.
+This is the original, basic setup with no remote control over a network. It can be setup to work with the 'Advanced/Ute Controllers'
+that provide simple management options. Configuration changes need a connected monitor/keyboard or via SSH. 
+No dashboard provided.
 
 **Best for:**
 - Quick testing
-- Development
 - Minimal resource usage
 - Headless operation
+- Small setups without need for oversight
 
 [Setup Guide →](owl-setup.md#basic-owl-no-dashboard)
 :::
@@ -43,9 +56,10 @@ Runs detection only. Control via connected monitor/keyboard or SSH. No dashboard
 Creates its own WiFi network with a local dashboard. Connect directly from your phone or tablet.
 
 **Best for:**
-- Single OWL deployments
+- Single or few OWL deployments (consider a networked system for > 4 OWL setups)
 - Field operations
-- DIY builds
+- Data collection
+- Visualising detection performance and camera FOV
 - No existing network infrastructure
 
 [Setup Guide →](owl-setup.md#standalone-owl-with-dashboard)
@@ -56,25 +70,27 @@ Creates its own WiFi network with a local dashboard. Connect directly from your 
 
 **Connects to existing network**
 
-Joins your WiFi network and connects to an MQTT broker. Can be used with or without a dedicated controller.
+Joins your WiFi network and connects to an MQTT broker. Can be used with or without a dedicated networked controller.
 
 **Best for:**
-- Integration with existing systems
-- Multiple OWLs on shared network
-- Custom MQTT setups
+- Larger OWL setups with need for fleet-style management and error reporting
+- More fine-detailed control
 - Farm network integration
+
+**Requires:**
+1. Networked controller 
+2. Dedicated network for the system
 
 [Setup Guide →](networked-setup.md)
 :::
 ::::
 
-```{admonition} Which should I choose?
+```{admonition} What should I choose?
 :class: tip
 
 - **Just want to try it out?** → Basic OWL
 - **Single unit in the field?** → Standalone OWL  
-- **Multiple OWLs or existing network?** → Networked OWL
-- **Fleet with central touchscreen control?** → [Networked + Controller](networked-setup.md#adding-a-central-controller)
+- **Multiple OWLs** → Networked OWL + Controller
 ```
 
 ## Configuration Comparison
