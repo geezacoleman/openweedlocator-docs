@@ -1,6 +1,6 @@
 # Operation Guide
 
-This guide explains how the OWL detects weeds, the image processing workflow, and how to connect solenoids for spot spraying.
+This guide explains how the OWL detects weeds and the image processing workflow.
 
 ## Image Processing Workflow
 
@@ -86,34 +86,6 @@ Performance of each algorithm was tested on 7 different day/night fields:
 
 ---
 
-## Connecting Solenoids for Spot Spraying
-
-Once hardware setup is complete, you can wire solenoids for spot spraying, targeted tillage, spot flaming, or other targeted weed control.
-
-### Wiring Instructions
-
-1. Wire the **GND wire** of your device to the ground pin on the Bulgin plug (same wire used for GND from 12V power source)
-2. Wire the **signal wire** to one of the relay outputs:
-   - Pin 1: Blue wire
-   - Pin 2: Green wire
-   - Pin 3: Orange wire
-   - Pin 4: White wire
-
-### Six-Way Harness
-
-The easiest wiring method is to create a six-way harness:
-- One end connects to the plug
-- One wire connects to source power GND
-- Four remaining wires connect to solenoids
-
-![Solenoid Wiring Diagram](https://user-images.githubusercontent.com/40649348/156698481-3d4fec4e-567a-4a18-b72e-b26d35c8d1c7.png)
-
-| Bulgin plug | Ground wiring harness |
-|:-----------:|:---------------------:|
-| ![Bulgin plug](https://media.github.sydney.edu.au/user/5402/files/7f753380-d03a-11eb-8d9b-658db73d3408) | ![Ground harness](https://media.github.sydney.edu.au/user/5402/files/7e440680-d03a-11eb-9af1-67132f4cc36f) |
-
----
-
 ## Operating Parameters
 
 Key parameters affecting field operation:
@@ -131,6 +103,7 @@ See [Configuration Guide](../../software/configuration/index.md) for full parame
 
 ## Next Steps
 
+- [Wiring & Connections](../wiring/index.md) - Connect solenoids, lights, and other 12V devices
 - [Use Cases](../use-cases/index.md) - Example applications and setups
 - [Configuration](../../software/configuration/index.md) - Adjust detection parameters
 - [Troubleshooting](../../troubleshooting/index.md) - Common issues and solutions

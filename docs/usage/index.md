@@ -7,6 +7,7 @@
 :hidden:
 
 operation/index
+wiring/index
 use-cases/index
 ```
 
@@ -14,14 +15,21 @@ This section covers how to operate your OWL in the field and the various applica
 
 ## Quick Navigation
 
-::::{grid} 1 1 2 2
+::::{grid} 1 1 3 3
 :gutter: 3
 
 :::{grid-item-card} Operation Guide
 :link: operation/index
 :link-type: doc
 
-How the OWL detects weeds, algorithm details, solenoid wiring, and field results.
+How the OWL detects weeds, algorithm details, and field results.
+:::
+
+:::{grid-item-card} Wiring & Connections
+:link: wiring/index
+:link-type: doc
+
+Connect solenoids, indicator lights, and other 12V devices. Includes demo/educational setups.
 :::
 
 :::{grid-item-card} Use Cases
