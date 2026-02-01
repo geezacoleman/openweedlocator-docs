@@ -9,7 +9,7 @@
 getting-started/index
 hardware/index
 software/index
-network/index
+controllers/index
 usage/index
 troubleshooting/index
 reference/index
@@ -51,6 +51,13 @@ Installation, configuration, and advanced setup options for Raspberry Pi and des
 :link-type: doc
 
 Learn about mounting OWL on vehicles, robots, and other platforms for various weed control applications.
+:::
+
+:::{grid-item-card} 🎛️ Controllers
+:link: controllers/index
+:link-type: doc
+
+Wired hardware controllers and wireless dashboard options for monitoring and control.
 :::
 ::::
 

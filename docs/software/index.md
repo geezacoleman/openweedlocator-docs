@@ -8,7 +8,6 @@
 
 installation/index
 configuration/index
-controller/index
 green-on-green/index
 development/index
 ```
@@ -57,13 +56,6 @@ Step-by-step instructions for installing OWL software on your Raspberry Pi.
 :link-type: doc
 
 Adjust detection sensitivity, relay timing, and other parameters.
-:::
-
-:::{grid-item-card} Controller Setup
-:link: controller/index
-:link-type: doc
-
-Build and configure GPIO-based controllers for managing multiple OWLs.
 :::
 
 :::{grid-item-card} Green-on-Green

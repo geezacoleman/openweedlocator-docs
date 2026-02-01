@@ -1,6 +1,8 @@
-# Controller Setup
+# Wired Controllers
 
-GPIO-based controllers allow you to manage up to four OWL units from a central control panel. A CAN FD-based controller is also in development for better scalability.
+GPIO-based hardware controllers provide physical switch control for OWL units. These connect directly to the Raspberry Pi GPIO pins and allow tactile control of detection, recording, and sensitivity settings.
+
+A CAN FD-based controller is also in development for better scalability.
 
 | Ute Controller | Advanced Controller |
 |----------------|---------------------|
@@ -166,5 +168,5 @@ With config files set, save them to the OWL, reboot, and you should be ready to 
 
 ## Next Steps
 
-- [Configuration Guide](../configuration/index.md) - Detailed parameter reference
+- [Configuration Guide](../../software/configuration/index.md) - Detailed parameter reference
 - [3D Printing Guide](../../hardware/3d-printing/index.md) - Print controller enclosures

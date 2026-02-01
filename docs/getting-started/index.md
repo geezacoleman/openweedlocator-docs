@@ -9,7 +9,7 @@ Alternatively, if you're interested in just exploring the software, you can inst
 :class: tip
 
 Before proceeding, ensure you have:
-- A fully assembled OWL unit ([Original OWL](../hardware/original-owl.md) or [Compact OWL](../hardware/compact-owl.md))
+- A fully assembled OWL unit ([Original OWL](../hardware/original-owl/index.md) or [Compact OWL](../hardware/compact-owl/index.md))
 - A Raspberry Pi with a fresh installation of **Raspberry Pi OS (64-bit)**
 - A connected Raspberry Pi camera module (we currently support USB or Raspberry Pi cameras)
 - SSH access or a connected monitor/keyboard
@@ -45,7 +45,7 @@ No dashboard provided.
 - Headless operation
 - Small setups without need for oversight
 
-[Setup Guide →](owl-setup.md#basic-owl-no-dashboard)
+[Setup Guide →](owl-setup.md)
 :::
 
 :::{grid-item-card} 📡 Standalone OWL
@@ -62,7 +62,7 @@ Creates its own WiFi network with a local dashboard. Connect directly from your 
 - Visualising detection performance and camera FOV
 - No existing network infrastructure
 
-[Setup Guide →](owl-setup.md#standalone-owl-with-dashboard)
+[Setup Guide →](owl-setup.md#completing-standalone-owl-setup)
 :::
 
 :::{grid-item-card} 🌐 Networked OWL
@@ -117,18 +117,19 @@ After completing your chosen setup path:
 :class: success
 
 **Recommended next steps:**
-1. [Configure detection settings](../software/configuration.md) for your target weeds
-2. [Learn about detection algorithms](../software/algorithms.md) and when to use each
-3. [Mount your OWL](../usage/mounting.md) on your vehicle or platform
-4. [Test in the field](../usage/field-testing.md) with real vegetation
+1. [Configure detection settings](../software/configuration/index.md) for your target weeds
+2. [Learn about detection algorithms](../usage/operation/index.md) and when to use each
+3. [Review use cases](../usage/use-cases/index.md) for mounting and applications
+4. [Set up controllers](../controllers/index.md) for remote monitoring and control
 ```
 
-## Detailed Network Documentation
+## Controllers
 
-For in-depth technical information about network configurations, see the dedicated [Network Documentation](../network/index.md):
+For information about controlling and monitoring your OWL, see the [Controllers](../controllers/index.md) section:
 
-- [Standalone Mode](../network/standalone/index.md) - WiFi hotspot configuration, MQTT broker setup, firewall rules
-- [Networked Mode](../network/networked/index.md) - WiFi client setup, static IP configuration, multi-OWL deployment
+- [No Controller](../controllers/index.md#no-controller) - Run OWL autonomously
+- [Wired Controllers](../controllers/wired/index.md) - Physical switch control (Ute/Advanced Controller)
+- [Wireless Controllers](../controllers/wireless/index.md) - Dashboard and network control (Standalone/Networked modes)
 
 ---
 
