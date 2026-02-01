@@ -9,6 +9,7 @@
 getting-started/index
 hardware/index
 software/index
+network/index
 usage/index
 troubleshooting/index
 reference/index

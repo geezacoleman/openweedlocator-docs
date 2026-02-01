@@ -123,6 +123,15 @@ After completing your chosen setup path:
 4. [Test in the field](../usage/field-testing.md) with real vegetation
 ```
 
+## Detailed Network Documentation
+
+For in-depth technical information about network configurations, see the dedicated [Network Documentation](../network/index.md):
+
+- [Standalone Mode](../network/standalone/index.md) - WiFi hotspot configuration, MQTT broker setup, firewall rules
+- [Networked Mode](../network/networked/index.md) - WiFi client setup, static IP configuration, multi-OWL deployment
+
+---
+
 ## Need Help?
 
 ```{admonition} Support Resources
