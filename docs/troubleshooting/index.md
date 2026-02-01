@@ -188,7 +188,7 @@ If you're still experiencing issues:
 
 1. **Check the terminal output** - Run `~/owl/./owl.py` directly to see detailed error messages
 2. **Search existing issues** - Check [GitHub Issues](https://github.com/geezacoleman/OpenWeedLocator/issues) for similar problems
-3. **Ask the community** - Post in [GitHub Discussions](https://github.com/geezacoleman/OpenWeedLocator/discussions)
+3. **Ask the community** - Post in the [OWL Community](https://community.openweedlocator.org)
 4. **Report a bug** - [Create a new issue](https://github.com/geezacoleman/OpenWeedLocator/issues/new) with:
    - Error message (full text)
    - Steps to reproduce

@@ -96,7 +96,7 @@ The OWL relay outputs can control any 12V device, enabling:
 
 As more OWLs are built and fallow weed control systems developed, we would love to share the results!
 
-- Post in [GitHub Discussions](https://github.com/geezacoleman/OpenWeedLocator/discussions)
+- Post in the [OWL Community](https://community.openweedlocator.org)
 - Share images of your finished systems
 - Describe your specific application and setup
 

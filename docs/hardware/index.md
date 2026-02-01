@@ -151,7 +151,7 @@ Both designs use similar core components but differ in assembly complexity and e
 
 ## Community & Support
 
-- 💬 **Questions**: Ask in [GitHub Discussions](https://github.com/geezacoleman/OpenWeedLocator/discussions)
+- 💬 **Questions**: Ask in the [OWL Community](https://community.openweedlocator.org)
 - 🔧 **Build Tips**: Share your assembly experience with the community
 - 📸 **Show Your Build**: We love seeing OWL systems in action!
 - 🐛 **Hardware Issues**: Report problems on [GitHub Issues](https://github.com/geezacoleman/OpenWeedLocator/issues)

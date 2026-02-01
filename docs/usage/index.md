@@ -57,6 +57,6 @@ The OWL is designed for site-specific weed control in fallow fields. It uses com
 
 As more OWLs are built and fallow weed control systems developed, we would love to share the end results. Please get in contact and we can upload images of finished systems.
 
-- Check the [Discussion page](https://github.com/geezacoleman/OpenWeedLocator/discussions) for questions, suggestions, ideas or feedback
+- Check the [OWL Community](https://community.openweedlocator.org) for questions, suggestions, ideas or feedback
 - If there's a bug or improvement, please [raise an issue](https://github.com/geezacoleman/OpenWeedLocator/issues)
 - Review the [contribution guidelines](https://github.com/geezacoleman/OpenWeedLocator/blob/main/CONTRIBUTING.md) for details on how to contribute
