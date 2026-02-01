@@ -1,6 +1,19 @@
 # Documentation build outputs
 docs/_build/
 docs/_static/generated/
+_build/
+
+# Claude Code / AI assistant files
+.claude/
+CLAUDE.md
+MIGRATION_PLAN.md
+HANDOVER_PROMPT.md
+
+# Source files (not for public repo)
+README-from-owl.md
+web_setup.sh
+doc_gen.py
+nul
 
 # Python
 __pycache__/

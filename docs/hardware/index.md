@@ -9,6 +9,7 @@
 
 compact-owl/index
 original-owl/index
+3d-printing/index
 ```
 
 The specific hardware requirements and details for each OWL format are provided below. There are two designs developed 
@@ -37,12 +38,13 @@ suppliers. Other types of connector, layout and design are also possible, which 
 
 :::{grid-item-card} 📚 Original OWL (Educational)
 :img-top: https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/accae1b1-b00d-40f9-ab95-743b732df2a0
-:link: original-owl.html
+:link: original-owl/index
+:link-type: doc
 
 **Educational Layout**
 
 The original OWL lays out all components in a flat design. It makes the connections and interactions within the system
-clear. It's a great educational tool to learn the parts required for a weed detection system and has served in the field 
+clear. It's a great educational tool to learn the parts required for a weed detection system and has served in the field
 as a functional weed detection system for a number of years.
 
 **Best for:** Education, prototyping, understanding system architecture
@@ -50,7 +52,8 @@ as a functional weed detection system for a number of years.
 
 :::{grid-item-card} 🏭 Compact OWL (Production)
 :img-top: https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/a9771aa2-355d-40db-ac15-f6da037b63ed
-:link: compact-owl.html
+:link: compact-owl/index
+:link-type: doc
 
 **Production Ready**
 
@@ -58,6 +61,17 @@ The new OWL design is more compact, inside either an extruded aluminium enclosur
 improved water and dust resistance, plus ease of assembly and longevity. This design is recommended for production use.
 
 **Best for:** Production deployment, field operations, commercial use
+:::
+
+:::{grid-item-card} 🖨️ 3D Printing Guide
+:link: 3d-printing/index
+:link-type: doc
+
+**Print Your Own Enclosure**
+
+All OWL enclosures and mounts can be 3D printed. STL files, print settings, and guidance are provided for both designs.
+
+**Includes:** STL files, print settings, controller enclosures
 :::
 ::::
 
@@ -72,6 +86,17 @@ It provides a more production friendly, durable and water/chemical resisant opti
 ### OWL Driver Board
 The [Official OWL driver board](https://github.com/geezacoleman/owl-driver-board) combines the relay control board, power supply and wiring. It will be available for
 purchase soon, or you can use the files provided to order/make your own.
+
+## Controllers
+
+OWL units can be controlled via GPIO-based controllers for managing 1-4 units. Controllers provide:
+
+- Recording toggle switches
+- Sensitivity adjustment
+- Status LEDs
+- Detection mode switching
+
+For complete controller wiring, GPIO pin mapping, and configuration, see the Controller Setup Guide (coming soon in the Software section).
 
 ## Required Tools
 
@@ -118,8 +143,8 @@ any component.
 
 Choose your OWL variant based on your needs:
 
-- **New to OWL?** Start with [Compact OWL](compact-owl.html) for easier assembly and production-ready design
-- **Want to learn?** Try [Original OWL](original-owl.html) for educational value and clear component visibility
+- **New to OWL?** Start with [Compact OWL](compact-owl/index.md) for easier assembly and production-ready design
+- **Want to learn?** Try [Original OWL](original-owl/index.md) for educational value and clear component visibility
 
 Both designs use similar core components but differ in assembly complexity and enclosure design.
 ```

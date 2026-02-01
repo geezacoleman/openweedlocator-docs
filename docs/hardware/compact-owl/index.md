@@ -316,3 +316,37 @@ the solenoids or whatever devices you are driving.
 | Bulgin plug | Ground wiring harness |
 |:-------------:|:-------------:|
 | ![Bulginplug](https://media.github.sydney.edu.au/user/5402/files/7f753380-d03a-11eb-8d9b-658db73d3408) | ![Groundharness](https://media.github.sydney.edu.au/user/5402/files/7e440680-d03a-11eb-9af1-67132f4cc36f) |
+
+---
+
+## Next Steps
+
+Congratulations on completing your Compact OWL hardware assembly! Here's what to do next:
+
+::::{grid} 1 1 2 2
+:gutter: 3
+
+:::{grid-item-card} 💻 Software Installation
+:link: ../../software/installation/index.html
+
+Install the OWL software on your Raspberry Pi to get your detection unit operational.
+:::
+
+:::{grid-item-card} ⚙️ Configuration
+:link: ../../software/configuration/index.html
+
+Configure detection sensitivity, relay timing, and other parameters for your specific use case.
+:::
+
+:::{grid-item-card} 🎯 Operation Guide
+:link: ../../usage/operation/index.html
+
+Learn how to operate your OWL in the field, including mounting, alignment, and best practices.
+:::
+
+:::{grid-item-card} 🖨️ 3D Printing
+:link: ../3d-printing/index.html
+
+Need replacement parts or want to print your own enclosure? Find all STL files and print settings here.
+:::
+::::
