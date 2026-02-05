@@ -3,6 +3,9 @@ docs/_build/
 docs/_static/generated/
 _build/
 
+# Reference docs
+reference_docs
+
 # Claude Code / AI assistant files
 .claude/
 CLAUDE.md
