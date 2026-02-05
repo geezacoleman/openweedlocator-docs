@@ -19,6 +19,12 @@ A networked OWL connects to your existing WiFi infrastructure and communicates v
 **Networked OWL** joins your existing WiFi — the OWL connects to your network.
 ```
 
+```{admonition} Haven't run the installer yet?
+:class: tip
+
+Complete the [Two-Step Install](../../software/two-step-install.md) first, then return here when prompted for dashboard setup.
+```
+
 ## Architecture Options
 
 ### Option A: Networked OWLs Only
@@ -107,7 +113,7 @@ If you are using a central controller, set that up first so you have the MQTT br
 
 ### Step 1: Run Basic OWL Setup
 
-First, complete the standard OWL installation. See [OWL Setup](owl-setup.md) for the full step-by-step walkthrough.
+First, complete the standard OWL installation. See [Two-Step Install](../../software/two-step-install.md) for the full step-by-step walkthrough.
 
 ```bash
 git clone https://github.com/geezacoleman/OpenWeedLocator owl
@@ -115,7 +121,7 @@ cd owl
 bash owl_setup.sh
 ```
 
-The installer will run through all steps (system update, camera check, virtual environment, OpenCV, dependencies, systemd service, desktop setup). See the [OWL Setup - Expected Installation Output](owl-setup.md#expected-installation-output) for what to expect at each step.
+The installer will run through all steps (system update, camera check, virtual environment, OpenCV, dependencies, systemd service, desktop setup). See the [Two-Step Install - Expected Installation Output](../../software/two-step-install.md#expected-installation-output) for what to expect at each step.
 
 ### Step 2: Enable Dashboard in Networked Mode
 
@@ -1049,6 +1055,8 @@ ip addr show wlan0
 sudo systemctl restart NetworkManager
 ```
 
+For more troubleshooting help, see the [full Troubleshooting Guide](../../troubleshooting/index.md).
+
 ---
 
 ## Service Management
@@ -1107,8 +1115,8 @@ MQTT overhead is minimal (~10 Kbps per OWL).
 ## Next Steps
 
 ```{seealso}
-- [OWL Setup](owl-setup.md) - Basic and standalone configurations
-- [Configuration Guide](../software/configuration/index.md) - Detection parameter tuning
-- [Controllers](../controllers/index.md) - Wired and wireless controller options
-- [Use Cases](../usage/use-cases/index.md) - Application examples and field deployment
+- [Standalone Setup](standalone.md) - Single OWL with WiFi hotspot
+- [Configuration Guide](../../software/configuration/index.md) - Detection parameter tuning
+- [Controllers](../../controllers/index.md) - Wired and wireless controller options
+- [Use Cases](../../usage/use-cases/index.md) - Application examples and field deployment
 ```

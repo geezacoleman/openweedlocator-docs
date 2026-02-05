@@ -32,18 +32,25 @@ to everyone.
 Complete guides for building both Original and Compact OWL systems with detailed parts lists.
 :::
 
-:::{grid-item-card} 🚀 Software Quick Start
+:::{grid-item-card} 🚀 Getting Started
 :link: getting-started/index
 :link-type: doc
 
-Completed the OWL build? Get your OWL up and running in under 30 minutes.
+New to OWL? Start here for a roadmap of the full setup process.
 :::
 
-:::{grid-item-card} 💻 Detailed Software Setup
-:link: software/index
+:::{grid-item-card} 💻 Software Installation
+:link: software/two-step-install
 :link-type: doc
 
-Installation, configuration, and advanced setup options for Raspberry Pi and desktop systems.
+Two-step automated install — up and running in ~10 minutes.
+:::
+
+:::{grid-item-card} 📡 Dashboard & Wireless
+:link: controllers/wireless/index
+:link-type: doc
+
+Set up your dashboard for remote monitoring. Standalone hotspot or networked multi-OWL.
 :::
 
 :::{grid-item-card} 📖 Usage & Applications

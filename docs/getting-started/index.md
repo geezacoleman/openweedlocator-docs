@@ -1,153 +1,123 @@
 # Getting Started
 
-Welcome to the OpenWeedLocator (OWL) software setup guide. This section will help you get your OWL system running using
-our ready-made setup scripts, once you've completed the hardware build.
+Welcome! Here's how to get your OWL up and running.
 
-Alternatively, if you're interested in just exploring the software, you can install this on Raspberry Pi with a camera attached.
-
-```{admonition} Prerequisites
-:class: tip
-
-Before proceeding, ensure you have:
-- A fully assembled OWL unit ([Original OWL](../hardware/original-owl/index.md) or [Compact OWL](../hardware/compact-owl/index.md))
-- A Raspberry Pi with a fresh installation of **Raspberry Pi OS (64-bit)**
-- A connected Raspberry Pi camera module (we currently support USB or Raspberry Pi cameras)
-- SSH access or a connected monitor/keyboard
-```
 ```{admonition} Connect a USB Drive
 :class: important
 
-The OWL software requires that you connect a USB drive to the Raspberry Pi for data collection. The software will not 
-start without one connected. 
+The OWL software requires that you connect a USB drive to the Raspberry Pi for data collection. The software will not
+start without one connected.
 
 We recommend the Sandisk Fit or Samsung drives that will fit within the Compact enclosure.
 ```
 
-## Choose Your Setup Path
+## What do I need?
 
-The OWL system supports several deployment configurations. Choose based on your needs:
-
-::::{grid} 1 1 3 3
+::::{grid} 1 1 2 2
 :gutter: 3
 
-:::{grid-item-card} 🦉 Basic OWL
-:class-card: sd-border-secondary
+:::{grid-item-card} Need hardware?
+:link: ../hardware/index
+:link-type: doc
 
-**Simplest setup, but no remote access**
-
-This is the original, basic setup with no remote control over a network. It can be setup to work with the 'Advanced/Ute Controllers'
-that provide simple management options. Configuration changes need a connected monitor/keyboard or via SSH. 
-No dashboard provided.
-
-**Best for:**
-- Quick testing
-- Minimal resource usage
-- Headless operation
-- Small setups without need for oversight
-
-[Setup Guide →](owl-setup.md)
+View the full parts lists and assembly guides for the Original OWL and Compact OWL. The Paradar driver board is available from the [Paradar store](https://paradar.co.uk/collections/openweedlocator).
 :::
 
-:::{grid-item-card} 📡 Standalone OWL
-:class-card: sd-border-primary
+:::{grid-item-card} Already have parts?
+:link: ../hardware/original-owl/index
+:link-type: doc
 
-**Self-contained with WiFi hotspot**
+Jump straight to the assembly guides for the [Original OWL](../hardware/original-owl/index.md) or [Compact OWL](../hardware/compact-owl/index.md).
+:::
+::::
 
-Creates its own WiFi network with a local dashboard. Connect directly from your phone or tablet.
+## How do I install the software?
 
-**Best for:**
-- Single or few OWL deployments (consider a networked system for > 4 OWL setups)
-- Field operations
-- Data collection
-- Visualising detection performance and camera FOV
-- No existing network infrastructure
+Once your hardware is assembled with a Raspberry Pi and camera connected:
 
-[Setup Guide →](owl-setup.md#completing-standalone-owl-setup)
+::::{grid} 1 1 2 2
+:gutter: 3
+
+:::{grid-item-card} Two-Step Install (Recommended)
+:link: ../software/two-step-install
+:link-type: doc
+
+Automated setup — download the repo and run the installer. Up and running in **~10 minutes**.
 :::
 
-:::{grid-item-card} 🌐 Networked OWL
-:class-card: sd-border-success
+:::{grid-item-card} Detailed Install
+:link: ../software/detailed-install
+:link-type: doc
 
-**Connects to existing network**
+Step-by-step manual installation. Learn what happens under the hood (**~60 minutes**).
+:::
+::::
 
-Joins your WiFi network and connects to an MQTT broker. Can be used with or without a dedicated networked controller.
+```{admonition} Prerequisites
+:class: tip
 
-**Best for:**
-- Larger OWL setups with need for fleet-style management and error reporting
-- More fine-detailed control
-- Farm network integration
+Before installing, ensure you have:
+- A fully assembled OWL unit ([Original OWL](../hardware/original-owl/index.md) or [Compact OWL](../hardware/compact-owl/index.md))
+- A Raspberry Pi with a fresh installation of **Raspberry Pi OS (64-bit)**
+- A connected Raspberry Pi camera module (USB or Raspberry Pi cameras supported)
+- SSH access or a connected monitor/keyboard
+```
 
-**Requires:**
-1. Networked controller 
-2. Dedicated network for the system
+## What about the dashboard and remote control?
 
-[Setup Guide →](networked-setup.md)
+After installation, you can set up a dashboard for remote monitoring and control:
+
+| Mode | Description | Best For |
+|------|-------------|----------|
+| **Standalone** | OWL creates its own WiFi hotspot with local dashboard | Single OWL, field use, no network infrastructure |
+| **Networked** | OWL joins existing WiFi with remote MQTT broker | Multiple OWLs, farm network integration |
+
+::::{grid} 1 1 2 2
+:gutter: 3
+
+:::{grid-item-card} Standalone Setup
+:link: ../controllers/wireless/standalone
+:link-type: doc
+
+Single OWL with its own WiFi hotspot. Connect from your phone or tablet.
+:::
+
+:::{grid-item-card} Networked Setup
+:link: ../controllers/wireless/networked
+:link-type: doc
+
+Multiple OWLs on an existing network with optional central controller.
 :::
 ::::
 
 ```{admonition} What should I choose?
 :class: tip
 
-- **Just want to try it out?** → Basic OWL
-- **Single unit in the field?** → Standalone OWL  
-- **Multiple OWLs** → Networked OWL + Controller
+- **Just want to try it out?** → Install software only (Basic OWL, no dashboard)
+- **Single unit in the field?** → Standalone OWL
+- **Multiple OWLs?** → Networked OWL + Controller
 ```
 
 ## Configuration Comparison
 
 | Feature | Basic | Standalone | Networked |
 |---------|-------|------------|-----------|
-| Weed detection | ✅ | ✅ | ✅ |
-| Auto-start on boot | ✅ | ✅ | ✅ |
-| WiFi hotspot | ❌ | ✅ | ❌ |
-| Web dashboard | ❌ | ✅ | ✅ |
-| Remote video feed | ❌ | ✅ | ✅ |
-| MQTT communication | ❌ | ✅ (local) | ✅ (remote) |
-| Multi-OWL support | ❌ | ❌ | ✅ |
-| Requires network | ❌ | ❌ | ✅ |
-| Phone/tablet control | ❌ | ✅ | ✅ |
+| Weed detection | Yes | Yes | Yes |
+| Auto-start on boot | Yes | Yes | Yes |
+| WiFi hotspot | No | Yes | No |
+| Web dashboard | No | Yes | Yes |
+| Remote video feed | No | Yes | Yes |
+| MQTT communication | No | Yes (local) | Yes (remote) |
+| Multi-OWL support | No | No | Yes |
+| Requires network | No | No | Yes |
+| Phone/tablet control | No | Yes | Yes |
 
----
+## Need a tutorial?
 
-## What's Next?
+- [Watch the installation walkthrough](https://www.youtube.com/watch?v=lH5b8tXYmDw) on YouTube (Feb 2025)
 
-After completing your chosen setup path:
+## Need help?
 
-```{admonition} Ready to Deploy?
-:class: success
-
-**Recommended next steps:**
-1. [Configure detection settings](../software/configuration/index.md) for your target weeds
-2. [Learn about detection algorithms](../usage/operation/index.md) and when to use each
-3. [Review use cases](../usage/use-cases/index.md) for mounting and applications
-4. [Set up controllers](../controllers/index.md) for remote monitoring and control
-```
-
-## Controllers
-
-For information about controlling and monitoring your OWL, see the [Controllers](../controllers/index.md) section:
-
-- [No Controller](../controllers/index.md#no-controller) - Run OWL autonomously
-- [Wired Controllers](../controllers/wired/index.md) - Physical switch control (Ute/Advanced Controller)
-- [Wireless Controllers](../controllers/wireless/index.md) - Dashboard and network control (Standalone/Networked modes)
-
----
-
-## Need Help?
-
-```{admonition} Support Resources
-:class: tip
-
-- 📖 **Detailed Guides**: Explore our [software](../software/index.md) and [hardware](../hardware/index.md) documentation
-- 💬 **Community**: Ask questions on the [OpenWeedLocator Community](https://community.openweedlocator.org)
-- 🐛 **Issues**: Report bugs on [GitHub Issues](https://github.com/geezacoleman/OpenWeedLocator/issues)
-- 📺 **Video**: Watch the [installation walkthrough](https://www.youtube.com/watch?v=lH5b8tXYmDw) on YouTube
-```
-
-```{toctree}
-:hidden:
-:maxdepth: 2
-
-owl-setup
-networked-setup
-```
+- [Troubleshooting Guide](../troubleshooting/index.md) - Common issues and solutions
+- [OpenWeedLocator Community](https://community.openweedlocator.org) - Ask questions and share ideas
+- [GitHub Issues](https://github.com/geezacoleman/OpenWeedLocator/issues) - Report bugs

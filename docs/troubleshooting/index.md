@@ -201,5 +201,5 @@ If you're still experiencing issues:
 
 - [Configuration Guide](../software/configuration/index.md) - Adjust detection parameters
 - [Operation Guide](../usage/operation/index.md) - Detection algorithms and solenoid wiring
-- [Software Installation](../software/installation/index.md) - Reinstall if needed
+- [Software Installation](../software/two-step-install.md) - Reinstall if needed
 

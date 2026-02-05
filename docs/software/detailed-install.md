@@ -1,6 +1,12 @@
-# Installation Guide
+# Detailed Installation
 
-This guide covers installing OWL software on a Raspberry Pi. Choose between the quick two-line install or the detailed step-by-step method.
+This setup approach may take longer (~60 minutes) but you'll be better prepared for problem solving, upgrades or changes. Use this if you want to understand what's happening under the hood.
+
+```{admonition} Prefer the automated installer?
+:class: tip
+
+The [Two-Step Install](two-step-install.md) automates all of these steps and takes ~10 minutes.
+```
 
 ## Step 1: Raspberry Pi Setup
 
@@ -40,55 +46,6 @@ After the restart, open up Terminal. You can press `CTRL + ALT + T`, or click th
 All commands below are provided for easy copy/paste. When using terminal you should see `owl@raspberrypi:~ $` at the start of each line and `(owl) owl@raspberrypi:~ $` when operating within the `owl` virtual environment. Pay close attention to the presence/absence of `(owl)` in front of each line.
 ```
 
----
-
-## Step 2: Quick Method - Two-line Install
-
-```{admonition} Recommended for Raspberry Pi 5 and Bookworm OS
-:class: tip
-
-The two-line install is the fastest way to get started.
-```
-
-### Two-line Install
-
-Clone the GitHub repository:
-
-```bash
-git clone https://github.com/geezacoleman/OpenWeedLocator owl
-```
-
-Run the setup script:
-
-```bash
-bash owl/owl_setup.sh
-```
-
-Once completed successfully, you should see a summary table:
-
-```bash
-Installation Summary:
- [OK] System Upgrade
- [OK] Camera Detected
- [OK] Camera Test
- [OK] Virtual Environment Created
- [OK] OpenCV Installed
- [OK] OWL Dependencies Installed
- [OK] Boot Scripts Moved
-```
-
-```{admonition} Quick Install Complete
-:class: success
-
-If you used the quick method, skip to [Focusing the Camera](#focusing-the-camera) below. The detailed steps explain what the `owl_setup.sh` script does under the hood.
-```
-
----
-
-## Step 2: Detailed Method
-
-This setup approach may take longer (~60 minutes) but you'll be better prepared for problem solving, upgrades or changes.
-
 **Requirements:**
 - Raspberry Pi
 - Empty SD Card (SanDisk 32GB SDXC recommended)
@@ -96,6 +53,10 @@ This setup approach may take longer (~60 minutes) but you'll be better prepared 
 - Power supply (if not using the OWL unit)
 - Screen and keyboard
 - WiFi/Ethernet cable
+
+---
+
+## Step 2: Manual Installation
 
 ### Free up space
 
@@ -297,7 +258,7 @@ Save with `Ctrl + X`, then `Y`, then `Enter`.
 
 ---
 
-## Focusing the Camera
+## Step 3: Focusing the Camera
 
 ```{admonition} Automatic Focus Cameras
 :class: note
@@ -341,7 +302,7 @@ Press `Esc` to exit when focusing is complete.
 
 ---
 
-## Final Reboot
+## Step 4: Final Reboot
 
 Shut down the Raspberry Pi and unplug the power. Reconnect the camera and all GPIO pins/power. Double check the camera cable is inserted, then reconnect power and wait for a beep.
 
@@ -363,6 +324,17 @@ For RTC (Real Time Clock) module setup, follow the [Adafruit instructions](https
 
 ## Next Steps
 
-- [Configuration Guide](../configuration/index.md) - Adjust detection parameters
-- [Controller Setup](../controller/index.md) - Build a controller for multiple OWLs
-- [Troubleshooting](../../troubleshooting/index.md) - Common issues and solutions
+```{admonition} Set up your dashboard
+:class: tip
+
+After installation, set up your dashboard for remote monitoring and control:
+
+- [Standalone Setup](../controllers/wireless/standalone.md) - WiFi hotspot with local dashboard
+- [Networked Setup](../controllers/wireless/networked.md) - Join existing network with central controller
+```
+
+```{seealso}
+- [Configuration Guide](configuration/index.md) - Adjust detection parameters
+- [Controllers](../controllers/index.md) - Build a controller for multiple OWLs
+- [Troubleshooting](../troubleshooting/index.md) - Common issues and solutions
+```

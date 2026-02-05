@@ -1,5 +1,15 @@
 # Wireless Controllers
 
+```{toctree}
+:maxdepth: 1
+:caption: Wireless Controllers
+:titlesonly:
+:hidden:
+
+standalone
+networked
+```
+
 Network-based control via WiFi and MQTT provides remote monitoring and control of your OWL system from any device with a web browser.
 
 ## Modes
@@ -9,80 +19,23 @@ Network-based control via WiFi and MQTT provides remote monitoring and control o
 | **Standalone** | OWL creates WiFi hotspot with local dashboard | Single OWL, field use, no network infrastructure |
 | **Networked** | OWL joins existing WiFi with remote MQTT broker | Multiple OWLs, farm network integration |
 
----
+::::{grid} 1 1 2 2
+:gutter: 3
 
-## Standalone Mode
+:::{grid-item-card} Standalone Mode
+:link: standalone
+:link-type: doc
 
-The OWL creates its own WiFi access point. Connect your phone, tablet, or laptop directly to control and monitor the OWL.
+OWL creates its own WiFi hotspot. Connect your phone, tablet, or laptop directly to control and monitor. Includes local MQTT broker and full web dashboard.
+:::
 
-**Features:**
-- WiFi hotspot (e.g., "OWL-1")
-- Local MQTT broker
-- Full web dashboard
-- Video feed
-- Detection controls
+:::{grid-item-card} Networked Mode
+:link: networked
+:link-type: doc
 
-**Access:**
-
-| Method | Address |
-|--------|---------|
-| WiFi Network | Connect to "OWL-1" (or your configured SSID) |
-| Dashboard | https://owl-1.local/ or https://10.42.0.1/ |
-| Video Feed | https://owl-1.local/video_feed |
-
-**Setup:**
-
-Standalone mode is configured during OWL software installation:
-
-```bash
-bash owl_setup.sh
-```
-
-When prompted, select:
-1. **Yes** to dashboard setup
-2. **Option 1** (Standalone)
-
-See [OWL Setup Guide](../../getting-started/owl-setup.md) for complete instructions.
-
----
-
-## Networked Mode
-
-The OWL joins your existing WiFi network and connects to a central MQTT broker. Multiple OWLs can be monitored from any device on the network.
-
-**Features:**
-- Integration with existing WiFi
-- Central MQTT communication
-- Video feed accessible from any network device
-- Multi-OWL coordination
-
-**Access:**
-
-| Method | Address |
-|--------|---------|
-| Video Feed | https://owl-1.local/video_feed or https://[static-ip]/video_feed |
-| SSH | ssh owl@owl-1.local |
-| MQTT | Connect to your broker IP on port 1883 |
-
-**Setup:**
-
-Networked mode is configured during OWL software installation:
-
-```bash
-bash owl_setup.sh
-```
-
-When prompted, select:
-1. **Yes** to dashboard setup
-2. **Option 2** (Networked)
-
-You'll need:
-- WiFi network SSID and password
-- Static IP for this OWL
-- Gateway IP (usually your router)
-- MQTT broker/controller IP
-
-See [Networked Setup Guide](../../getting-started/networked-setup.md) for complete instructions.
+OWL joins your existing WiFi network. Multiple OWLs communicate via a central MQTT broker. Optional dedicated controller with touchscreen.
+:::
+::::
 
 ---
 
@@ -202,8 +155,7 @@ mosquitto_pub -h localhost -t test -m test
 
 ## Next Steps
 
-- [OWL Setup Guide](../../getting-started/owl-setup.md) - Complete software installation
-- [Networked Setup Guide](../../getting-started/networked-setup.md) - Multi-OWL network configuration
+- [Standalone Setup](standalone.md) - Complete standalone OWL setup walkthrough
+- [Networked Setup](networked.md) - Multi-OWL network configuration
 - [Wired Controllers](../wired/index.md) - Add physical switch control
 - [Configuration Guide](../../software/configuration/index.md) - MQTT and controller settings
-

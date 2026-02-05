@@ -70,7 +70,7 @@ There are two options for the enclosure. The 3D printed enclosure and the offici
 a 3D printed tray and the same components. The 3D printed version allows you to make a start without needing to buy bespoke
 components if you have access to a 3D printer.
 
-The 3D model files for the printed enclosure can be downloaded [here]().
+The 3D model files for the printed enclosure can be downloaded from the [3D Printing](../3d-printing/index.md) page.
 
 The Official OWL Enclosure will be available for purchase through the OWL store soon.
 
@@ -327,7 +327,7 @@ Congratulations on completing your Compact OWL hardware assembly! Here's what to
 :gutter: 3
 
 :::{grid-item-card} 💻 Software Installation
-:link: ../../software/installation/index.html
+:link: ../../software/two-step-install.html
 
 Install the OWL software on your Raspberry Pi to get your detection unit operational.
 :::

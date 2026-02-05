@@ -6,13 +6,14 @@
 :titlesonly:
 :hidden:
 
-installation/index
+two-step-install
+detailed-install
 configuration/index
 green-on-green/index
 development/index
 ```
 
-Installing the OWL software is straightforward and can be automated for a simple, two-line install. Alternatively, you can take the step-by-step alternative to see what is happening under the hood.
+Installing the OWL software is straightforward and can be automated for a simple, two-step install. Alternatively, you can take the step-by-step alternative to see what is happening under the hood.
 
 Both begin by flashing the latest Raspbian operating system to an SD card and booting up a Raspberry Pi.
 
@@ -20,8 +21,8 @@ Both begin by flashing the latest Raspbian operating system to an SD card and bo
 
 | Method | Time | Best For |
 |--------|------|----------|
-| Two-line installation | ~10 mins | Quick setup, production use |
-| Detailed installation | ~60 mins | Learning, customisation, troubleshooting |
+| Two-Step Install | ~10 mins | Quick setup, production use |
+| Detailed Install | ~60 mins | Learning, customisation, troubleshooting |
 
 ## Supported Platforms
 
@@ -44,11 +45,18 @@ The project supports the following Raspberry Pi models:
 ::::{grid} 1 1 2 2
 :gutter: 3
 
-:::{grid-item-card} Installation Guide
-:link: installation/index
+:::{grid-item-card} Two-Step Install
+:link: two-step-install
 :link-type: doc
 
-Step-by-step instructions for installing OWL software on your Raspberry Pi.
+Automated setup — download the repo and run the installer. Up and running in ~10 minutes.
+:::
+
+:::{grid-item-card} Detailed Install
+:link: detailed-install
+:link-type: doc
+
+Step-by-step manual installation. Learn what happens under the hood (~60 minutes).
 :::
 
 :::{grid-item-card} Configuration

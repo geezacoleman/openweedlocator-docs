@@ -196,6 +196,6 @@ camera_name = cam1
 
 ## Next Steps
 
-- [Controller Setup](../controller/index.md) - Build a controller for managing OWLs
+- [Controller Setup](../../controllers/index.md) - Build a controller for managing OWLs
 - [Green-on-Green](../green-on-green/index.md) - Experimental in-crop detection
 - [Troubleshooting](../../troubleshooting/index.md) - Common issues and solutions

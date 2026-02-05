@@ -133,4 +133,4 @@ After printing your enclosure parts:
 
 - [Original OWL Assembly Guide](../original-owl/index.md) - Complete build instructions for the Original OWL
 - [Compact OWL Assembly Guide](../compact-owl/index.md) - Complete build instructions for the Compact OWL
-- [Software Installation](../../software/installation/index.md) - Install and configure OWL software
+- [Software Installation](../../software/two-step-install.md) - Install and configure OWL software

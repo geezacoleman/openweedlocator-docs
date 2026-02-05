@@ -332,7 +332,7 @@ Congratulations on completing your Original OWL hardware assembly! Here's what t
 :gutter: 3
 
 :::{grid-item-card} 💻 Software Installation
-:link: ../../software/installation/index.html
+:link: ../../software/two-step-install.html
 
 Install the OWL software on your Raspberry Pi to get your detection unit operational.
 :::
