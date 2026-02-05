@@ -30,7 +30,7 @@ From your own computer, download and flash the latest **64-bit** version of Rasp
 
 Once the Raspbian OS has been flashed to the SD Card (may take 5-10 minutes), remove the SD card and insert it into the Raspberry Pi. Connect the screen, keyboard and mouse and then power up the Pi.
 
-Alternatively, you can SSH into your OWL from a separate device and install it remotely. A good guide on how to do that is available [here](https://www.makeuseof.com/how-to-ssh-into-raspberry-pi-remote/).
+Alternatively, you can {abbr}`SSH (Secure Shell — remote access to your Pi from another computer over the network)` into your OWL from a separate device and install it remotely. A good guide on how to do that is available [here](https://www.makeuseof.com/how-to-ssh-into-raspberry-pi-remote/).
 
 #### First boot
 
@@ -38,7 +38,7 @@ On the first boot you may be asked to set country, timezone, keyboard, connect t
 
 #### Opening terminal
 
-After the restart, open up Terminal. You can press `CTRL + ALT + T`, or click the icon in the top left with the `>_` symbol.
+After the restart, open up {abbr}`Terminal (the command-line interface where you type commands to control the Pi)`. You can press `CTRL + ALT + T`, or click the icon in the top left with the `>_` symbol.
 
 ```{admonition} Terminal Commands
 :class: note
@@ -60,7 +60,7 @@ All commands below are provided for easy copy/paste. When using terminal you sho
 
 ### Free up space
 
-The Raspberry Pi comes pre-installed with software that can be removed to free up space:
+The Raspberry Pi comes pre-installed with software that can be removed to free up space. These commands use {abbr}`sudo (superuser do — runs a command with administrator privileges)` because they modify system packages:
 
 ```bash
 sudo apt-get purge wolfram-engine
@@ -76,7 +76,7 @@ sudo apt-get clean
 
 ### Set up the virtual environment
 
-A virtual environment contains all the necessary packages in one neat spot. We'll use `virtualenv` and `virtualenvwrapper`.
+A {abbr}`virtual environment (an isolated set of Python packages, separate from the system — prevents software conflicts)` contains all the necessary packages in one neat spot. We'll use `virtualenv` and `virtualenvwrapper`.
 
 Update the system:
 
@@ -84,7 +84,7 @@ Update the system:
 sudo apt update && sudo apt full-upgrade
 ```
 
-Add environment configuration to `.bashrc`:
+Add environment configuration to {abbr}`.bashrc (a shell configuration file that runs every time you open a terminal)`:
 
 ```bash
 echo "# virtualenv and virtualenvwrapper" >> ~/.bashrc
@@ -144,7 +144,7 @@ Ensure you're in the `owl` environment:
 workon owl
 ```
 
-Install OpenCV:
+Install OpenCV using {abbr}`pip (Python package installer — downloads and installs Python libraries)`:
 
 ```bash
 pip3 install opencv-contrib-python
@@ -218,7 +218,7 @@ python
 
 ### Starting OWL on boot
 
-Make the scripts executable:
+Make the scripts executable with {abbr}`chmod (change file permissions — controls who can read, write, or run a file)`:
 
 ```bash
 chmod a+x owl.py
@@ -242,13 +242,13 @@ sudo mv owl_boot.sh /usr/local/bin/owl_boot.sh
 sudo mv owl_boot_wrapper.sh /usr/local/bin/owl_boot_wrapper.sh
 ```
 
-Add to cron for startup:
+Add to {abbr}`crontab (a scheduled task system — used here to run OWL automatically on every boot)` for startup:
 
 ```bash
 sudo crontab -e
 ```
 
-Select `1. /bin/nano editor`, then add this line at the bottom:
+Select `1. /bin/nano editor` ({abbr}`nano (a simple terminal-based text editor — save with Ctrl+X, then Y, then Enter)`), then add this line at the bottom:
 
 ```
 @reboot /usr/local/bin/owl_boot_wrapper.sh > /home/launch.log 2>&1

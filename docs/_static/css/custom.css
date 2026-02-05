@@ -422,3 +422,25 @@ figcaption {
 .content p {
     margin: 1rem 0;
 }
+
+/* --------------------------------------------------------------------------
+   19. Abbreviation Tooltips
+   -------------------------------------------------------------------------- */
+abbr[title] {
+    text-decoration: underline dotted rgba(17, 78, 209, 0.4);
+    text-underline-offset: 3px;
+    cursor: help;
+    font-style: normal;
+}
+
+abbr[title]:hover {
+    text-decoration: underline dotted var(--owl-primary);
+}
+
+body[data-theme="dark"] abbr[title] {
+    text-decoration: underline dotted rgba(193, 227, 255, 0.4);
+}
+
+body[data-theme="dark"] abbr[title]:hover {
+    text-decoration: underline dotted var(--owl-secondary);
+}

@@ -60,7 +60,7 @@ Before installing, ensure you have:
 - A fully assembled OWL unit ([Original OWL](../hardware/original-owl/index.md) or [Compact OWL](../hardware/compact-owl/index.md))
 - A Raspberry Pi with a fresh installation of **Raspberry Pi OS (64-bit)**
 - A connected Raspberry Pi camera module (USB or Raspberry Pi cameras supported)
-- SSH access or a connected monitor/keyboard
+- {abbr}`SSH (Secure Shell — remote access to your Pi over the network)` access or a connected monitor/keyboard
 ```
 
 ## What about the dashboard and remote control?
@@ -121,3 +121,7 @@ Multiple OWLs on an existing network with optional central controller.
 - [Troubleshooting Guide](../troubleshooting/index.md) - Common issues and solutions
 - [OpenWeedLocator Community](https://community.openweedlocator.org) - Ask questions and share ideas
 - [GitHub Issues](https://github.com/geezacoleman/OpenWeedLocator/issues) - Report bugs
+
+```{tip}
+**New to the command line?** Check out the [Glossary](../reference/glossary/index.md) for explanations of terminal commands, Linux concepts, and OWL-specific terms.
+```

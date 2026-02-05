@@ -2,7 +2,7 @@
 
 This guide covers setting up an OWL unit using the automated installer. The main steps are:
 
-1. Step 1: Install Raspbian onto an SD card
+1. Step 1: Install Raspbian onto an {abbr}`SD card (Secure Digital card — a small removable storage card that holds the Pi's operating system)`
 2. Step 2: Download and run the setup script
 
 After the installer completes, you'll [focus the camera](#step-3-focus-your-camera) and [verify the installation](#step-4-verify-installation).
@@ -16,7 +16,7 @@ Before starting, ensure you have:
 | Hardware | Fully assembled OWL with Raspberry Pi and camera               |
 | Camera | Connected and enabled Raspberry Pi camera module or USB camera |
 | Internet | WiFi or Ethernet connection (for initial setup only)           |
-| Time | Approximately 20-30 minutes                                    |
+| Time | Approximately 20 to 30 minutes                                    |
 
 ## Step 1: Prepare the Raspberry Pi
 
@@ -30,7 +30,7 @@ Before starting, ensure you have:
 **Required Settings:**
 - **Username**: `owl` (strongly recommended for compatibility)
 - **Password**: Choose a secure password
-- **SSH**: Enable for remote access
+- **{abbr}`SSH (Secure Shell — remote access to your Pi over the network)`**: Enable for remote access
 - **WiFi**: Configure your network for initial setup
 - **Locale**: Set your timezone and keyboard layout
 ```
@@ -69,20 +69,22 @@ ssh owl@<your-pi-ip-address>
 
 ## Step 2: Run the OWL Installer
 
-Once connected to your Pi, open up the terminal with CTRL + ALT + T (if using a screen/keyboard) and run these commands:
+Once connected to your Pi, open up the {abbr}`terminal (the command-line interface where you type commands — press CTRL+ALT+T to open)` with CTRL + ALT + T (if using a screen/keyboard) and run these commands:
 
 ```bash
 git clone https://github.com/geezacoleman/OpenWeedLocator owl
 ```
-This first command will download the repository into a folder called owl in your home directory. It may take some time
+This first command ({abbr}`git clone (downloads a complete copy of a code repository from GitHub to your Pi)`) will download the repository into a folder called owl in your home directory. It may take some time
 depending on your internet speed and connection.
 ```bash
 cd owl
 ```
-Then we `change directory (cd)` into `owl` so we can run the final command below:
+Then we {abbr}`cd (change directory — moves you into a different folder)` into `owl` so we can run the final command below:
 ```bash
 bash owl_setup.sh
 ```
+The {abbr}`bash (a command that runs a shell script — a file containing a sequence of commands)` command executes the setup script.
+
 ```{admonition} Choosing Basic, Standalone or Networked setup
 :class: important
 During the setup you will be asked: 'Do you want to set up a Dashboard?':
@@ -100,7 +102,7 @@ Respond YES, and then select 2 (Networked OWL) - setup instructions are provided
 This command will run the setup script. Here is where you can decide to setup the Basic, Standalone or Networked OWL.
 
 ```{warning}
-**Do not run with sudo!** The installer will request elevated permissions only when needed.
+**Do not run with {abbr}`sudo (superuser do — runs a command with administrator privileges)`!** The installer will request elevated permissions only when needed.
 ```
 
 ### What the Installer Does
@@ -124,19 +126,19 @@ The `owl_setup.sh` script performs these steps automatically:
   - Space Cleanup
   - Removes unnecessary packages (LibreOffice, Wolfram) to free space
 * - 4
-  - Virtual Environment
+  - {abbr}`Virtual Environment (an isolated set of Python packages, separate from the system — prevents software conflicts)`
   - Creates an isolated Python environment for OWL
 * - 5
-  - NumPy Alignment
-  - Ensures NumPy versions are compatible with system OpenCV
+  - {abbr}`NumPy (a Python library for numerical computing, used by OpenCV for image processing)` Alignment
+  - Ensures NumPy versions are compatible with system {abbr}`OpenCV (Open Computer Vision — the library that powers weed detection)`
 * - 6
   - OpenCV Installation
   - Installs opencv-contrib-python in the virtual environment
 * - 7
   - OWL Dependencies
-  - Installs all Python packages from requirements.txt
+  - Installs all Python packages from requirements.txt using {abbr}`pip (Python package installer — downloads and installs Python libraries)`
 * - 8
-  - Systemd Service
+  - {abbr}`Systemd (the Linux service manager that starts, stops, and monitors background programs)` Service
   - Configures OWL to start automatically on boot
 * - 9
   - Desktop Setup
