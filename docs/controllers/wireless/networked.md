@@ -1,5 +1,21 @@
 # Networked Setup
 
+```{warning}
+**Development Branch — Subject to Change**
+
+The wireless dashboard features described on this page are currently on the `wireless-display` branch and have not yet been merged into `main`. The setup process and behaviour may change before the final release.
+
+To use these features, you must clone from the branch:
+
+    git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
+```
+
+```{note}
+**systemd replaces cron for service management**
+
+The `wireless-display` branch uses systemd services (`owl.service`, `owl-dash.service`) to manage OWL startup and shutdown, replacing the cron-based `@reboot` approach used on `main`. This provides better control over start/stop/restart and more reliable logging via `journalctl`.
+```
+
 This guide covers setting up OWL units that connect to an existing WiFi network rather than creating their own hotspot. This configuration allows multiple OWLs to communicate over a shared network and optionally be managed by a central controller.
 
 ## Overview
@@ -116,9 +132,13 @@ If you are using a central controller, set that up first so you have the MQTT br
 First, complete the standard OWL installation. See [Two-Step Install](../../software/two-step-install.md) for the full step-by-step walkthrough.
 
 ```bash
-git clone https://github.com/geezacoleman/OpenWeedLocator owl
+git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
 cd owl
 bash owl_setup.sh
+```
+
+```{important}
+You must use `-b wireless-display` to clone from the development branch. The dashboard and networking features are not yet available on `main`.
 ```
 
 The installer will run through all steps (system update, camera check, virtual environment, OpenCV, dependencies, systemd service, desktop setup). See the [Two-Step Install - Expected Installation Output](../../software/two-step-install.md#expected-installation-output) for what to expect at each step.
@@ -330,8 +350,6 @@ In networked mode, there is **no local MQTT broker**. The OWL connects to the re
 
 #### Nginx Web Server
 
-In networked mode, Nginx serves a **video feed only** (not a full dashboard):
-
 ```{code-block} text
 [INFO] Setting up Nginx web server...
 [OK] Nginx configuration is valid
@@ -339,7 +357,7 @@ In networked mode, Nginx serves a **video feed only** (not a full dashboard):
 ```
 
 ```{note}
-Navigating to `https://owl-1.local/` in a browser will show a simple information page with a link to the video feed. The full management dashboard is provided by the [central controller](#adding-a-central-controller), not by individual networked OWLs.
+In networked mode, individual OWLs do **not** host their own dashboard. They serve a video feed that the [central controller](#adding-a-central-controller) proxies, and publish status, diagnostics, and detection data via MQTT. All monitoring and control is done through the controller's dashboard.
 ```
 
 #### Avahi (mDNS)
@@ -408,8 +426,8 @@ Testing Commands:
 [INFO] Performing final system validation...
 [INFO] Testing network connectivity...
 [OK] Can reach controller at 192.168.1.2
-[INFO] Testing dashboard service...
-[OK] Dashboard service is responding
+[INFO] Testing video feed...
+[OK] Video feed is responding
 ```
 
 If the controller is not reachable during setup (e.g., it hasn't been set up yet):
@@ -503,17 +521,16 @@ In networked mode, each OWL is configured with:
 | Component | Configuration |
 |-----------|--------------|
 | **WiFi Client** | Connects to specified network with static IP |
-| **MQTT Client** | Points to remote broker (mosquitto-clients only) |
-| **Video Streaming** | Nginx serves video feed over HTTPS |
+| **MQTT Client** | Publishes status, diagnostics, and detection data to remote broker |
+| **Video Streaming** | Nginx serves the video feed over HTTPS, proxied by the controller |
 | **mDNS** | Hostname resolution (owl-1.local, etc.) |
-| **UFW Firewall** | Allows SSH, HTTP, HTTPS, and MQTT ports |
+| **UFW Firewall** | Allows SSH, HTTPS, and MQTT ports |
 | **SSL Certificate** | Self-signed, valid for 10 years |
 
 **Not installed in networked mode:**
 - Local MQTT broker (uses remote broker)
 - WiFi hotspot
-- Dashboard service (owl-dash)
-- Full dashboard web interface (served by controller instead)
+- Local dashboard (the controller provides the dashboard for all OWLs)
 
 ### Step 4: Verify Connection
 
@@ -574,18 +591,15 @@ For each additional OWL, repeat steps 1-4 with:
 
 ### Individual OWL Access
 
-Each networked OWL serves a video feed and information page:
+In networked mode, individual OWLs do not host their own dashboard. They serve a video feed that the central controller proxies, and publish status and diagnostics via MQTT. All monitoring and control is done through the [central controller's dashboard](#adding-a-central-controller).
 
 | Access Method | URL |
 |---------------|-----|
-| Information Page | `https://owl-1.local/` or `https://192.168.1.11/` |
-| Video Feed | `https://owl-1.local/video_feed` |
+| Video Feed | `https://owl-1.local/video_feed` or `https://192.168.1.11/video_feed` |
 | SSH | `ssh owl@owl-1.local` or `ssh owl@192.168.1.11` |
 
 ```{note}
-The information page at the root URL shows the OWL hostname, mode, and a link to the video feed. The full management dashboard is provided by the [central controller](#adding-a-central-controller), not by individual networked OWLs.
-
-Your browser will show a security warning because the SSL certificate is self-signed. This is expected — click through to proceed.
+Your browser will show a security warning because the SSL certificate is self-signed. This is expected — click through to proceed. In normal operation, you won't access OWL video feeds directly — the controller dashboard proxies them all into a single interface.
 ```
 
 ### MQTT Communication
@@ -624,9 +638,9 @@ For fleet management with a dedicated dashboard, you can set up a central contro
 
 1. Flash **Raspberry Pi OS (64-bit)** with username `owl`
 
-2. Download the OWL repository:
+2. Download the OWL repository (from the `wireless-display` branch):
    ```bash
-   git clone https://github.com/geezacoleman/OpenWeedLocator owl
+   git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
    cd owl
    ```
 

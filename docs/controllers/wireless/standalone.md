@@ -1,5 +1,21 @@
 # Standalone Setup
 
+```{warning}
+**Development Branch — Subject to Change**
+
+The wireless dashboard features described on this page are currently on the `wireless-display` branch and have not yet been merged into `main`. The setup process and behaviour may change before the final release.
+
+To use these features, you must clone from the branch:
+
+    git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
+```
+
+```{note}
+**systemd replaces cron for service management**
+
+The `wireless-display` branch uses systemd services (`owl.service`, `owl-dash.service`) to manage OWL startup and shutdown, replacing the cron-based `@reboot` approach used on `main`. This provides better control over start/stop/restart and more reliable logging via `journalctl`.
+```
+
 When the installer prompts for dashboard setup, choose **yes**:
 
 ```{code-block} text

@@ -99,6 +99,16 @@ Respond YES, and then select 1 (standalone OWL) - setup instructions are provide
 Respond YES, and then select 2 (Networked OWL) - setup instructions are provided under [Networked Setup](../controllers/wireless/networked.md).
 ```
 
+```{warning}
+**Dashboard features require the `wireless-display` branch**
+
+The Standalone and Networked dashboard features are currently in development on the `wireless-display` branch. If you plan to set up a dashboard, clone from this branch instead:
+
+    git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
+
+For a **Basic OWL** (no dashboard), cloning from `main` is fine.
+```
+
 This command will run the setup script. Here is where you can decide to setup the Basic, Standalone or Networked OWL.
 
 ```{warning}
