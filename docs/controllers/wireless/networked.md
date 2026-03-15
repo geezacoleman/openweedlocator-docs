@@ -10,42 +10,26 @@ To use these features, you must clone from the branch:
     git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
 ```
 
-```{note}
-**systemd replaces cron for service management**
-
-The `wireless-display` branch uses systemd services (`owl.service`, `owl-dash.service`) to manage OWL startup and shutdown, replacing the cron-based `@reboot` approach used on `main`. This provides better control over start/stop/restart and more reliable logging via `journalctl`.
-```
-
-This guide covers setting up OWL units that connect to an existing WiFi network rather than creating their own hotspot. This configuration allows multiple OWLs to communicate over a shared network and optionally be managed by a central controller.
+This guide walks you through connecting multiple OWL units to a shared WiFi network so they can all be monitored and controlled from a single dashboard. By the end, you'll have a working system where every OWL reports back to one central screen in the tractor cab.
 
 ## Overview
 
-A networked OWL connects to your existing WiFi infrastructure and communicates via MQTT. This enables:
+A networked OWL connects to your existing WiFi and communicates with other devices using a lightweight messaging system called MQTT. This enables:
 
 - Multiple OWLs on the same network
+- Central monitoring from a touchscreen in the cab
 - Integration with existing farm networks
-- Central monitoring from any device on the network
-- Optional centralised control with a dedicated controller
+- Remote start, stop, and configuration changes
 
 ```{admonition} Networked vs Standalone
 :class: note
 
-**Standalone OWL** creates its own WiFi hotspot — you connect directly to the OWL.
+**Standalone OWL** creates its own WiFi hotspot — you connect directly to the OWL. Best for a single unit.
 
-**Networked OWL** joins your existing WiFi — the OWL connects to your network.
+**Networked OWL** joins your existing WiFi — the OWL connects to your network. Best for multiple units managed together.
 ```
 
-```{admonition} Haven't run the installer yet?
-:class: tip
-
-Complete the [Two-Step Install](../../software/two-step-install.md) first, then return here when prompted for dashboard setup.
-```
-
-## Architecture Options
-
-### Option A: Networked OWLs Only
-
-Multiple OWLs connect to the same WiFi network and MQTT broker. You can monitor each OWL individually from any device on the network.
+**Option A: Networked OWLs only** — Multiple OWLs connect to the same WiFi and a shared message broker. You monitor each OWL individually from any device on the network. Use this if you already have an MQTT broker or want to integrate with other systems.
 
 ```{mermaid}
 graph LR
@@ -73,14 +57,7 @@ graph LR
     O2 -.->|MQTT| M
 ```
 
-**Use when:**
-- You have an existing MQTT broker
-- You want to integrate with other systems
-- You prefer distributed monitoring
-
-### Option B: Networked OWLs + Central Controller
-
-A dedicated Raspberry Pi acts as the central hub with MQTT broker and management dashboard. Ideal for commercial operations.
+**Option B: Networked OWLs + Central Controller (recommended)** — A dedicated Raspberry Pi in the cab acts as the central hub with a touchscreen dashboard. It runs the message broker and shows all OWLs on one screen. This is the setup most farmers will want.
 
 ```{mermaid}
 graph TB
@@ -106,583 +83,119 @@ graph TB
     style C fill:#4CAF50,color:#fff
 ```
 
-**Use when:**
-- Managing multiple OWLs from one location
-- You want a dedicated in-cab touchscreen interface
-- No existing MQTT infrastructure
+```{admonition} Haven't run the installer yet?
+:class: tip
+
+Complete the [Two-Step Install](../../software/two-step-install.md) first, then return here when prompted for dashboard setup.
+```
+
+This guide follows **Option B** (controller + OWLs). If you're using Option A, skip to [Step 2](#step-2-set-up-each-owl) and point your OWLs at your existing MQTT broker instead.
 
 ---
 
-## Setting Up Networked OWLs
+## Understanding your network
 
-### Prerequisites
+Before you start, here are the networking terms you'll see during setup, explained in plain language.
 
-Before starting, you'll need:
-- WiFi network name (SSID) and password
-- MQTT broker address (IP or hostname)
-- Static IP address for each OWL (recommended)
-- Gateway IP address
+**WiFi network name (SSID)**
+: The name of your WiFi that appears when you connect your phone. You'll enter this during setup so the OWLs and controller can join the same network.
+
+**Password**
+: Your WiFi password — the same one you use on your phone or laptop.
+
+**IP address**
+: Like a street address for each device on your network. Every device gets a unique one, such as `192.168.1.11`. Devices use these addresses to find and talk to each other.
+
+**Static IP**
+: An address that's permanently assigned to a device so it never changes. Without this, your router might give a device a different address each time it restarts, and the other devices won't be able to find it.
+
+**Gateway**
+: Your router's own IP address — the "front gate" that all network traffic goes through. It usually ends in `.1` (for example, `192.168.1.1`).
+
+**Subnet**
+: A group of addresses that can talk to each other directly. If your router is `192.168.1.1`, then all your devices should use addresses that start with `192.168.1.` — the last number is the only part that changes.
+
+**MQTT**
+: A lightweight messaging system that lets the OWLs talk to the controller. Think of the controller as a noticeboard — OWLs pin their status messages to it, and the dashboard reads them.
+
+**MQTT broker**
+: The device that runs the noticeboard. In a typical setup, the controller Pi runs the broker so you don't need any extra hardware.
 
 ```{tip}
-If you are using a central controller, set that up first so you have the MQTT broker IP ready. See [Adding a Central Controller](#adding-a-central-controller) below.
+**Where do I find my router's IP address?** Check your phone's WiFi settings (tap the network name for details), or look at the sticker on the bottom of your router. It's usually `192.168.1.1` or `192.168.0.1`.
 ```
 
-### Step 1: Run Basic OWL Setup
+---
 
-First, complete the standard OWL installation. See [Two-Step Install](../../software/two-step-install.md) for the full step-by-step walkthrough.
+## Planning your setup
+
+Before powering on any Raspberry Pi, gather the following information and write it down on a piece of paper.
+
+**What you'll need:**
+
+- [ ] Your WiFi network name and password
+- [ ] A Raspberry Pi for the controller (Pi 4 or 5, 4GB+ RAM recommended)
+- [ ] Optional: a touchscreen display (EDATEC HMI3010 at 1280x800 or Raspberry Pi 7" display)
+- [ ] One Raspberry Pi per OWL unit (with camera and relay board)
+- [ ] A plan for IP addresses (see the table below)
+
+**Recommended IP addresses:**
+
+| Device | Address | Note |
+|--------|---------|------|
+| Router (gateway) | 192.168.1.1 | Usually already set — check your router |
+| Controller | 192.168.1.2 | The in-cab Pi that runs the dashboard |
+| OWL 1 | 192.168.1.11 | First OWL on the boom |
+| OWL 2 | 192.168.1.12 | Second OWL |
+| OWL 3 | 192.168.1.13 | Third OWL |
+| OWL 4 | 192.168.1.14 | Continue the pattern |
+
+```{tip}
+Write these addresses on a piece of paper and keep it with your equipment. You'll need them during setup and they're useful for troubleshooting later.
+```
+
+**Router tips:**
+
+- Use the **2.4 GHz** WiFi band if your router supports both 2.4 and 5 GHz — it has better range across a spray boom
+- If possible, set up **DHCP reservations** (or "address reservation") in your router for each device, so the addresses are locked in even if a device loses its static IP setting
+- Position the router centrally for good coverage across the boom
+
+---
+
+## Step 1 — Set up the controller
+
+The controller is the central hub that runs the dashboard and message broker. Set this up first so the OWLs have something to connect to.
+
+### What you'll need
+
+- Raspberry Pi 4 or 5 (4GB+ RAM)
+- MicroSD card flashed with **Raspberry Pi OS (64-bit)**, username set to `owl`
+- Optional: touchscreen display for in-cab use
+
+```{tip}
+Use the free [Raspberry Pi Imager](https://www.raspberrypi.com/software/) tool to flash the SD card. When it asks for a username, enter `owl`.
+```
+
+### Run the controller setup
+
+Connect the controller Pi to a monitor and keyboard (or access it via SSH), then run:
 
 ```bash
 git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
 cd owl
-bash owl_setup.sh
+sudo bash controller/networked/in-cab_controller_setup.sh
 ```
-
-```{important}
-You must use `-b wireless-display` to clone from the development branch. The dashboard and networking features are not yet available on `main`.
-```
-
-The installer will run through all steps (system update, camera check, virtual environment, OpenCV, dependencies, systemd service, desktop setup). See the [Two-Step Install - Expected Installation Output](../../software/two-step-install.md#expected-installation-output) for what to expect at each step.
-
-### Step 2: Enable Dashboard in Networked Mode
-
-When the installer prompts for dashboard setup, choose **yes**:
-
-```{code-block} text
-[INFO] Dashboard setup available...
-Do you want to add a web dashboard for remote control? (y/n): y
-```
-
-The dashboard Python dependencies are installed first:
-
-```{code-block} text
-[INFO] Setting up OWL Dashboard...
-[INFO] Installing dashboard Python dependencies...
-... (installing flask, gunicorn, paho-mqtt, psutil, boto3)
-[OK] Installing dashboard Python dependencies completed successfully.
-[INFO] Verifying Python package installations...
-[OK] Flask: 3.0.0, Gunicorn: 21.2.0, Paho-MQTT: installed
-[OK] Verifying Python dependencies completed successfully.
-```
-
-Then select **Networked mode**:
-
-```{code-block} text
-[INFO] OWL Setup Configuration
-=======================================
-
-[INFO] Select OWL Operation Mode:
-  1) Standalone - Create WiFi hotspot with local MQTT broker and dashboard
-  2) Networked  - Connect to existing WiFi network with remote MQTT broker
-
-Select mode (1 or 2): 2
-[INFO] Networked mode selected
-```
-
-### Step 3: Configure Network Settings
-
-Enter the network details for this OWL:
-
-```{code-block} text
-:caption: Networked OWL configuration
-
-[INFO] Configuring WiFi Client (Networked Mode)
-Enter WiFi network name (SSID) to join: FarmNetwork
-Enter WiFi network password: ********
-Re-enter WiFi password to confirm: ********
-Enter OWL ID number (default: 1): 1
-Enter static IP for this OWL (e.g., 192.168.1.11): 192.168.1.11
-Enter gateway IP (default: 192.168.1.1): 192.168.1.1
-Enter central controller IP (MQTT broker; default: 192.168.1.2): 192.168.1.2
-```
-
-```{note}
-Passwords are masked with `*` characters as you type.
-```
-
-```{important}
-**IP Address Planning:**
-- Each OWL needs a unique static IP
-- All IPs must be on the same subnet
-- The MQTT broker IP can be any device running an MQTT broker
-- Avoid using `.0` or `.255` as the last octet (these are reserved)
-```
-
-### Network Validation
-
-The setup validates your network configuration. All IPs must share the same subnet:
-
-```{code-block} text
-:caption: Successful validation
-
-[OK] Network OK: OWL 192.168.1.11, Gateway 192.168.1.1, Controller 192.168.1.2 (base 192.168.1.x).
-```
-
-If there's a **subnet mismatch**, the script will ask you to re-enter the IPs:
-
-```{code-block} text
-:caption: Subnet mismatch (requires re-entry)
-
-[WARN] OWL static IP base (192.168.1.x) differs from Controller base (10.0.0.x).
-[WARN] Please re-enter BOTH the OWL static IP and the Controller IP so they share the same subnet.
-```
-
-If the **gateway doesn't match**, a similar warning is shown:
-
-```{code-block} text
-[WARN] OWL static IP base (192.168.1.x) differs from Gateway base (10.0.0.x).
-[WARN] Please re-enter the Gateway IP to match the OWL subnet.
-```
-
-### Configuration Summary
-
-After validation, you'll see the full configuration summary:
-
-```{code-block} text
-:caption: Networked configuration summary
-
-[INFO] Networked Configuration Summary:
-  Mode: Networked
-  Hostname: owl-1
-  WiFi Network: FarmNetwork
-  Static IP: 192.168.1.11
-  Gateway: 192.168.1.1
-  Controller IP: 192.168.1.2
-  MQTT Broker: 192.168.1.2:1883 (remote)
-  Video Feed: https://owl-1.local/video_feed
-
-Continue with these settings? (y/n): y
-```
-
-Review this carefully before confirming. If anything is wrong, enter **n** to cancel and re-run the setup.
-
-### Network Change Warning
 
 ```{warning}
-**If you are connected via SSH**, read this carefully!
+The controller setup **must** be run with `sudo`. If you forget, you'll see:
 
-Before proceeding with network configuration, you will see:
-
-    [INFO] If you are using a wifi connection to access the Pi over SSH or for internet,
-    your network connection will be replaced with the new connection settings.
-    [WARNING] If so it is likely this will drop out when the network is reconnected under a different IP address
-    [WARNING] Reconnect under the details entered above. OWL Static IP: 192.168.1.11
-    [WARNING] Make sure you have physical access to the Pi in case of issues
-    Do you want to continue? (y/n):
-
-In **Networked mode**, the Pi will switch from your current WiFi connection to the new static IP configuration. Your SSH session **will drop**. After setup completes and the Pi reboots, reconnect using the new static IP:
-
-    ssh owl@192.168.1.11
-
-Or by hostname (if mDNS is working on your network):
-
-    ssh owl@owl-1.local
+    [ERROR] This script must be run with sudo privileges.
 ```
 
-### Expected Networked Setup Output
-
-Below is the step-by-step output you should see during the networked setup.
-
-#### Package Installation
-
-In networked mode, only MQTT **clients** are installed (not the broker):
+The script will ask you a series of questions. Enter the values you wrote down in the planning step.
 
 ```{code-block} text
-:caption: System packages (networked mode)
-
-[INFO] Installing required system packages...
-[INFO] Installing MQTT clients only (networked mode)...
-... (apt-get install output)
-[OK] Installing system packages (nginx, ufw, openssl, avahi-daemon, mosquitto, net-tools) completed successfully.
-```
-
-#### MQTT Broker Skipped
-
-```{code-block} text
-:caption: No local MQTT broker in networked mode
-
-[INFO] Skipping MQTT broker setup (networked mode - using remote broker)
-```
-
-```{important}
-In networked mode, there is **no local MQTT broker**. The OWL connects to the remote broker specified during configuration (e.g., the controller at 192.168.1.2). Make sure that broker is running before the OWL reboots.
-```
-
-#### WiFi Client Configuration
-
-```{code-block} text
-:caption: WiFi client with static IP
-
-[INFO] Configuring WiFi client connection: FarmNetwork...
-[OK] WiFi configuration completed successfully.
-```
-
-#### Firewall Configuration
-
-```{code-block} text
-:caption: UFW firewall
-
-[INFO] Configuring firewall (UFW)...
-[INFO] Configuring UFW for networked mode...
-[OK] UFW firewall configuration completed successfully.
-```
-
-#### Hostname and Permissions
-
-```{code-block} text
-:caption: Hostname and sudo permissions
-
-[INFO] Setting hostname to owl-1...
-[OK] Setting hostname completed successfully.
-[INFO] Updating local hostname resolution...
-[OK] Setting hostname and local resolution completed successfully.
-[INFO] Configuring sudo permissions for Pi 5 fan control...
-[OK] Fan control sudo permissions completed successfully.
-[INFO] Configuring sudo permissions for OWL service control...
-[OK] Service control sudo permissions completed successfully.
-```
-
-#### SSL Certificate
-
-```{code-block} text
-[INFO] Generating SSL certificates...
-[OK] SSL certificate generation completed successfully.
-```
-
-#### Nginx Web Server
-
-```{code-block} text
-[INFO] Setting up Nginx web server...
-[OK] Nginx configuration is valid
-[OK] Nginx configuration completed successfully.
-```
-
-```{note}
-In networked mode, individual OWLs do **not** host their own dashboard. They serve a video feed that the [central controller](#adding-a-central-controller) proxies, and publish status, diagnostics, and detection data via MQTT. All monitoring and control is done through the controller's dashboard.
-```
-
-#### Avahi (mDNS)
-
-```{code-block} text
-[INFO] Configuring Avahi for .local domain resolution...
-[OK] Avahi service configuration completed successfully.
-```
-
-#### Service Startup
-
-```{code-block} text
-:caption: Services (no local dashboard in networked mode)
-
-[INFO] Starting and enabling services...
-[OK] Starting services completed successfully.
-[INFO] Skipping dashboard service creation (networked mode)
-```
-
-#### Configuration Summary File
-
-```{code-block} text
-[INFO] Creating configuration summary...
-```
-
-The full configuration is saved at `/opt/owl-dash-config.txt`:
-
-```{code-block} text
-:caption: /opt/owl-dash-config.txt (Networked OWL)
-
-OWL Configuration
-================
-Mode: Networked
-OWL ID: 1
-Hostname: owl-1
-WiFi Network: FarmNetwork
-Static IP: 192.168.1.11
-Gateway: 192.168.1.1
-
-Controller Configuration:
-- Controller IP: 192.168.1.2
-- MQTT Broker: 192.168.1.2:1883 (remote)
-
-Access:
-- Video Feed: https://owl-1.local/video_feed
-- Video Feed: https://192.168.1.11/video_feed
-- SSH: ssh owl@owl-1.local or ssh owl@192.168.1.11
-
-SSL Certificate: /etc/ssl/certs/owl.crt
-SSL Private Key: /etc/ssl/private/owl.key
-Nginx Config: /etc/nginx/sites-available/owl-dash
-Avahi Service: /etc/avahi/services/owl-dash.service
-
-Testing Commands:
-- mosquitto_pub -h 192.168.1.2 -t "test/message" -m "Hello World"
-- mosquitto_sub -h 192.168.1.2 -t "owl/#"
-- curl -k https://localhost/video_feed
-- ping 192.168.1.2
-```
-
-#### Final Validation
-
-```{code-block} text
-:caption: Network connectivity test
-
-[INFO] Performing final system validation...
-[INFO] Testing network connectivity...
-[OK] Can reach controller at 192.168.1.2
-[INFO] Testing video feed...
-[OK] Video feed is responding
-```
-
-If the controller is not reachable during setup (e.g., it hasn't been set up yet):
-
-```{code-block} text
-[WARNING] Cannot reach controller - check network
-```
-
-This is not a critical failure — the connection will work once the controller is online and the OWL reboots.
-
-#### MQTT Configuration Reminder
-
-```{code-block} text
-:caption: OWL config reminder
-
-[INFO] Checking OWL configuration...
-[INFO] Remember to set in OWL config:
-  [MQTT]
-  enable = True
-  broker_ip = 192.168.1.2
-  broker_port = 1883
-  device_id = owl-1
-```
-
-#### Setup Complete Summary
-
-```{code-block} text
-:caption: Final summary (all steps passed)
-
-[INFO] OWL Setup Summary:
-[OK] System Packages
-[OK] MQTT Configuration
-[OK] Network Configuration
-[OK] UFW Firewall Configuration
-[OK] Fan Control Permissions
-[OK] Nginx Configuration
-[OK] SSL Certificate Generation
-[OK] Avahi Service Configuration
-[OK] Service Management
-
-[INFO] Networked Mode - Access Information:
-  Hostname: owl-1
-  Static IP: 192.168.1.11
-  WiFi Network: FarmNetwork
-  Controller: 192.168.1.2
-  Video Feed: https://owl-1.local/video_feed
-  Configuration: /opt/owl-dash-config.txt
-
-[INFO] Testing Commands:
-  mosquitto_pub -h 192.168.1.2 -t 'owl/test' -m 'hello'
-  mosquitto_sub -h 192.168.1.2 -t 'owl/#'
-  curl -k https://localhost/video_feed
-  ping 192.168.1.2
-  ssh owl@owl-1.local
-
-[COMPLETE] OWL setup completed successfully!
-
-[INFO] Setup Complete - Reboot Recommended
-======================================
-A reboot is recommended to ensure all services start properly.
-
-After reboot:
-  * OWL will connect to WiFi 'FarmNetwork'
-  * Video feed will be at https://owl-1.local/video_feed
-  * MQTT will connect to 192.168.1.2:1883
-  * owl.py will launch if enabled
-
-Reboot now? (y/n):
-```
-
-Enter **y** to reboot immediately (recommended), or **n** to reboot later with `sudo reboot`.
-
-```{admonition} If any steps show [FAIL]
-:class: warning
-
-If the summary shows failures, you will see error details:
-
-    [ERROR] Some components failed to install. Check the status above.
-    [ERROR] WiFi Config: WiFi configuration failed
-    [ERROR] Please fix the above issues before rebooting.
-
-Review the specific error, fix the issue, and re-run `web_setup.sh`:
-
-    sudo ~/owl/web/web_setup.sh
-```
-
-### What Gets Configured
-
-In networked mode, each OWL is configured with:
-
-| Component | Configuration |
-|-----------|--------------|
-| **WiFi Client** | Connects to specified network with static IP |
-| **MQTT Client** | Publishes status, diagnostics, and detection data to remote broker |
-| **Video Streaming** | Nginx serves the video feed over HTTPS, proxied by the controller |
-| **mDNS** | Hostname resolution (owl-1.local, etc.) |
-| **UFW Firewall** | Allows SSH, HTTPS, and MQTT ports |
-| **SSL Certificate** | Self-signed, valid for 10 years |
-
-**Not installed in networked mode:**
-- Local MQTT broker (uses remote broker)
-- WiFi hotspot
-- Local dashboard (the controller provides the dashboard for all OWLs)
-
-### Step 4: Verify Connection
-
-After reboot, verify the OWL is connected:
-
-```bash
-# Check WiFi connection
-nmcli con show --active
-```
-
-You should see your network listed as active:
-
-```{code-block} text
-NAME         UUID                                  TYPE  DEVICE
-FarmNetwork  a1b2c3d4-e5f6-7890-abcd-ef1234567890  wifi  wlan0
-```
-
-```bash
-# Check IP address
-ip addr show wlan0
-```
-
-Look for your static IP in the output:
-
-```{code-block} text
-inet 192.168.1.11/24 brd 192.168.1.255 scope global wlan0
-```
-
-```bash
-# Test MQTT connection to the controller
-mosquitto_pub -h 192.168.1.2 -t "owl/test" -m "hello from owl-1"
-```
-
-If the broker is running, this command will complete silently (no output = success). If it fails:
-
-```{code-block} text
-Error: The connection was refused.
-```
-
-This means the MQTT broker is not running or not reachable. Check the controller is set up and on the same network.
-
-```bash
-# Check OWL service
-sudo systemctl status owl.service
-```
-
-You should see `Active: active (running)`.
-
-### Step 5: Repeat for Additional OWLs
-
-For each additional OWL, repeat steps 1-4 with:
-- Incremented OWL ID (1, 2, 3...)
-- Unique static IP (192.168.1.11, .12, .13...)
-
----
-
-## Accessing Networked OWLs
-
-### Individual OWL Access
-
-In networked mode, individual OWLs do not host their own dashboard. They serve a video feed that the central controller proxies, and publish status and diagnostics via MQTT. All monitoring and control is done through the [central controller's dashboard](#adding-a-central-controller).
-
-| Access Method | URL |
-|---------------|-----|
-| Video Feed | `https://owl-1.local/video_feed` or `https://192.168.1.11/video_feed` |
-| SSH | `ssh owl@owl-1.local` or `ssh owl@192.168.1.11` |
-
-```{note}
-Your browser will show a security warning because the SSL certificate is self-signed. This is expected — click through to proceed. In normal operation, you won't access OWL video feeds directly — the controller dashboard proxies them all into a single interface.
-```
-
-### MQTT Communication
-
-All OWLs publish to the configured MQTT broker:
-
-```bash
-# Subscribe to all OWL messages (run on any networked device)
-mosquitto_sub -h 192.168.1.2 -t "owl/#" -v
-```
-
-Example messages:
-```text
-owl/owl-1/status {"state": "running", "fps": 12.5, "detections": 23}
-owl/owl-2/status {"state": "running", "fps": 11.8, "detections": 45}
-```
-
----
-
-## Adding a Central Controller
-
-For fleet management with a dedicated dashboard, you can set up a central controller. The controller provides the MQTT broker and management dashboard for all networked OWLs.
-
-```{important}
-**Set up the controller BEFORE the networked OWLs.** The OWLs need the controller's IP address during their setup, and the MQTT broker must be running for OWLs to connect.
-```
-
-### Controller Hardware
-
-**Recommended:**
-- Raspberry Pi 4 or 5 (4GB+ RAM)
-- Official Raspberry Pi 7" touchscreen (optional but recommended)
-- 12V power supply or buck converter
-
-### Controller Setup
-
-1. Flash **Raspberry Pi OS (64-bit)** with username `owl`
-
-2. Download the OWL repository (from the `wireless-display` branch):
-   ```bash
-   git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
-   cd owl
-   ```
-
-3. Run the controller setup script:
-   ```bash
-   sudo bash controller/controller_setup.sh
-   ```
-
-   ```{warning}
-   The controller setup **must** be run with sudo. If you forget, you'll see:
-
-       [ERROR] This script must be run with sudo privileges.
-       [ERROR] Please run: sudo ./controller_setup.sh
-   ```
-
-### Controller Setup: Introduction
-
-When the script starts, you'll see a summary of what it will do:
-
-```{code-block} text
-:caption: Controller setup intro
-
-============================================
-    OWL In-Cab Controller Setup
-============================================
-
-This script will configure this Raspberry Pi as the
-in-cab controller for multiple OWL units.
-
-The controller will:
-  * Install all required system packages
-  * Create a Python virtual environment
-  * Configure MQTT broker for OWL communication
-  * Set up Nginx web server with SSL
-  * Configure WiFi with static IP
-  * Optional: Enable kiosk mode for display
-```
-
-### Controller Setup: Configuration Prompts
-
-```{code-block} text
-:caption: Controller configuration
+:caption: Controller configuration prompts
 
 [INFO] Controller Configuration
 =======================================
@@ -696,10 +209,37 @@ Enable kiosk mode on boot? (y/n, default: y): y
 ```
 
 ```{note}
-**Kiosk mode** launches Chromium in full-screen on boot, auto-loading the controller dashboard. Ideal for touchscreen installations. Enter **n** if you want a normal desktop environment.
+**Kiosk mode** means the dashboard opens automatically in full-screen when the Pi boots — you won't see a normal desktop. This is ideal for a touchscreen in the cab. Enter **n** if you want a normal desktop environment.
 ```
 
-### Controller Setup: Configuration Summary
+If you enable kiosk mode, the script will ask you to choose a screen resolution:
+
+```{code-block} text
+:caption: Screen resolution selection (kiosk mode only)
+
+[INFO] Select display resolution (for kiosk/touchscreen):
+  1) 1280x800  (EDATEC HMI3010 default)
+  2) 1024x600  (7" alternative)
+  3) 1920x1080 (Full HD)
+  4) Custom
+
+Select resolution (1-4, default 1): 1
+```
+
+The script will also ask about GPS. If you have a Teltonika router that provides GPS data, enable this for speed-adaptive spray timing:
+
+```{code-block} text
+:caption: GPS configuration
+
+[INFO] GPS Configuration
+  The controller can receive GPS data from a Teltonika router
+  via NMEA-over-TCP on port 8500. This enables speed-adaptive
+  actuation and track recording.
+
+Enable GPS from Teltonika router? (y/n, default: n): n
+```
+
+Finally, review the configuration summary and confirm:
 
 ```{code-block} text
 :caption: Configuration summary
@@ -712,6 +252,8 @@ Static IP: 192.168.1.2
 Gateway: 192.168.1.1
 Hostname: owl-controller
 Kiosk Mode: y
+Screen Resolution: 1280x800
+GPS: Disabled
 
 Access Information:
   Dashboard: https://owl-controller.local/ or https://192.168.1.2/
@@ -720,13 +262,36 @@ Access Information:
 Continue with these settings? (y/n): y
 ```
 
-### Controller Setup: Installation Progress
-
-The script installs system packages, Python environment, MQTT broker, SSL, Nginx, Avahi, firewall, dashboard service, and configures WiFi. You'll see `[OK]` or `[FAIL]` for each step:
+The installation will then run automatically. It takes around 10-15 minutes. Watch for `[OK]` messages — if everything passes, you'll see a summary like this:
 
 ```{code-block} text
-:caption: Key installation steps
+:caption: Successful controller setup
 
+[INFO] OWL Controller Setup Summary:
+============================================
+[OK] System Packages
+[OK] Python Environment
+[OK] MQTT Broker Configuration
+[OK] SSL Certificate
+[OK] Nginx Configuration
+[OK] Avahi (.local) Configuration
+[OK] Firewall Configuration
+[OK] Dashboard Service
+[OK] CONTROLLER.ini
+[OK] Service Management
+[OK] Kiosk Mode Configuration
+[OK] WiFi Configuration
+[OK] Static IP Configuration
+
+[COMPLETE] OWL Controller setup completed successfully!
+```
+
+<details>
+<summary>What to expect during installation (click to expand)</summary>
+
+The script installs and configures each component in order. You'll see output like this:
+
+```text
 [INFO] Updating system package list...
 [OK] System update completed successfully.
 [INFO] Installing required system packages...
@@ -756,14 +321,6 @@ The script installs system packages, Python environment, MQTT broker, SSL, Nginx
 [INFO] Starting and enabling services...
 [OK] OWL Controller dashboard service started successfully
 [OK] Starting services completed successfully.
-```
-
-### Controller Setup: Final Validation
-
-The script tests MQTT, dashboard, and network connectivity:
-
-```{code-block} text
-:caption: Final validation
 
 [INFO] Performing final system validation...
 [INFO] Testing MQTT broker...
@@ -782,351 +339,377 @@ The script tests MQTT, dashboard, and network connectivity:
 [OK] Static IP 192.168.1.2 configured
 ```
 
-### Controller Setup: Complete Summary
+</details>
 
-```{code-block} text
-:caption: Final summary
+When prompted, reboot the controller:
 
-============================================
-[INFO] OWL Controller Setup Summary:
-============================================
-[OK] System Packages
-[OK] Python Environment
-[OK] MQTT Broker Configuration
-[OK] SSL Certificate
-[OK] Nginx Configuration
-[OK] Avahi (.local) Configuration
-[OK] Firewall Configuration
-[OK] Dashboard Service
-[OK] Service Management
-[OK] Kiosk Mode Configuration
-[OK] WiFi Configuration
-[OK] Static IP Configuration
-
-[INFO] Controller Access Information:
-=======================================
-  Controller IP: 192.168.1.2
-  Dashboard URL: https://owl-controller.local/ or https://192.168.1.2/
-  MQTT Broker: 192.168.1.2:1883
-  Hostname: owl-controller
-  Configuration: /opt/owl-controller-config.txt
-
-[INFO] Testing Commands:
-  mosquitto_pub -h 192.168.1.2 -t 'owl/test' -m 'hello'
-  mosquitto_sub -h 192.168.1.2 -t 'owl/#'
-  systemctl status owl-controller mosquitto nginx
-  journalctl -u owl-controller -f
-
-[INFO] Next Steps for OWL Configuration:
-1. On each OWL unit, edit the configuration file
-2. Set network_mode = 'networked_owl'
-3. Set controller_ip = '192.168.1.2'
-4. Set mqtt_broker = '192.168.1.2'
-5. OWLs will automatically connect to this controller
-
-[COMPLETE] OWL Controller setup completed successfully!
-============================================
-
-A reboot is recommended to ensure all services start properly.
-
-After reboot:
-  * Controller will connect to WiFi 'FarmNetwork'
-  * Dashboard will be available at https://192.168.1.2/
-  * MQTT broker will be running on port 1883
-  * Kiosk mode will launch automatically on boot
-
-Reboot now? (y/n):
+```text
+Reboot now? (y/n): y
 ```
 
-### What the Controller Provides
+After reboot, the controller is ready. If kiosk mode is enabled, the dashboard will open automatically in full-screen.
 
-| Component | Purpose |
-|-----------|---------|
-| **Mosquitto MQTT Broker** | Central message hub for all OWLs |
-| **Controller Dashboard** | Web interface showing all connected OWLs |
-| **Nginx + SSL** | Secure web server with MJPEG streaming support |
-| **Avahi/mDNS** | Local hostname resolution (owl-controller.local) |
-| **Python Virtual Environment** | Isolated environment at `/home/owl/controller_venv` |
-| **UFW Firewall** | Allows SSH, HTTP, HTTPS, MQTT, and mDNS ports |
-| **Kiosk Mode** (optional) | Full-screen Chromium dashboard for touchscreen |
+**What the controller provides:**
 
-### Accessing the Controller
+| Component | What it does |
+|-----------|-------------|
+| MQTT broker | Central message hub — all OWLs send their status here |
+| Dashboard | Web interface showing all connected OWLs on one screen |
+| Nginx + SSL | Secure web server that handles video streaming |
+| Kiosk mode (optional) | Full-screen dashboard that starts automatically on boot |
 
-After setup and reboot:
-- Dashboard: `https://owl-controller.local/` or `https://192.168.1.2/`
-- MQTT Broker: `192.168.1.2:1883`
-- Configuration file: `/opt/owl-controller-config.txt`
+```{tip}
+**Dashboard access:** Open `https://192.168.1.2/` in any browser on the same network. Your browser will show a security warning — this is normal and safe to click through. The connection is encrypted, but the certificate is self-generated rather than from a public authority.
+```
+
+**Next step:** Now set up each OWL unit using the controller's IP address (`192.168.1.2`) when prompted.
+
+---
+
+## Step 2 — Set up each OWL
+
+Each OWL unit on the boom needs to be set up individually. The process is the same for each one — just change the OWL ID number and IP address.
+
+### Run the OWL installer
+
+On each OWL Pi, clone the repository and run the installer:
+
+```bash
+git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
+cd owl
+bash owl_setup.sh
+```
+
+The installer handles everything: system updates, camera check, virtual environment, OpenCV, and dependencies. When it asks about the web dashboard, say **yes**:
+
+```{code-block} text
+[INFO] Dashboard setup available...
+Do you want to add a web dashboard for remote control? (y/n): y
+```
+
+The installer then runs the network setup automatically — you do not need to run a separate script.
+
+```{tip}
+If you need to re-run just the network setup later (without reinstalling everything), use:
+
+    sudo bash ~/owl/controller/shared/setup.sh
+```
+
+### Choose networked mode
+
+Select **Networked** mode and choose your connection type:
+
+```{code-block} text
+[INFO] Select OWL Operation Mode:
+  1) Standalone - Create WiFi hotspot with local MQTT broker and dashboard
+  2) Networked  - Connect to existing WiFi network with remote MQTT broker
+
+Select mode (1 or 2): 2
+[INFO] Networked mode selected
+
+[INFO] Select network connection type:
+  1) WiFi     - Connect to an existing WiFi network
+  2) Ethernet - Use a wired LAN connection (eth0)
+
+Select connection type (1 or 2, default: 1): 1
+```
 
 ```{note}
-Your browser will show a security warning because the SSL certificate is self-signed. This is expected — click through to proceed.
-
-If kiosk mode is enabled, the dashboard will load automatically in full-screen Chromium on the connected display.
+**WiFi vs Ethernet:** Most setups use WiFi. Choose Ethernet if you've run a network cable directly to the OWL — this skips the WiFi credentials and uses the wired connection instead.
 ```
 
----
+### Enter network settings
 
-## Network Planning Guide
+Enter the details for this OWL. Use the IP addresses you planned earlier.
 
-### Recommended IP Scheme
-
-| Device | Hostname | Static IP |
-|--------|----------|-----------|
-| WiFi Router | - | 192.168.1.1 |
-| Controller (if used) | owl-controller | 192.168.1.2 |
-| MQTT Broker (if separate) | - | 192.168.1.3 |
-| OWL Unit 1 | owl-1 | 192.168.1.11 |
-| OWL Unit 2 | owl-2 | 192.168.1.12 |
-| OWL Unit 3 | owl-3 | 192.168.1.13 |
-| OWL Unit 4 | owl-4 | 192.168.1.14 |
-
-### Router Configuration
-
-For reliable operation:
-- **Disable DHCP** or configure DHCP reservations for all OWL devices
-- **Enable 2.4GHz** band (better range than 5GHz)
-- **Position centrally** for coverage across spray boom
-
-### Alternative MQTT Brokers
-
-The networked OWL can connect to any MQTT broker:
-
-| Broker | Configuration |
-|--------|---------------|
-| **Controller Pi** | Use controller IP (e.g., 192.168.1.2) |
-| **Separate Server** | Any device running Mosquitto |
-| **Cloud MQTT** | Public broker address (requires internet) |
-| **Home Assistant** | Home Assistant's built-in broker |
-
----
-
-## Configuration Reference
-
-### OWL Network Configuration
-
-Each OWL's network config is saved at `/opt/owl-dash-config.txt`. View it with:
-
-```bash
-cat /opt/owl-dash-config.txt
-```
-
-### OWL Detection Config
-
-Enable MQTT in each OWL's detection config:
-
-```bash
-nano ~/owl/config/DAY_SENSITIVITY_2.ini
-```
-
-```{code-block} ini
-:caption: MQTT section in DAY_SENSITIVITY_2.ini
-
-[MQTT]
-enable = True
-broker_ip = 192.168.1.2
-broker_port = 1883
-device_id = owl-1
-```
-
-```{important}
-Each OWL must have a unique `device_id` (e.g., owl-1, owl-2, owl-3). This matches the hostname set during setup.
-```
-
-### Controller Configuration
-
-Controller config is saved at `/opt/owl-controller-config.txt`:
+**WiFi connection:**
 
 ```{code-block} text
-:caption: /opt/owl-controller-config.txt
+[INFO] Configuring WiFi Client (Networked Mode)
+Enter WiFi network name (SSID) to join: FarmNetwork
+Enter WiFi network password: ********
+Re-enter WiFi password to confirm: ********
+Enter OWL ID number (default: 1): 1
+Enter static IP for this OWL (e.g., 192.168.1.11): 192.168.1.11
+Enter gateway IP (default: 192.168.1.1): 192.168.1.1
+Enter central controller IP (MQTT broker; default: 192.168.1.2): 192.168.1.2
+```
 
-OWL Controller Configuration
-============================
-Hostname: owl-controller
-Static IP: 192.168.1.2
-Gateway: 192.168.1.1
-WiFi SSID: FarmNetwork
-WiFi Password: [HIDDEN]
+**Ethernet connection:** Same prompts but without the WiFi name and password.
 
-Access URLs:
-- Dashboard: https://owl-controller.local/ or https://192.168.1.2/
-- MQTT Broker: 192.168.1.2:1883
+The script validates that all your addresses are on the same subnet:
 
-Service Configuration:
-- MQTT Config: /etc/mosquitto/conf.d/owl_controller.conf
-- MQTT Log: /var/log/mosquitto/mosquitto.log
-- Nginx Config: /etc/nginx/sites-available/owl-controller
-- SSL Certificate: /etc/ssl/certs/owl-controller.crt
-- SSL Private Key: /etc/ssl/private/owl-controller.key
-- Avahi Service: /etc/avahi/services/owl-controller.service
-- Dashboard Service: /etc/systemd/system/owl-controller.service
-- Python Venv: /home/owl/controller_venv
+```{code-block} text
+[OK] Network OK: OWL 192.168.1.11, Gateway 192.168.1.1, Controller 192.168.1.2 (base 192.168.1.x).
+```
 
-Testing Commands:
-- mosquitto_pub -h localhost -t "test/message" -m "Hello World"
-- mosquitto_sub -h localhost -t "owl/#"
-- curl -k https://localhost/
-- systemctl status owl-controller mosquitto nginx
+If there's a mismatch (for example, the OWL is on `192.168.1.x` but the controller is on `10.0.0.x`), the script will warn you and ask you to re-enter the addresses.
 
-OWL Configuration:
-- Set network_mode to 'networked_owl' in OWL config
-- Set controller_ip to '192.168.1.2'
-- Set mqtt_broker to '192.168.1.2'
+Review the summary and confirm:
+
+```{code-block} text
+[INFO] Networked Configuration Summary:
+  Mode: Networked
+  Hostname: owl-1
+  Connection: WiFi (FarmNetwork)
+  Static IP: 192.168.1.11
+  Gateway: 192.168.1.1
+  Controller IP: 192.168.1.2
+  MQTT Broker: 192.168.1.2:1883 (remote)
+  Video Feed: https://owl-1.local/video_feed
+
+Continue with these settings? (y/n): y
+```
+
+```{warning}
+**If you're connected via SSH:** When the network settings are applied, your SSH connection will drop because the Pi is switching to its new IP address. Reconnect using the new static IP:
+
+    ssh owl@192.168.1.11
+```
+
+<details>
+<summary>What to expect during OWL setup (click to expand)</summary>
+
+In networked mode, the OWL installs MQTT clients (not a broker) and configures networking:
+
+```text
+[INFO] Installing required system packages...
+[INFO] Installing MQTT clients only (networked mode)...
+[OK] Installing system packages completed successfully.
+[INFO] Skipping MQTT broker setup (networked mode - using remote broker)
+[INFO] Configuring WiFi client connection: FarmNetwork...
+[OK] WiFi configuration completed successfully.
+[INFO] Configuring firewall (UFW)...
+[OK] UFW firewall configuration completed successfully.
+[INFO] Setting hostname to owl-1...
+[OK] Setting hostname completed successfully.
+[INFO] Generating SSL certificates...
+[OK] SSL certificate generation completed successfully.
+[INFO] Setting up Nginx web server...
+[OK] Nginx configuration completed successfully.
+[INFO] Configuring Avahi for .local domain resolution...
+[OK] Avahi service configuration completed successfully.
+[INFO] Starting and enabling services...
+[OK] Starting services completed successfully.
+```
+
+The setup writes configuration to `GENERAL_CONFIG.ini` and `CONTROLLER.ini` automatically — you don't need to edit any config files manually.
+
+</details>
+
+When prompted, reboot the OWL:
+
+```text
+Reboot now? (y/n): y
+```
+
+### Repeat for each OWL
+
+For each additional OWL, repeat the process above with:
+- An incremented **OWL ID** (1, 2, 3...)
+- A unique **static IP** (192.168.1.11, .12, .13...)
+
+Everything else (WiFi name, password, gateway, controller IP) stays the same.
+
+---
+
+## Step 3 — Verify everything works
+
+### Check the controller
+
+1. Open `https://192.168.1.2/` in a browser on the same network. You should see the OWL Controller dashboard.
+
+2. Your browser will show a security warning — this is normal. Click "Advanced" and then "Proceed" (the exact wording varies by browser). The connection is encrypted and safe.
+
+3. As each OWL comes online after reboot, it should appear as a card on the dashboard within a few seconds.
+
+4. To check the message broker is running, open a terminal on the controller and run:
+
+```bash
+mosquitto_sub -h localhost -t "owl/#" -v
+```
+
+You should see messages from each connected OWL appearing every few seconds.
+
+### Check each OWL
+
+On each OWL, verify the connection:
+
+```bash
+# Check WiFi is connected (or Ethernet)
+nmcli con show --active
+
+# Check the correct IP address is assigned
+ip addr show wlan0    # use eth0 for Ethernet
+
+# Test that the OWL can reach the controller
+mosquitto_pub -h 192.168.1.2 -t "owl/test" -m "hello from owl-1"
+
+# Check the detection service is running
+sudo systemctl status owl.service
+```
+
+If the MQTT test completes silently (no output), it worked. If you see `Error: The connection was refused`, check that the controller is powered on and connected to the same network.
+
+```{note}
+If OWLs don't appear on the dashboard, see the [Troubleshooting](#troubleshooting) section below.
 ```
 
 ---
 
 ## Troubleshooting
 
-### OWL Not Connecting to WiFi
+### WiFi or network problems
 
 ```bash
-# Check WiFi status
-nmcli con show
+# Check if WiFi is connected
+nmcli con show --active
+
+# See available WiFi networks
 nmcli dev wifi list
 
-# Manually connect
+# Check your IP address
+ip addr show wlan0
+
+# Manually reconnect to WiFi
 sudo nmcli con up "FarmNetwork"
 
-# Check IP address
-ip addr show wlan0
+# Restart the network service
+sudo systemctl restart NetworkManager
 ```
 
-Expected output when connected:
-
-```{code-block} text
-NAME         UUID                                  TYPE  DEVICE
-FarmNetwork  a1b2c3d4-e5f6-7890-abcd-ef1234567890  wifi  wlan0
-```
-
-### OWL Not Publishing to MQTT
+If the OWL has the wrong IP address, re-run the network setup:
 
 ```bash
-# Test MQTT connection from OWL
-mosquitto_pub -h 192.168.1.2 -t "owl/test" -m "hello"
-
-# Check if broker is reachable
-ping 192.168.1.2
-
-# Check OWL service logs
-journalctl -u owl.service -f
+sudo bash ~/owl/controller/shared/setup.sh
 ```
 
-If the MQTT test fails with `Error: The connection was refused`, check:
-1. The controller is powered on and connected to the same network
-2. The mosquitto service is running on the controller: `sudo systemctl status mosquitto`
-3. The firewall allows port 1883: `sudo ufw status` (on the controller)
+### OWLs not appearing on controller
 
-### Cannot Access OWL Video Feed
+First, check the MQTT broker on the controller:
+
+```bash
+# Is the broker running?
+sudo systemctl status mosquitto
+
+# Can the controller receive messages?
+mosquitto_sub -h localhost -t "owl/#" -v
+```
+
+Then, from the OWL, check it can reach the controller:
+
+```bash
+# Can the OWL reach the controller?
+ping 192.168.1.2
+
+# Can the OWL send MQTT messages?
+mosquitto_pub -h 192.168.1.2 -t "owl/test" -m "hello"
+```
+
+If `ping` works but MQTT fails, the firewall on the controller may be blocking port 1883:
+
+```bash
+# On the controller, check firewall rules
+sudo ufw status
+```
+
+### Video feed not working
 
 ```bash
 # Check nginx is running
 sudo systemctl status nginx
 
-# Test locally on the OWL
+# Test the video feed locally on the OWL
 curl -k https://localhost/video_feed
 
-# Check firewall
-sudo ufw status
+# Check the camera is detected
+vcgencmd get_camera    # Pi 4 and earlier
+libcamera-hello --list-cameras    # Pi 5
 ```
 
-### Controller Not Receiving Messages
+### Services not starting
 
 ```bash
-# On controller, check mosquitto
-sudo systemctl status mosquitto
-ss -tlnp | grep 1883
-
-# Check mosquitto logs
-sudo tail -f /var/log/mosquitto/mosquitto.log
-
-# Subscribe to test messages
-mosquitto_sub -h localhost -t "#" -v
-```
-
-Expected output when MQTT is working:
-
-```{code-block} text
-:caption: mosquitto service status
-
-Active: active (running) since ...
-```
-
-```{code-block} text
-:caption: Port 1883 listening
-
-LISTEN  0  100  0.0.0.0:1883  0.0.0.0:*  users:(("mosquitto",pid=1234,fd=5))
-```
-
-### Static IP Not Applied
-
-```bash
-# Check NetworkManager connection
-nmcli con show "FarmNetwork"
-
-# Verify IP
-ip addr show wlan0
-
-# Restart NetworkManager
-sudo systemctl restart NetworkManager
-```
-
-For more troubleshooting help, see the [full Troubleshooting Guide](../../troubleshooting/index.md).
-
----
-
-## Service Management
-
-### OWL Services
-
-```bash
-# Detection service
+# Check the OWL detection service
 sudo systemctl status owl.service
-sudo systemctl restart owl.service
-journalctl -u owl.service -f
+journalctl -u owl.service --no-pager -n 50
 
-# Nginx (video feed)
-sudo systemctl status nginx
-sudo systemctl restart nginx
+# Check the controller dashboard service
+sudo systemctl status owl-controller
+journalctl -u owl-controller --no-pager -n 50
 ```
 
-### Controller Services
+For more help, see the [full Troubleshooting Guide](../../troubleshooting/index.md).
+
+---
+
+## Reference
+
+### MQTT topics
+
+Each OWL publishes to device-specific topics. Replace `{id}` with the device ID (e.g., `owl-1`).
+
+| Topic | Purpose |
+|-------|---------|
+| `owl/{id}/state` | Full device state (detection mode, algorithm, settings) |
+| `owl/{id}/commands` | Control commands sent to the OWL (start, stop, config changes) |
+| `owl/{id}/status` | Heartbeat and connectivity status |
+| `owl/{id}/detection` | Weed detection events |
+| `owl/{id}/config` | Configuration data |
+| `owl/{id}/indicators` | LED and buzzer indicator state |
+| `owl/{id}/gps` | GPS data from the controller |
+
+To watch all messages from all OWLs:
 
 ```bash
-# Controller dashboard
-sudo systemctl status owl-controller
-journalctl -u owl-controller -f
-
-# MQTT broker
-sudo systemctl status mosquitto
-sudo tail -f /var/log/mosquitto/mosquitto.log
-
-# Web server
-sudo systemctl status nginx
+mosquitto_sub -h 192.168.1.2 -t "owl/#" -v
 ```
 
+### Configuration files
+
+The setup script configures these files automatically — you should not need to edit them manually.
+
+| File | Location | Purpose |
+|------|----------|---------|
+| `GENERAL_CONFIG.ini` | `~/owl/config/` | Detection parameters, sensitivity presets, relay mapping |
+| `CONTROLLER.ini` | `~/owl/config/` | MQTT settings, network mode, GPS, actuation timing |
+| Network config summary | `/opt/owl-dash-config.txt` (OWL) or `/opt/owl-controller-config.txt` (controller) | Human-readable record of setup choices |
+
+### System services
+
+| Service | Runs on | Purpose |
+|---------|---------|---------|
+| `owl.service` | Each OWL | Weed detection and camera |
+| `owl-controller` | Controller | Dashboard web application |
+| `mosquitto` | Controller | MQTT message broker |
+| `nginx` | Both | Web server (SSL, video proxy) |
+
+Common service commands:
+
+```bash
+# Check if a service is running
+sudo systemctl status owl.service
+
+# Restart a service
+sudo systemctl restart owl-controller
+
+# View live logs
+journalctl -u owl.service -f
+```
+
+### Scaling
+
+| OWL count | WiFi recommendation |
+|-----------|---------------------|
+| 1-4 | Single router, 2.4 GHz band |
+| 5-8 | Dual-band router or mesh network |
+| 8+ | Multiple access points along the boom |
+
+Each OWL video stream uses approximately 1-2 Mbps. MQTT overhead is minimal (around 10 Kbps per OWL).
+
 ---
 
-## Scaling Considerations
-
-### Bandwidth
-
-Each OWL video stream uses approximately:
-- **Low quality**: 0.5-1 Mbps
-- **Medium quality**: 1-2 Mbps
-- **High quality**: 2-4 Mbps
-
-MQTT overhead is minimal (~10 Kbps per OWL).
-
-### WiFi Coverage
-
-| OWL Count | Recommendation |
-|-----------|----------------|
-| 1-4 | Single router, 2.4GHz |
-| 5-8 | Dual-band router or mesh |
-| 8+ | Multiple access points |
-
----
-
-## Next Steps
+## Next steps
 
 ```{seealso}
 - [Standalone Setup](standalone.md) - Single OWL with WiFi hotspot
