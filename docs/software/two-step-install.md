@@ -1,45 +1,35 @@
 # Two-Step Install
 
-This guide covers setting up an OWL unit using the automated installer. The main steps are:
+This guide covers setting up an OWL unit using the automated installer:
 
-1. Step 1: Install Raspbian onto an {abbr}`SD card (Secure Digital card — a small removable storage card that holds the Pi's operating system)`
-2. Step 2: Download and run the setup script
+1. **Step 1** — Flash Raspberry Pi OS onto an SD card
+2. **Step 2** — Download and run the setup script
 
-After the installer completes, you'll [focus the camera](#step-3-focus-your-camera) and [verify the installation](#step-4-verify-installation).
+The installer handles everything: system updates, camera check, Python environment, OpenCV, dependencies, and boot configuration. It takes around 20-30 minutes.
 
 ## Prerequisites
 
-Before starting, ensure you have:
-
-| Requirement | Details                                                        |
-|-------------|----------------------------------------------------------------|
-| Hardware | Fully assembled OWL with Raspberry Pi and camera               |
-| Camera | Connected and enabled Raspberry Pi camera module or USB camera |
-| Internet | WiFi or Ethernet connection (for initial setup only)           |
-| Time | Approximately 20 to 30 minutes                                    |
+| Requirement | Details |
+|-------------|---------|
+| Hardware | Fully assembled OWL with Raspberry Pi and camera |
+| Camera | Connected Raspberry Pi camera module or USB camera |
+| Internet | WiFi or Ethernet connection (for initial setup only) |
 
 ## Step 1: Prepare the Raspberry Pi
 
-### Flash the Operating System
+### Flash the operating system
 
 1. Download and install [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
 2. Select **Raspberry Pi OS (64-bit)** as the operating system
 3. Click the **settings cog** before writing to configure:
 
 ```{important}
-**Required Settings:**
+**Required settings:**
 - **Username**: `owl` (strongly recommended for compatibility)
 - **Password**: Choose a secure password
-- **{abbr}`SSH (Secure Shell — remote access to your Pi over the network)`**: Enable for remote access
+- **SSH**: Enable for remote access
 - **WiFi**: Configure your network for initial setup
 - **Locale**: Set your timezone and keyboard layout
-```
-
-```{admonition} Connecting to a phone hotspot
-:class: tip
-It is often convenient to set the Pi to connect automatically to a phone hotspot for internet access. If you connect your
-computer to the same network, then connecting over the network via SSH is straightforward. Just check your phone for the
-IP address of the connected Pi under the Hotspot settings.
 ```
 
 ```{figure} https://github.com/geezacoleman/OpenWeedLocator/assets/51358498/a86a6358-3a8c-4f40-94df-9eeba9c17e4d
@@ -52,359 +42,63 @@ Use Raspberry Pi Imager to flash the OS and configure initial settings.
 4. Write the image to your SD card
 5. Insert the SD card into your Raspberry Pi and boot
 
-### Connect to Your Pi
+### Connect to your Pi
 
-**Option A: Direct Connection**
-Connect a monitor and keyboard directly to the Pi.
+**Option A: Direct connection** — Connect a monitor and keyboard directly to the Pi. Simplest approach, avoids any SSH dropout issues during network changes.
 
-This approach can avoid any issues with losing the SSH connection and access to the Pi when adjusting network settings.
+**Option B: SSH** — Find the Pi's IP address and connect from another device on the same network:
 
-**Option B: SSH (Recommended)**
-
-Find the IP address of the connected Raspberry Pi and connect to it via another device on the same network. More convenient
-than setting up a screen and keyboard, but everything must be done through the command line.
 ```bash
 ssh owl@<your-pi-ip-address>
 ```
 
-## Step 2: Run the OWL Installer
+```{tip}
+It's often convenient to connect the Pi to a phone hotspot for internet access. If your computer is on the same hotspot, you can SSH in easily — check your phone's hotspot settings for the Pi's IP address.
+```
 
-Once connected to your Pi, open up the {abbr}`terminal (the command-line interface where you type commands — press CTRL+ALT+T to open)` with CTRL + ALT + T (if using a screen/keyboard) and run these commands:
+## Step 2: Run the installer
+
+Open a terminal (press Ctrl+Alt+T if using a monitor) and run:
 
 ```bash
 git clone https://github.com/geezacoleman/OpenWeedLocator owl
-```
-This first command ({abbr}`git clone (downloads a complete copy of a code repository from GitHub to your Pi)`) will download the repository into a folder called owl in your home directory. It may take some time
-depending on your internet speed and connection.
-```bash
 cd owl
-```
-Then we {abbr}`cd (change directory — moves you into a different folder)` into `owl` so we can run the final command below:
-```bash
 bash owl_setup.sh
-```
-The {abbr}`bash (a command that runs a shell script — a file containing a sequence of commands)` command executes the setup script.
-
-```{admonition} Choosing Basic, Standalone or Networked setup
-:class: important
-During the setup you will be asked: 'Do you want to set up a Dashboard?':
-
-**Basic OWL**
-Respond NO and the setup should complete.
-
-**Standalone OWL**
-Respond YES, and then select 1 (standalone OWL) - setup instructions are provided under [Standalone Setup](../controllers/wireless/standalone.md).
-
-**Networked OWL**
-Respond YES, and then select 2 (Networked OWL) - setup instructions are provided under [Networked Setup](../controllers/wireless/networked.md).
 ```
 
 ```{warning}
-**Dashboard features require the `wireless-display` branch**
-
-The Standalone and Networked dashboard features are currently in development on the `wireless-display` branch. If you plan to set up a dashboard, clone from this branch instead:
+**Dashboard features require the `wireless-display` branch.** If you plan to set up a Standalone or Networked dashboard, clone from this branch instead:
 
     git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
 
 For a **Basic OWL** (no dashboard), cloning from `main` is fine.
 ```
 
-This command will run the setup script. Here is where you can decide to setup the Basic, Standalone or Networked OWL.
-
 ```{warning}
-**Do not run with {abbr}`sudo (superuser do — runs a command with administrator privileges)`!** The installer will request elevated permissions only when needed.
+**Do not run with sudo!** The installer will request elevated permissions only when needed.
 ```
 
-### What the Installer Does
+The installer will work through system updates, camera checks, Python environment setup, OpenCV, and dependencies. You'll see `[OK]` for each successful step. If a step fails, you'll see `[FAIL]` with an error message.
 
-The `owl_setup.sh` script performs these steps automatically:
-
-```{list-table}
-:header-rows: 1
-:widths: 10 30 60
-
-* - Step
-  - Action
-  - Details
-* - 1
-  - System Update
-  - Updates and upgrades all system packages
-* - 2
-  - Camera Check
-  - Verifies a camera is connected and functional
-* - 3
-  - Space Cleanup
-  - Removes unnecessary packages (LibreOffice, Wolfram) to free space
-* - 4
-  - {abbr}`Virtual Environment (an isolated set of Python packages, separate from the system — prevents software conflicts)`
-  - Creates an isolated Python environment for OWL
-* - 5
-  - {abbr}`NumPy (a Python library for numerical computing, used by OpenCV for image processing)` Alignment
-  - Ensures NumPy versions are compatible with system {abbr}`OpenCV (Open Computer Vision — the library that powers weed detection)`
-* - 6
-  - OpenCV Installation
-  - Installs opencv-contrib-python in the virtual environment
-* - 7
-  - OWL Dependencies
-  - Installs all Python packages from requirements.txt using {abbr}`pip (Python package installer — downloads and installs Python libraries)`
-* - 8
-  - {abbr}`Systemd (the Linux service manager that starts, stops, and monitors background programs)` Service
-  - Configures OWL to start automatically on boot
-* - 9
-  - Desktop Setup
-  - Sets wallpaper and creates Focus desktop shortcut
-* - 10
-  - Dashboard (Optional)
-  - Prompts to install web dashboard for remote control
-```
-
-### Installation Status Indicators
-
-You'll see status indicators throughout:
-- `[OK]` - Step completed successfully
-- `[FAIL]` - Step failed (check the error message)
-- `[WARNING]` - Non-critical issue, installation continues
-- `[INFO]` - Progress information
-
----
-
-### Expected Installation Output
-
-Below is what you should see at each step of the installer. Use this to confirm everything is working correctly.
-
-```{admonition} If OWL is already running
-:class: note
-
-If `owl.service` is already running (e.g., you are re-running the installer), you will be prompted first:
-
-    [WARNING] The owl.service is currently running.
-    Do you want to stop the service to continue with the installation? (y/n): y
-    [INFO] Stopping owl.service...
-
-Enter `y` to continue.
-```
-
-#### Step 1: System Update
+When the installer reaches the dashboard prompt, choose your setup path:
 
 ```{code-block} text
-:caption: System update output
-
-[INFO] Updating and upgrading the system...
-... (apt update and upgrade output)
-[OK] System upgrade completed successfully.
-```
-
-#### Step 2: Camera Check
-
-The installer checks for a connected camera. If found:
-
-```{code-block} text
-:caption: Camera detected
-
-[INFO] Checking for connected Raspberry Pi camera...
-[INFO] Camera detected successfully.
-```
-
-If no camera is found, you will be prompted to connect one:
-
-```{code-block} text
-:caption: No camera detected
-
-[INFO] Checking for connected Raspberry Pi camera...
-[ERROR] No camera detected!
-Please connect a Raspberry Pi camera and press Enter to retry...
-```
-
-```{warning}
-The installer will **not continue** until a camera is detected. Check that your ribbon cable is properly seated and that the camera module is compatible.
-```
-
-#### Step 3: Camera Functionality Test
-
-After detecting the camera, the installer tests that it can actually capture images:
-
-```{code-block} text
-:caption: Camera test passed
-
-[INFO] Testing camera functionality...
-[INFO] Camera is working correctly.
-```
-
-If the camera test fails, the installer will attempt a full system upgrade to resolve any driver issues:
-
-```{code-block} text
-:caption: Camera test failed (auto-recovery)
-
-[INFO] Testing camera functionality...
-[WARNING] Camera test failed. Running full system upgrade to resolve potential issues...
-... (full upgrade output)
-[OK] Full system upgrade completed successfully.
-[INFO] Retesting camera after full upgrade...
-[INFO] Camera test passed after full upgrade.
-```
-
-If the camera still fails after a full upgrade, a critical error is shown:
-
-```{code-block} text
-:caption: Camera failure (requires manual intervention)
-
-[CRITICAL ERROR] Camera still not working after full upgrade.
-Please log an issue: https://github.com/geezacoleman/OpenWeedLocator/issues
-```
-
-#### Step 4: Space Cleanup
-
-```{code-block} text
-:caption: Removing unnecessary packages
-
-[INFO] Freeing up space by removing unnecessary packages...
-... (removing wolfram-engine, libreoffice)
-[OK] Cleaning up completed successfully.
-```
-
-#### Step 5: Virtual Environment
-
-The installer creates an isolated Python environment so OWL's packages don't interfere with the system:
-
-```{code-block} text
-:caption: Virtual environment creation
-
-[INFO] Setting up the virtual environment...
-[OK] Installing virtualenv packages completed successfully.
-[OK] Virtualenv configuration completed successfully.
-[INFO] Creating the 'owl' virtual environment...
-[OK] Creating virtual environment 'owl' completed successfully.
-```
-
-#### Step 6: NumPy Alignment
-
-The installer checks that NumPy versions match between the system and virtual environment. This prevents OpenCV compatibility issues:
-
-```{code-block} text
-:caption: NumPy versions match (ideal)
-
-[INFO] Checking NumPy consistency (system vs venv) ...
-[OK] System NumPy: 1.24.2 at /usr/lib/python3/dist-packages/numpy/__init__.py.
-[INFO] Venv NumPy: 1.24.2 at /usr/lib/python3/dist-packages/numpy/__init__.py
-[OK] NumPy versions match: 1.24.2
-```
-
-If a mismatch is found, the installer corrects it automatically:
-
-```{code-block} text
-:caption: NumPy mismatch auto-corrected
-
-[INFO] Checking NumPy consistency (system vs venv) ...
-[OK] System NumPy: 1.24.2 at /usr/lib/python3/dist-packages/numpy/__init__.py.
-[INFO] Venv NumPy: 1.26.4 at /home/owl/.virtualenvs/owl/lib/python3.11/site-packages/numpy/__init__.py
-[WARN] NumPy mismatch detected (venv=1.26.4, system=1.24.2). Aligning venv to system...
-[OK] Venv NumPy aligned to system: 1.24.2
-```
-
-#### Step 7: OpenCV Installation
-
-```{code-block} text
-:caption: OpenCV install and verification
-
-[INFO] Installing opencv-contrib-python in the 'owl' virtual environment...
-... (pip install output)
-[OK] Installing opencv-contrib-python completed successfully.
-[OK] Final check: NumPy 1.24.2, OpenCV 4.9.0
-```
-
-The final check line confirms both NumPy and OpenCV are importable and their versions.
-
-#### Step 8: OWL Dependencies
-
-```{code-block} text
-:caption: Python dependencies
-
-[INFO] Installing the OWL Python dependencies...
-... (pip install output)
-[OK] Installing dependencies from requirements.txt completed successfully.
-```
-
-#### Step 9: OWL Systemd Service
-
-The installer creates a systemd service so OWL starts automatically on every boot:
-
-```{code-block} text
-:caption: Service creation and startup
-
-[INFO] Setting up OWL to start on boot with systemd...
-[INFO] Creating systemd service for OWL...
-[INFO] Starting OWL service...
-[OK] OWL systemd service is active
-[OK] Creating OWL systemd service completed successfully.
-```
-
-If the service fails to start, you will see debugging information:
-
-```{code-block} text
-:caption: Service startup failure
-
-[INFO] Starting OWL service...
-[FAIL] OWL systemd service failed to start
-[INFO] Showing service logs for debugging:
-... (service status output)
-[INFO] For live logs, run: journalctl -u owl.service -f
-```
-
-#### Step 10: Desktop Setup
-
-```{code-block} text
-:caption: Desktop configuration
-
-[INFO] Setting desktop background...
-[OK] Setting desktop background completed successfully.
-[INFO] Creating OWL Focusing desktop icon...
-[INFO] Focus OWL desktop icon created at: /home/owl/Desktop/Focus.desktop
-[OK] Creating desktop icon completed successfully.
-```
-
-#### Step 11: Dashboard Setup (Decision Point)
-
-This is where you choose your setup path:
-
-```{code-block} text
-:caption: Dashboard prompt
-
-[INFO] Dashboard setup available...
 Do you want to add a web dashboard for remote control? (y/n):
 ```
 
-- Enter **n** for a **Basic OWL** (skips dashboard, proceeds to final summary)
-- Enter **y** for **Standalone** or **Networked** (launches the web setup script)
+```{admonition} Choosing your setup type
+:class: important
 
-If you choose **n**, the installer will install the dashboard Python dependencies and then proceed to the final summary. For Standalone setup, see [Standalone Setup](../controllers/wireless/standalone.md). For Networked setup, see [Networked Setup](../controllers/wireless/networked.md).
+**Basic OWL** — Enter **n**. The installer finishes and you're done.
 
-```{code-block} text
-:caption: Dashboard skipped (Basic OWL)
+**Standalone OWL** — Enter **y**, then select option 1. This creates a WiFi hotspot with a local dashboard. See [Standalone Setup](../controllers/wireless/standalone.md) for the dashboard configuration steps.
 
-[INFO] Dashboard setup skipped.
+**Networked OWL** — Enter **y**, then select option 2. This connects to an existing WiFi network with a central controller. See [Networked Setup](../controllers/wireless/networked.md) for the dashboard configuration steps.
 ```
 
-```{code-block} text
-:caption: Dashboard accepted (triggers web_setup.sh)
-
-[INFO] Setting up OWL Dashboard...
-[INFO] Installing dashboard Python dependencies...
-... (installing flask, gunicorn, paho-mqtt, psutil, boto3)
-[OK] Installing dashboard Python dependencies completed successfully.
-[INFO] Verifying Python package installations...
-[OK] Flask: 3.0.0, Gunicorn: 21.2.0, Paho-MQTT: installed
-[OK] Verifying Python dependencies completed successfully.
-```
-
-After the dashboard Python dependencies are installed, the `web_setup.sh` script runs automatically. See the [Standalone](../controllers/wireless/standalone.md) or [Networked](../controllers/wireless/networked.md) sections for what happens next.
-
-#### Final Installation Summary
-
-After all steps complete (and after dashboard setup if selected), you will see the final summary:
+After all steps complete, you'll see the final summary:
 
 ```{code-block} text
-:caption: Successful installation summary
-
 [INFO] Installation Summary:
 [OK] System Upgrade
 [OK] Camera Detected
@@ -424,98 +118,156 @@ After all steps complete (and after dashboard setup if selected), you will see t
 Start OWL focusing? (y/n):
 ```
 
-If you chose not to install the dashboard:
+Enter **y** to start the focusing procedure immediately, or **n** to focus later using the desktop icon.
 
-```{code-block} text
-:caption: Summary without dashboard
+<details>
+<summary>Full installation output step-by-step (click to expand)</summary>
 
-[INFO] Installation Summary:
-[OK] System Upgrade
-[OK] Camera Detected
-[OK] Camera Test
-[OK] Virtual Environment Created
-[OK] Global NumPy Version Detected
-[OK] OpenCV Installed
-[OK] NumPy Versions Aligned
-[OK] OWL Dependencies Installed
-[OK] OWL Service (systemd) Started
-[OK] Desktop Icon Created
-[SKIPPED] Web Dashboard
+**System update:**
 
-[COMPLETE] OWL version installed: X.X.X
-
-Start OWL focusing? (y/n):
+```text
+[INFO] Updating and upgrading the system...
+[OK] System upgrade completed successfully.
 ```
 
-Enter **y** to start the focusing procedure immediately, or **n** to skip (you can focus later using the desktop icon or command line).
+**Camera check and test:**
 
----
+```text
+[INFO] Checking for connected Raspberry Pi camera...
+[INFO] Camera detected successfully.
+[INFO] Testing camera functionality...
+[INFO] Camera is working correctly.
+```
 
-## Step 3: Focus Your Camera
+If no camera is found, the installer will pause and ask you to connect one. If the camera test fails, it will attempt a full system upgrade to resolve driver issues and retry automatically.
 
-Proper focus is critical for accurate weed detection. After installation completes:
+**Space cleanup:**
 
-### Using the Desktop Icon
+```text
+[INFO] Freeing up space by removing unnecessary packages...
+[OK] Cleaning up completed successfully.
+```
 
-If you have a monitor connected, double-click the **Focus** icon on the desktop.
+**Python environment:**
 
-### Using the Command Line
+```text
+[INFO] Setting up the virtual environment...
+[OK] Installing virtualenv packages completed successfully.
+[OK] Virtualenv configuration completed successfully.
+[INFO] Creating the 'owl' virtual environment...
+[OK] Creating virtual environment 'owl' completed successfully.
+[INFO] Checking NumPy consistency (system vs venv) ...
+[OK] System NumPy: 1.24.2 at /usr/lib/python3/dist-packages/numpy/__init__.py.
+[INFO] Venv NumPy: 1.24.2 at /usr/lib/python3/dist-packages/numpy/__init__.py
+[OK] NumPy versions match: 1.24.2
+```
+
+If the NumPy versions differ between system and virtual environment, the installer aligns them automatically.
+
+**OpenCV and dependencies:**
+
+```text
+[INFO] Installing opencv-contrib-python in the 'owl' virtual environment...
+[OK] Installing opencv-contrib-python completed successfully.
+[OK] Final check: NumPy 1.24.2, OpenCV 4.9.0
+[INFO] Installing the OWL Python dependencies...
+[OK] Installing dependencies from requirements.txt completed successfully.
+```
+
+**Service and desktop setup:**
+
+```text
+[INFO] Setting up OWL to start on boot with systemd...
+[INFO] Creating systemd service for OWL...
+[INFO] Starting OWL service...
+[OK] OWL systemd service is active
+[OK] Creating OWL systemd service completed successfully.
+[INFO] Setting desktop background...
+[OK] Setting desktop background completed successfully.
+[INFO] Creating OWL Focusing desktop icon...
+[OK] Creating desktop icon completed successfully.
+```
+
+**Dashboard setup (if selected):**
+
+```text
+[INFO] Setting up OWL Dashboard...
+[INFO] Installing dashboard Python dependencies...
+[OK] Installing dashboard Python dependencies completed successfully.
+[INFO] Verifying Python package installations...
+[OK] Flask: 3.0.0, Gunicorn: 21.2.0, Paho-MQTT: installed
+[OK] Verifying Python dependencies completed successfully.
+```
+
+After the dashboard dependencies install, the `controller/shared/setup.sh` script runs automatically. See the [Standalone](../controllers/wireless/standalone.md) or [Networked](../controllers/wireless/networked.md) pages for what happens next.
+
+</details>
+
+```{admonition} If any steps show [FAIL]
+:class: warning
+
+The summary will show error details. Review the specific error and re-run the installer:
+
+    cd ~/owl
+    bash owl_setup.sh
+
+If only the dashboard setup needs re-running:
+
+    sudo bash ~/owl/controller/shared/setup.sh
+```
+
+```{admonition} If OWL is already running
+:class: note
+
+If you're re-running the installer and `owl.service` is already active, you'll be prompted to stop it first. Enter **y** to continue.
+```
+
+## After installation
+
+### Focus your camera
+
+Proper focus is critical for accurate weed detection.
+
+If you said **y** to the focusing prompt at the end of installation, the focus tool is already running. Otherwise, start it using the **Focus** desktop icon, or from the command line:
 
 ```bash
 ~/owl/./owl.py --focus
 ```
 
-### Focus Procedure
-
 1. Point the camera at vegetation or a focus target
 2. Observe the **sharpness value** displayed on screen
-3. Slowly rotate the lens focus ring
-4. Find the position with the **highest sharpness value**
-5. Lock the focus ring (if your lens has a lock screw)
+3. Slowly rotate the lens focus ring to find the **highest sharpness value**
+4. Lock the focus ring (if your lens has a lock screw)
 
 ```{tip}
-For field deployment, focus at your typical operating distance (usually 0.9m for a 1m wide coverage).
+For field deployment, focus at your typical operating distance (usually 0.9 m for 1 m wide coverage).
 ```
 
----
-
-## Step 4: Verify Installation
-
-### Check the OWL Service
+### Verify the installation
 
 ```bash
+# Check the OWL detection service is running
 sudo systemctl status owl.service
-```
 
-You should see `Active: active (running)`.
+# Check the dashboard service (Standalone only)
+sudo systemctl status owl-dash
 
-### Check the Dashboard Service (Standalone Only)
-
-```bash
-sudo systemctl status owl-dash.service
-```
-
-### Test Detection
-
-```bash
-# Run with display output
-~/owl/./owl.py --show-display
-
-# Or check the service logs
+# View live detection logs
 journalctl -u owl.service -f
+
+# Run with on-screen display for testing
+~/owl/./owl.py --show-display
 ```
 
----
-
-## Next Steps
+## Next steps
 
 ```{admonition} Set up your dashboard
 :class: tip
 
 If you chose Standalone or Networked mode during installation, continue with your dashboard setup:
 
-- [Standalone Setup](../controllers/wireless/standalone.md) - WiFi hotspot with local dashboard
-- [Networked Setup](../controllers/wireless/networked.md) - Join existing network with central controller
+- [Standalone Setup](../controllers/wireless/standalone.md) — WiFi hotspot with local dashboard
+- [Networked Setup](../controllers/wireless/networked.md) — Join existing network with central controller
 ```
 
 ```{seealso}
