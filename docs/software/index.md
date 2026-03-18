@@ -10,6 +10,7 @@ two-step-install
 detailed-install
 configuration/index
 green-on-green/index
+agent/index
 development/index
 ```
 
@@ -70,7 +71,14 @@ Adjust detection sensitivity, relay timing, and other parameters.
 :link: green-on-green/index
 :link-type: doc
 
-Experimental in-crop weed detection using deep learning.
+In-crop weed detection using YOLO object detection models.
+:::
+
+:::{grid-item-card} AI Assistant
+:link: agent/index
+:link-type: doc
+
+Control OWL through natural language with an AI chat assistant.
 :::
 
 :::{grid-item-card} Development Setup

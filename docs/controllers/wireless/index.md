@@ -80,9 +80,14 @@ Both standalone and networked modes use MQTT for communication between the OWL a
 
 | Topic | Purpose |
 |-------|---------|
-| `owl/{device_id}/status` | OWL status updates (FPS, detections, state) |
-| `owl/{device_id}/commands` | Commands to OWL (start, stop, config) |
-| `owl/{device_id}/detection` | Detection events |
+| `owl/{device_id}/state` | Full OWL state (FPS, detections, settings, mode) |
+| `owl/{device_id}/commands` | Commands to OWL (start, stop, config changes) |
+| `owl/{device_id}/status` | Heartbeat and connectivity status |
+| `owl/{device_id}/detection` | Detection events and results |
+| `owl/{device_id}/config` | Configuration snapshots |
+| `owl/{device_id}/indicators` | LED and buzzer indicator state |
+| `owl/{device_id}/errors` | Error reports |
+| `owl/{device_id}/gps` | GPS position and speed data |
 
 ### Testing MQTT
 
@@ -106,7 +111,7 @@ mosquitto_sub -h 192.168.1.2 -t "owl/#"
 
 Enable MQTT in your OWL config file:
 
-**File:** `~/owl/config/GENERAL_CONFIG.ini` and `~/owl/config/CONTROLLER.ini`
+**File:** `~/owl/config/CONTROLLER.ini`
 
 **Standalone:**
 ```ini

@@ -134,20 +134,18 @@ A [Nylon Hose Protector](https://www.amazon.com/nylon-hose-sleeve/) sleeve will 
 
 ## Config File Settings
 
-Update the controller section of `config.ini`:
+Update the controller section of `GENERAL_CONFIG.ini`:
 
 ```ini
 [Controller]
-# choose between 'None', 'ute' or 'advanced'
-controller_type = None
+# choose between 'none', 'ute' or 'advanced'
+controller_type = none
 
 # for advanced controller
-detection_mode_pin_up = 35
-detection_mode_pin_down = 36
+detection_mode_pin_up = 36
+detection_mode_pin_down = 35
 recording_pin = 38
 sensitivity_pin = 40
-low_sensitivity_config = config/DAY_SENSITIVITY_2.ini
-high_sensitivity_config = config/DAY_SENSITIVITY_3.ini
 
 # for UteController
 switch_purpose = recording
@@ -156,7 +154,7 @@ switch_pin = 37
 
 **Ute Controller:** The toggle switch can be used for either toggling recording or detection. Select this mode with `switch_purpose`.
 
-**Advanced Controller:** The sensitivity files switched with the sensitivity switch can be adjusted with `low_sensitivity_config` and `high_sensitivity_config`.
+**Advanced Controller:** The sensitivity switch cycles through built-in presets (Low and High) stored as `[Sensitivity_Low]` and `[Sensitivity_High]` sections in `GENERAL_CONFIG.ini`. Custom presets can also be saved from the dashboard.
 
 ```{admonition} Final Steps
 :class: success

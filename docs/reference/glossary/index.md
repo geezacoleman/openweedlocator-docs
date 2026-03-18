@@ -161,10 +161,9 @@ journalctl
     ```
 
 crontab
-    **Scheduled tasks.** A system for running commands automatically at specific times or on events like startup.
+    **Scheduled tasks.** A legacy system for running commands on events like startup. (OWL now uses systemd services for automatic startup — see the [install guide](../../software/detailed-install.md).)
     ```text
     sudo crontab -e                      # edit the root cron schedule
-    @reboot /usr/local/bin/owl_boot_wrapper.sh   # run on every boot
     ```
 
 `.bashrc`
@@ -232,6 +231,9 @@ Ports
 :::{glossary}
 :sorted: false
 
+ByteTrack
+    A multi-object tracking algorithm that assigns persistent IDs to detected weeds across video frames. Used in Green-on-Green mode for class smoothing and crop mask stabilisation.
+
 MQTT
     **Message Queuing Telemetry Transport.** A lightweight messaging protocol used for communication between OWL units and the dashboard. Messages are published to *topics* and received by *subscribers*.
 
@@ -283,14 +285,20 @@ Avahi
 Mosquitto
     The MQTT broker software installed on the OWL. Handles message routing between OWL units and the dashboard.
 
-`config.ini`
-    The main OWL configuration file. Contains detection parameters, camera settings, and GPIO mappings. Located at `~/owl/config.ini`.
+`GENERAL_CONFIG.ini`
+    The main OWL configuration file. Contains detection parameters, camera settings, sensitivity presets, tracking, and GPIO relay mappings. Located at `~/owl/config/GENERAL_CONFIG.ini`.
 
-`DAY_SENSITIVITY_2.ini`
-    A preset sensitivity configuration file. Alternative configurations can be loaded to adjust detection thresholds for different conditions.
+`CONTROLLER.ini`
+    Infrastructure configuration for MQTT, network mode, GPS, and web dashboard. Created by the setup script. Located at `~/owl/config/CONTROLLER.ini`.
+
+NCNN
+    A neural network inference framework optimised for ARM CPUs. The recommended model format for running YOLO on Raspberry Pi. Models consist of a `.param` and `.bin` file pair.
 
 NumPy
     A Python library for numerical computing. Used by OpenCV for image processing. Must be version-aligned between the system and virtual environment.
+
+YOLO
+    **You Only Look Once.** An object detection model architecture used for Green-on-Green weed detection. Trained with the Ultralytics framework and exported to NCNN format for deployment on Raspberry Pi.
 :::
 
 ---

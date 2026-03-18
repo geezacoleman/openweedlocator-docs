@@ -183,12 +183,15 @@ Verify with `ls` - you should see the `owl` folder.
 The OWL requires these packages:
 - OpenCV (already installed)
 - numpy
-- imutils
 - gpiozero
 - pandas
 - RPi.GPIO
 - tqdm
 - blessed
+- matplotlib
+- Pillow
+- ultralytics (YOLO object detection)
+- ncnn (neural network inference on ARM)
 
 Change to the owl directory:
 
@@ -218,43 +221,34 @@ python
 
 ### Starting OWL on boot
 
-Make the scripts executable with {abbr}`chmod (change file permissions — controls who can read, write, or run a file)`:
+OWL uses {abbr}`systemd (the Linux service manager — handles starting, stopping, and monitoring background programs)` to start automatically on boot. The setup script (`owl_setup.sh`) creates the service for you during installation.
+
+If you installed manually, run the shared setup script to create the systemd service:
 
 ```bash
-chmod a+x owl.py
+sudo bash ~/owl/controller/shared/setup.sh
 ```
+
+This creates `owl.service` which starts the detection pipeline automatically on every boot.
+
+**Useful commands:**
 
 ```bash
-chmod a+x owl_boot.sh
+# Check if OWL is running
+sudo systemctl status owl.service
+
+# View live logs
+journalctl -u owl.service -f
+
+# Stop OWL
+sudo systemctl stop owl.service
+
+# Restart OWL
+sudo systemctl restart owl.service
+
+# Disable auto-start on boot
+sudo systemctl disable owl.service
 ```
-
-```bash
-chmod a+x owl_boot_wrapper.sh
-```
-
-Move boot scripts to the system directory:
-
-```bash
-sudo mv owl_boot.sh /usr/local/bin/owl_boot.sh
-```
-
-```bash
-sudo mv owl_boot_wrapper.sh /usr/local/bin/owl_boot_wrapper.sh
-```
-
-Add to {abbr}`crontab (a scheduled task system — used here to run OWL automatically on every boot)` for startup:
-
-```bash
-sudo crontab -e
-```
-
-Select `1. /bin/nano editor` ({abbr}`nano (a simple terminal-based text editor — save with Ctrl+X, then Y, then Enter)`), then add this line at the bottom:
-
-```
-@reboot /usr/local/bin/owl_boot_wrapper.sh > /home/launch.log 2>&1
-```
-
-Save with `Ctrl + X`, then `Y`, then `Enter`.
 
 ---
 

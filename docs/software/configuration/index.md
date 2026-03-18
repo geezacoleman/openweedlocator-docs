@@ -1,71 +1,106 @@
 # Configuration Guide
 
-Changing detection settings is easy using config files and command line flags. Use the `config.ini` file in the config folder to set parameters.
+OWL uses two configuration files to separate detection settings from infrastructure settings. Both are standard INI files that can be edited with any text editor or adjusted through the web dashboard.
 
-The default config file is `DAY_SENSITIVITY_2.ini`. Save any changes before restarting `owl.py`.
+## Config File Overview
+
+| File | Location | Purpose |
+|------|----------|---------|
+| `GENERAL_CONFIG.ini` | `~/owl/config/` | Detection parameters, camera, sensitivity presets, tracking, relay mapping |
+| `CONTROLLER.ini` | `~/owl/config/` | MQTT, network mode, GPS, web dashboard, actuation timing |
+
+An `active_config.txt` file in the same directory points to the current detection config (defaults to `config/GENERAL_CONFIG.ini`).
+
+```{admonition} Copy-on-write protection
+:class: note
+
+`GENERAL_CONFIG.ini` and `CONTROLLER.ini` are protected defaults. When changes are made through the dashboard, a timestamped copy is created automatically (e.g. `GENERAL_CONFIG_20260318_1430.ini`) so the originals are never corrupted.
+```
 
 ## Sensitivity Presets
 
-Three sensitivity levels are provided to get you started:
+Instead of separate config files for each sensitivity level, OWL embeds sensitivity presets directly in `GENERAL_CONFIG.ini`:
 
-| Config File | Description |
-|-------------|-------------|
-| `DAY_SENSITIVITY_1.ini` | Least sensitive - minimises false positives, only detects large weeds. Minimum detection size increased. |
-| `DAY_SENSITIVITY_2.ini` | Default OWL parameters - balanced detection. |
-| `DAY_SENSITIVITY_3.ini` | Most sensitive - reduces missed detections with lower minimum detection size and wider detection ranges. |
+```ini
+[Sensitivity]
+active = medium
 
-## Command Line Flags
+[Sensitivity_Low]
+exg_min = 25
+exg_max = 200
+hue_min = 41
+hue_max = 80
+...
 
-Command line flags let you specify options in Terminal without editing code:
+[Sensitivity_Medium]
+exg_min = 25
+exg_max = 200
+hue_min = 39
+hue_max = 83
+...
 
+[Sensitivity_High]
+exg_min = 22
+exg_max = 210
+hue_min = 35
+hue_max = 85
+...
+```
+
+Each preset stores the 9 GreenOnBrown threshold values. The `[Sensitivity] active` key determines which preset is loaded at startup. You can switch presets from the dashboard, the wired controller sensitivity switch, or the AI assistant.
+
+Custom presets can be saved from the dashboard and are stored as additional `[Sensitivity_YourName]` sections in the config file.
+
+## Changing Settings
+
+There are several ways to adjust OWL settings:
+
+**Dashboard sliders (recommended)**
+: The web dashboard provides range sliders for all detection parameters. Changes take effect immediately and are persisted to the config file.
+
+**AI assistant**
+: Open the Agent tab in the dashboard and describe what you want in plain language — e.g. "make detection more sensitive" or "switch to the exg algorithm". See the [AI Assistant guide](../agent/index.md).
+
+**Direct INI editing**
+: Edit the config file directly with a text editor:
 ```bash
-usage: owl.py [-h] [--input] [--show-display] [--focus]
-  --input               path to image directory, single image or video file
-  --show-display        show display windows
-  --focus               focus the camera
-  --help                display all flags
+nano ~/owl/config/GENERAL_CONFIG.ini
+```
+Save the file and restart OWL for changes to take effect.
+
+**Command line flags**
+: Override the config file or enable display mode at startup:
+```bash
+# Use a specific config file
+python owl.py --config config/my_custom.ini
+
+# Show display for threshold adjustment
+python owl.py --show-display
+
+# Camera focus mode
+python owl.py --focus
+
+# Process a video or image directory
+python owl.py --input path/to/media
 ```
 
-## Creating Custom Config Files
-
-Create your own config files to meet specific conditions. In `owl.py`, update the path to your config file:
-
-| Navigate to the `owl` directory | Open the `owl.py` file |
-|:-------------------------------:|:----------------------:|
-| ![owl_dir](https://user-images.githubusercontent.com/51358498/221152779-46c78fe2-92e6-4e65-9ebd-234ae02c33f6.png) | ![open_greenonbrown_py](https://user-images.githubusercontent.com/51358498/221153072-922d9ed6-8120-4c2d-9bd2-a999030b4723.png) |
-
-Scroll to the bottom and update the config file path:
-
-```python
-owl = Owl(config_file='config/ENTER_YOUR_CONFIG_FILE_HERE.ini')
-```
-
-## Complete Config Template
+## Complete GENERAL_CONFIG.ini Template
 
 ```ini
 [System]
-# select your algorithm
 algorithm = exhsv
-# operate on a video, image or directory of media
 input_file_or_directory =
-# choose how many relays are connected to the OWL
 relay_num = 4
 actuation_duration = 0.15
 delay = 0
+actuation_zone = 100
 
 [Controller]
-# choose between 'None', 'ute' or 'advanced'
-controller_type = None
-
-# for advanced controller
-detection_mode_pin_up = 35
-detection_mode_pin_down = 36
+controller_type = none
+detection_mode_pin_up = 36
+detection_mode_pin_down = 35
 recording_pin = 38
 sensitivity_pin = 40
-low_sensitivity_config = config/DAY_SENSITIVITY_2.ini
-high_sensitivity_config = config/DAY_SENSITIVITY_3.ini
-
-# for UteController
 switch_purpose = recording
 switch_pin = 37
 
@@ -73,18 +108,22 @@ switch_pin = 37
 image_loop_time = 5
 
 [Camera]
-resolution_width = 640
-resolution_height = 480
+resolution_width = 1456
+resolution_height = 1088
 exp_compensation = -2
+crop_factor_horizontal = 0.02
+crop_factor_vertical = 0.02
 
 [GreenOnGreen]
-# parameters related to green-on-green detection
 model_path = models
 confidence = 0.5
-class_filter_id = None
+detect_classes =
+actuation_mode = centre
+min_detection_pixels = 50
+inference_resolution = 320
+crop_buffer_px = 20
 
 [GreenOnBrown]
-# parameters related to green-on-brown detection
 exg_min = 25
 exg_max = 200
 hue_min = 39
@@ -97,105 +136,256 @@ min_detection_area = 10
 invert_hue = False
 
 [DataCollection]
-# all data collection related parameters
-sample_images = False
+image_sample_enable = False
+detection_enable = True
 sample_method = whole
 sample_frequency = 30
 save_directory = /media/owl/SanDisk
-disable_detection = False
 log_fps = False
 camera_name = cam1
 
 [Relays]
-# defines the relay ID (left) that matches to a boardpin (right) on the Pi.
 0 = 13
 1 = 15
 2 = 16
 3 = 18
+
+[Tracking]
+tracking_enabled = False
+track_class_window = 5
+track_crop_persist = 3
+
+[Sensitivity]
+active = medium
+
+[Sensitivity_Low]
+exg_min = 25
+exg_max = 200
+hue_min = 41
+hue_max = 80
+saturation_min = 52
+saturation_max = 218
+brightness_min = 62
+brightness_max = 188
+min_detection_area = 20
+
+[Sensitivity_Medium]
+exg_min = 25
+exg_max = 200
+hue_min = 39
+hue_max = 83
+saturation_min = 50
+saturation_max = 220
+brightness_min = 60
+brightness_max = 190
+min_detection_area = 10
+
+[Sensitivity_High]
+exg_min = 22
+exg_max = 210
+hue_min = 35
+hue_max = 85
+saturation_min = 40
+saturation_max = 225
+brightness_min = 50
+brightness_max = 200
+min_detection_area = 5
 ```
 
-## Parameter Reference
+## Complete CONTROLLER.ini Reference
 
-### System Parameters
+```ini
+[MQTT]
+enable = True
+broker_ip = localhost
+broker_port = 1883
+device_id = auto
 
-| Parameter | Options | Description |
+[WebDashboard]
+port = 8000
+
+[Network]
+mode = networked
+static_ip = localhost
+controller_ip = localhost
+
+[GPS]
+# GPS data source for owl.py (none / serial / tcp)
+source = none
+# Serial GPS settings (only when source = serial)
+port = /dev/ttyUSB0
+baudrate = 9600
+# Networked controller GPS server (Teltonika NMEA-over-TCP)
+enable = False
+nmea_port = 8500
+boom_width = 12.0
+track_save_directory = tracks
+
+[Actuation]
+# Relay timing — used as fallback when no GPS speed data
+actuation_duration = 0.15
+delay = 0.0
+# Speed-adaptive actuation geometry (networked controller)
+actuation_length_cm = 10
+offset_cm = 30
+speed_avg_window = 5.0
+```
+
+## Parameter Reference — GENERAL_CONFIG.ini
+
+### System
+
+| Parameter | Default | Description |
 |-----------|---------|-------------|
-| `algorithm` | `gog`, `exg`, `exgr`, `exgs`, `exhu`, `hsv`, `exhsv` | Detection algorithm. Most sensitive: `exg`. Least sensitive/most precise: `exgr`, `exhu`, `hsv`, `exhsv`. |
-| `actuation_duration` | Float (decimal) | Length of time relay is activated (seconds). |
-| `input_file_or_directory` | Path | Path to image, video, or directory of media. |
-| `relay_num` | Integer | Number of relay lanes. Set to 1 for single relay. |
-| `delay` | Float | Delay between detection and actuation. Default: 0. |
+| `algorithm` | `exhsv` | Detection algorithm: `exg`, `exgr`, `maxg`, `nexg`, `exhsv`, `hsv`, `gndvi`, `gog`, `gog-hybrid` |
+| `input_file_or_directory` | *(empty)* | Path to image, video, or directory for offline processing. Leave empty for live camera. |
+| `relay_num` | `4` | Number of relay lanes (1-4). |
+| `actuation_duration` | `0.15` | Relay activation time in seconds. |
+| `delay` | `0` | Delay between detection and actuation in seconds. |
+| `actuation_zone` | `100` | Percentage of the frame width used for relay lane mapping (1-100). |
 
-### Controller Parameters
+### Controller
 
-| Parameter | Options | Description |
+| Parameter | Default | Description |
 |-----------|---------|-------------|
-| `controller_type` | `None`, `ute`, `advanced` | Controller type. `advanced` enables extra features, `ute` for simpler use. |
-| `detection_mode_pin_up` | Integer | GPIO pin for "detection mode up" (advanced). |
-| `detection_mode_pin_down` | Integer | GPIO pin for "detection mode down" (advanced). |
-| `recording_pin` | Integer | GPIO pin to activate/deactivate image recording. |
-| `sensitivity_pin` | Integer | GPIO pin to switch between low and high sensitivity. |
-| `low_sensitivity_config` | Path | Config file path for low sensitivity settings. |
-| `high_sensitivity_config` | Path | Config file path for high sensitivity settings. |
-| `switch_purpose` | `recording` or other | Switch purpose in UteController setups. |
-| `switch_pin` | Integer | GPIO pin for switch functionality (ute). |
+| `controller_type` | `none` | Wired controller type: `none`, `ute`, or `advanced`. |
+| `detection_mode_pin_up` | `36` | GPIO board pin for detection mode up (advanced controller). |
+| `detection_mode_pin_down` | `35` | GPIO board pin for detection mode down (advanced controller). |
+| `recording_pin` | `38` | GPIO board pin for recording toggle. |
+| `sensitivity_pin` | `40` | GPIO board pin for sensitivity switch. |
+| `switch_purpose` | `recording` | Ute controller switch function: `recording` or `detection`. |
+| `switch_pin` | `37` | GPIO board pin for ute controller switch. |
 
-### Camera Parameters
+### Camera
 
-| Parameter | Options | Description |
+| Parameter | Default | Description |
 |-----------|---------|-------------|
-| `resolution_width` | Integer | Camera width (default: 640). |
-| `resolution_height` | Integer | Camera height (default: 480). |
-| `exp_compensation` | Integer (-8 to 8) | Exposure compensation. Default: -2 for faster shutter. |
+| `resolution_width` | `1456` | Camera capture width in pixels. |
+| `resolution_height` | `1088` | Camera capture height in pixels. |
+| `exp_compensation` | `-2` | Exposure compensation (-8 to 8). Negative values give faster shutter speed. |
+| `crop_factor_horizontal` | `0.02` | Fraction of width to crop from each side (0.0-0.5). |
+| `crop_factor_vertical` | `0.02` | Fraction of height to crop from each side (0.0-0.5). |
 
-### GreenOnGreen Parameters
+### Visualisation
 
-| Parameter | Options | Description |
+| Parameter | Default | Description |
 |-----------|---------|-------------|
-| `model_path` | Path | Path to the model file. |
-| `confidence` | Float | Cutoff confidence for detection. Default: 0.5 (50%). |
-| `class_filter_id` | Integer | Filter to target specific classes. |
+| `image_loop_time` | `5` | Seconds between display frame updates when using `--show-display`. |
 
-### GreenOnBrown Parameters
+### GreenOnGreen
 
-| Parameter | Options | Description |
+| Parameter | Default | Description |
 |-----------|---------|-------------|
-| `exg_min` | 0-255 | Minimum threshold for ExG algorithm. 10=very sensitive, 25=not sensitive. |
-| `exg_max` | 0-255 | Maximum threshold for ExG. Keep above 180. |
-| `hue_min` | 0-128 | Minimum hue threshold. Typically 39-83. |
-| `hue_max` | 0-128 | Maximum hue threshold. Typically 39-83. |
-| `saturation_min` | 0-255 | Minimum saturation threshold. Typically 50-220. |
-| `saturation_max` | 0-255 | Maximum saturation threshold. Typically 50-220. |
-| `brightness_min` | 0-255 | Minimum brightness threshold. Typically 60-190. |
-| `brightness_max` | 0-255 | Maximum brightness threshold. Typically 60-190. |
-| `min_detection_area` | Integer | Minimum pixel area for valid detection. |
-| `invert_hue` | Boolean | Inverts detected hue - detects outside thresholds instead of inside. |
+| `model_path` | `models` | Directory containing YOLO model files (NCNN or PyTorch). |
+| `confidence` | `0.5` | Minimum confidence threshold for detections (0.0-1.0). |
+| `detect_classes` | *(empty)* | Comma-separated class IDs to detect. Empty means all classes. |
+| `actuation_mode` | `centre` | How detections map to relays: `centre` (bounding box centre) or `zone` (segmentation mask pixel count, requires seg model). |
+| `min_detection_pixels` | `50` | Minimum pixel count for valid segmentation detections (zone mode). |
+| `inference_resolution` | `320` | Input image size for YOLO inference. Smaller is faster, larger is more accurate. |
+| `crop_buffer_px` | `20` | Pixel buffer added around crop mask regions (gog-hybrid mode). |
 
-### DataCollection Parameters
+### GreenOnBrown
 
-| Parameter | Options | Description |
+| Parameter | Default | Description |
 |-----------|---------|-------------|
-| `sample_images` | True/False | Enable/disable image data collection. |
-| `sample_method` | `bbox`, `square`, `whole` | Image sampling method. |
-| `sample_frequency` | Integer | Sample every N frames. |
-| `save_directory` | Path | Where to save images. Default: `/media/owl/SanDisk`. |
-| `disable_detection` | True/False | Disable detection for data collection only. |
-| `log_fps` | True/False | Save FPS to a file. |
-| `camera_name` | String | Camera name for saved recordings. |
+| `exg_min` | `25` | Minimum Excess Green threshold (0-255). Lower = more sensitive. |
+| `exg_max` | `200` | Maximum Excess Green threshold (0-255). Keep above 180. |
+| `hue_min` | `39` | Minimum hue threshold (0-179). Green vegetation is typically 39-83. |
+| `hue_max` | `83` | Maximum hue threshold (0-179). |
+| `saturation_min` | `50` | Minimum saturation threshold (0-255). |
+| `saturation_max` | `220` | Maximum saturation threshold (0-255). |
+| `brightness_min` | `60` | Minimum brightness threshold (0-255). |
+| `brightness_max` | `190` | Maximum brightness threshold (0-255). |
+| `min_detection_area` | `10` | Minimum pixel area for a valid detection. Increase to ignore small noise. |
+| `invert_hue` | `False` | When True, detects colours outside the hue range instead of inside. Useful for detecting non-green targets. |
 
-### Relay Mapping
+### DataCollection
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `image_sample_enable` | `False` | Enable image data collection to USB drive. |
+| `detection_enable` | `True` | Enable weed detection and relay actuation. Set False for data collection only. |
+| `sample_method` | `whole` | Image sampling method: `bbox` (bounding boxes only), `square` (square crops), `whole` (full frame). |
+| `sample_frequency` | `30` | Save an image every N frames. |
+| `save_directory` | `/media/owl/SanDisk` | Directory for saved images. Typically a USB drive mount point. |
+| `log_fps` | `False` | Log frame processing times to file. |
+| `camera_name` | `cam1` | Camera identifier used in saved file names. |
+
+### Tracking
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `tracking_enabled` | `False` | Enable ByteTrack multi-object tracking for persistent weed IDs across frames. |
+| `track_class_window` | `5` | Number of frames to smooth class predictions over. Reduces class flickering. |
+| `track_crop_persist` | `3` | Number of frames a crop mask region persists after the crop leaves frame (gog-hybrid mode). |
+
+### Relays
 
 | Parameter | Description |
 |-----------|-------------|
-| `0 = 13` | Relay 0 maps to GPIO boardpin 13 |
-| `1 = 15` | Relay 1 maps to GPIO boardpin 15 |
-| `2 = 16` | Relay 2 maps to GPIO boardpin 16 |
-| `3 = 18` | Relay 3 maps to GPIO boardpin 18 |
+| `0 = 13` | Relay 0 maps to GPIO board pin 13 |
+| `1 = 15` | Relay 1 maps to GPIO board pin 15 |
+| `2 = 16` | Relay 2 maps to GPIO board pin 16 |
+| `3 = 18` | Relay 3 maps to GPIO board pin 18 |
+
+### Sensitivity
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `active` | `medium` | Active sensitivity preset name. Built-in presets: `low`, `medium`, `high`. Custom presets can be saved from the dashboard. |
+
+## Parameter Reference — CONTROLLER.ini
+
+### MQTT
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `enable` | `True` | Enable MQTT communication with the dashboard. |
+| `broker_ip` | `localhost` | MQTT broker IP address. `localhost` for standalone, controller IP for networked. |
+| `broker_port` | `1883` | MQTT broker port. |
+| `device_id` | `auto` | Unique device identifier. `auto` generates from hostname. |
+
+### WebDashboard
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `port` | `8000` | Gunicorn listening port (behind Nginx reverse proxy). |
+
+### Network
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `mode` | `networked` | Network mode: `standalone` (creates WiFi hotspot) or `networked` (joins existing network). |
+| `static_ip` | `localhost` | Static IP for the OWL on the network. |
+| `controller_ip` | `localhost` | IP address of the networked controller (networked mode only). |
+
+### GPS
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `source` | `none` | GPS data source for owl.py: `none`, `serial`, or `tcp`. |
+| `port` | `/dev/ttyUSB0` | Serial GPS device path (when source = serial). |
+| `baudrate` | `9600` | Serial GPS baud rate. |
+| `enable` | `False` | Enable GPS server on the networked controller. |
+| `nmea_port` | `8500` | TCP port for incoming NMEA data (Teltonika router). |
+| `boom_width` | `12.0` | Spray boom width in metres (for track recording). |
+| `track_save_directory` | `tracks` | Directory for saved GPS track files. |
+
+### Actuation
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `actuation_duration` | `0.15` | Relay activation time in seconds (fallback when no GPS speed data). |
+| `delay` | `0.0` | Delay between detection and actuation in seconds. |
+| `actuation_length_cm` | `10` | Physical spray patch length in cm (speed-adaptive calculation). |
+| `offset_cm` | `30` | Distance from camera to nozzle in cm (speed-adaptive calculation). |
+| `speed_avg_window` | `5.0` | Time window in seconds for GPS speed averaging. |
 
 ---
 
 ## Next Steps
 
 - [Controller Setup](../../controllers/index.md) - Build a controller for managing OWLs
-- [Green-on-Green](../green-on-green/index.md) - Experimental in-crop detection
+- [Green-on-Green](../green-on-green/index.md) - In-crop weed detection using YOLO
+- [AI Assistant](../agent/index.md) - Control OWL through natural language
 - [Troubleshooting](../../troubleshooting/index.md) - Common issues and solutions
