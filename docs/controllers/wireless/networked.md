@@ -557,6 +557,27 @@ If OWLs don't appear on the dashboard, see the [Troubleshooting](#troubleshootin
 
 ---
 
+## Downloading recorded images
+
+Each OWL saves images to its USB drive during detection. The networked controller lets you pull those images wirelessly — no need to walk out to each unit and unplug a USB drive.
+
+Open the downloads page at `https://<controller-ip>/downloads` (this is a separate page from the main kiosk dashboard, designed for use on a laptop).
+
+### How to download
+
+1. **Select an OWL** from the dropdown — only online devices can be selected
+2. **Scan sessions** — the controller asks the OWL to list its recording folders. This takes a couple of seconds
+3. **Transfer** — pick a session and hit Transfer. The OWL packages the images into a ZIP and sends it to the controller over your WiFi network. A progress bar shows the transfer status
+4. **Download to your laptop** — once transferred, the ZIP appears in the "Downloaded files" section. Click Download to save it to your computer
+
+### Managing storage
+
+Transferred ZIPs are stored on the controller in a `downloads/` directory with a 2 GB quota. The storage meter shows how much space is used. Remove old files to free space for new transfers.
+
+You can also delete sessions directly from the OWL's USB drive using the "Delete from OWL" button. This is permanent — make sure you've transferred the data first.
+
+---
+
 ## Troubleshooting
 
 ### WiFi or network problems

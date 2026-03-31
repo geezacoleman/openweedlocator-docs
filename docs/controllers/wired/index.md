@@ -103,6 +103,10 @@ TinkerCAD models (1, 2, and 4 OWLs) available [here](https://www.tinkercad.com/t
 | Spot spray enable | Red (trailer cable) | BOARD 35 | G (#16) |
 | GPIO GND | Brown (trailer cable) | BOARD 39 | H (#16) |
 
+```{note}
+The Advanced controller uses BOARD 37 for the status LED by default. If you are using a Sixfab 4G HAT (which also uses BOARD 37), you will need to remap the status LED to an unused pin in `GENERAL_CONFIG.ini`. The UTE controller does not have this conflict — it uses BOARD 40 for the status LED.
+```
+
 ---
 
 ## 3D Printed Enclosures
@@ -149,12 +153,16 @@ sensitivity_pin = 40
 
 # for UteController
 switch_purpose = recording
-switch_pin = 37
+switch_pin = 36
 ```
 
-**Ute Controller:** The toggle switch can be used for either toggling recording or detection. Select this mode with `switch_purpose`.
+**Ute Controller:** The toggle switch can be used for either toggling recording or detection. Select this mode with `switch_purpose`. When a UTE controller is active, **only the recording control** is locked on the dashboard — detection, nozzles, sensitivity, and fan remain controllable from the web interface.
 
-**Advanced Controller:** The sensitivity switch cycles through built-in presets (Low and High) stored as `[Sensitivity_Low]` and `[Sensitivity_High]` sections in `GENERAL_CONFIG.ini`. Custom presets can also be saved from the dashboard.
+**Advanced Controller:** The sensitivity switch cycles through built-in presets (Low and High) stored as `[Sensitivity_Low]` and `[Sensitivity_High]` sections in `GENERAL_CONFIG.ini`. Custom presets can also be saved from the dashboard. When active, recording, detection, and sensitivity are locked on the dashboard.
+
+```{warning}
+**Sixfab 4G HAT users:** If you have a Sixfab Base HAT for cellular/GPS, do not use pin BOARD 37 for any OWL function — the Sixfab HAT uses that pin to control modem power, and toggling it (e.g., with a blinking LED) will repeatedly power-cycle the modem. The default pin assignments have been moved to avoid this conflict (`switch_pin` to BOARD 36, status LED to BOARD 40).
+```
 
 ```{admonition} Final Steps
 :class: success

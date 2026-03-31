@@ -203,6 +203,76 @@ Your browser will show a security warning because the SSL certificate is self-ge
 
 The dashboard provides live video with detection overlay, real-time statistics, start/stop controls, configuration adjustments, and wireless data downloads.
 
+## Using the dashboard
+
+### Controls
+
+The Dashboard tab has large toggle buttons for the main functions:
+
+- **Detection** / **Tracking** — tap to start or stop. Shows ON/OFF state
+- **Recording** — shows a blinking red dot when active (like a camera record indicator). Tap to toggle
+- **All Nozzles** — turns green when engaged (blanket spray mode). Tap to toggle
+- **Sensitivity** — switch between Low, Medium, and High detection presets
+- **Fan** — Auto or 100% manual override
+
+### Using a wired controller
+
+If you have a [wired controller](../wired/index.md) (UTE or Advanced) connected, the dashboard only locks the controls that the hardware switch manages. Everything else stays interactive:
+
+| Controller | What the hardware controls | What you can still use on the dashboard |
+|------------|--------------------------|----------------------------------------|
+| UTE | Recording | Detection, tracking, nozzles, sensitivity, fan |
+| Advanced | Recording, detection, sensitivity | Tracking, nozzles, fan |
+
+Locked controls show a small lock icon. Use the physical switch to change them.
+
+### GPS and image tagging
+
+If you open the dashboard on a phone with GPS enabled, captured images are automatically tagged with your location. This is useful for mapping weed hotspots — you can plot geotagged images on a map later.
+
+To use GPS:
+
+1. Open the dashboard on your phone (GPS must be allowed in the browser)
+2. The GPS toggle in the dashboard shows your accuracy
+3. While GPS is active, every saved image includes location coordinates
+
+```{tip}
+GPS tagging relies on your phone's browser sending location updates. If you close the browser, switch to another app, or lose signal, tagging stops within a few seconds. Reopen the dashboard to resume.
+```
+
+If you have a wired controller connected, a GPS status LED on the controller box shows the current state:
+
+| LED pattern | Meaning |
+|-------------|---------|
+| Solid on | GPS lock — images are being tagged |
+| Regular flashing | Acquiring — waiting for signal |
+| Double flash, pause | Error or stale — phone disconnected or no signal |
+| Off | GPS not active |
+
+## Downloading recorded images
+
+```{important}
+You need a USB drive plugged into the OWL to record images. See [USB drive requirements](../wired/index.md) for recommended drives.
+```
+
+When recording is enabled, the OWL saves images to the USB drive in date-based folders (e.g., `20260315/`). You can download these wirelessly without unplugging the drive.
+
+### The downloads page
+
+Open `https://owl-1.local/downloads` in your browser, or tap "Download sessions as ZIP" at the bottom of the Storage tab.
+
+The page lists each recording session by date, with image count and total size. From here you can:
+
+- **Preview images** — tap a session to expand a thumbnail grid. Tap any thumbnail to see the full image
+- **Download as ZIP** — downloads all images from that session as a single file
+- **Delete a session** — permanently removes the images from the USB drive
+
+A storage bar at the bottom shows how full the USB drive is.
+
+```{warning}
+Deleting a session permanently removes the images from the USB drive. There is no undo. Download the data first if you need it.
+```
+
 ## Troubleshooting
 
 ### Hotspot or dashboard not working

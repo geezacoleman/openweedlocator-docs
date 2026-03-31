@@ -102,7 +102,7 @@ detection_mode_pin_down = 35
 recording_pin = 38
 sensitivity_pin = 40
 switch_purpose = recording
-switch_pin = 37
+switch_pin = 36
 
 [Visualisation]
 image_loop_time = 5
@@ -213,8 +213,8 @@ controller_ip = localhost
 # GPS data source for owl.py (none / serial / tcp)
 source = none
 # Serial GPS settings (only when source = serial)
-port = /dev/ttyUSB0
-baudrate = 9600
+port = /dev/ttyUSB1
+baudrate = 115200
 # Networked controller GPS server (Teltonika NMEA-over-TCP)
 enable = False
 nmea_port = 8500
@@ -254,7 +254,7 @@ speed_avg_window = 5.0
 | `recording_pin` | `38` | GPIO board pin for recording toggle. |
 | `sensitivity_pin` | `40` | GPIO board pin for sensitivity switch. |
 | `switch_purpose` | `recording` | Ute controller switch function: `recording` or `detection`. |
-| `switch_pin` | `37` | GPIO board pin for ute controller switch. |
+| `switch_pin` | `36` | GPIO board pin for ute controller switch. Avoid BOARD 37 if using Sixfab HAT. |
 
 ### Camera
 
@@ -364,8 +364,8 @@ speed_avg_window = 5.0
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `source` | `none` | GPS data source for owl.py: `none`, `serial`, or `tcp`. |
-| `port` | `/dev/ttyUSB0` | Serial GPS device path (when source = serial). |
-| `baudrate` | `9600` | Serial GPS baud rate. |
+| `port` | `/dev/ttyUSB1` | Serial GPS device path (when source = serial). Use `/dev/ttyUSB1` for Sixfab 4G HAT GNSS. |
+| `baudrate` | `115200` | Serial GPS baud rate. Sixfab modem uses 115200. |
 | `enable` | `False` | Enable GPS server on the networked controller. |
 | `nmea_port` | `8500` | TCP port for incoming NMEA data (Teltonika router). |
 | `boom_width` | `12.0` | Spray boom width in metres (for track recording). |
