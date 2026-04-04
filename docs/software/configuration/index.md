@@ -113,6 +113,7 @@ resolution_height = 1088
 exp_compensation = -2
 crop_factor_horizontal = 0.02
 crop_factor_vertical = 0.02
+camera_type = auto
 
 [GreenOnGreen]
 model_path = models
@@ -265,6 +266,7 @@ speed_avg_window = 5.0
 | `exp_compensation` | `-2` | Exposure compensation (-8 to 8). Negative values give faster shutter speed. |
 | `crop_factor_horizontal` | `0.02` | Fraction of width to crop from each side (0.0-0.5). |
 | `crop_factor_vertical` | `0.02` | Fraction of height to crop from each side (0.0-0.5). |
+| `camera_type` | `auto` | Camera selection: `auto` (auto-detect), `rpi` (force Pi camera), `usb` (force USB webcam). |
 
 ### Visualisation
 
