@@ -145,18 +145,22 @@ Update the controller section of `GENERAL_CONFIG.ini`:
 # choose between 'none', 'ute' or 'advanced'
 controller_type = none
 
-# for advanced controller
-detection_mode_pin_up = 36
-detection_mode_pin_down = 35
-recording_pin = 38
-sensitivity_pin = 40
+# Shared LED pins (BOARD numbering)
+status_led_pin = 40
+gps_led_pin = 38
 
-# for UteController
+# Ute controller (single switch)
 switch_purpose = recording
 switch_pin = 36
+
+# Advanced controller (multiple switches)
+detection_mode_pin_up = 36
+detection_mode_pin_down = 35
+recording_pin = 33
+sensitivity_pin = 32
 ```
 
-**Ute Controller:** The toggle switch can be used for either toggling recording or detection. Select this mode with `switch_purpose`. When a UTE controller is active, **only the recording control** is locked on the dashboard — detection, nozzles, sensitivity, and fan remain controllable from the web interface.
+**Ute Controller:** The toggle switch can be used for either toggling recording or detection. Select this mode with `switch_purpose`. When a UTE controller is active, only the control matching `switch_purpose` is locked on the dashboard — the other control, nozzles, sensitivity, and fan remain controllable from the web interface.
 
 **Advanced Controller:** The sensitivity switch cycles through built-in presets (Low and High) stored as `[Sensitivity_Low]` and `[Sensitivity_High]` sections in `GENERAL_CONFIG.ini`. Custom presets can also be saved from the dashboard. When active, recording, detection, and sensitivity are locked on the dashboard.
 

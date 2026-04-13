@@ -66,12 +66,8 @@ cd owl
 bash owl_setup.sh
 ```
 
-```{warning}
-**Dashboard features require the `wireless-display` branch.** If you plan to set up a Standalone or Networked dashboard, clone from this branch instead:
-
-    git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
-
-For a **Basic OWL** (no dashboard), cloning from `main` is fine.
+```{tip}
+Dashboard features (Standalone and Networked) are included in the main branch. The installer will ask whether you want to enable the web dashboard during setup.
 ```
 
 ```{warning}

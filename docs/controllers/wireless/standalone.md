@@ -1,15 +1,5 @@
 # Standalone Setup
 
-```{warning}
-**Development Branch — Subject to Change**
-
-The wireless dashboard features described on this page are currently on the `wireless-display` branch and have not yet been merged into `main`. The setup process and behaviour may change before the final release.
-
-To use these features, you must clone from the branch:
-
-    git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
-```
-
 Standalone mode turns a single OWL into a self-contained unit — it creates its own WiFi hotspot and runs its own dashboard. Connect your phone, tablet, or laptop to the OWL's WiFi to monitor and control it. No existing network or router required.
 
 ```{admonition} Haven't run the installer yet?

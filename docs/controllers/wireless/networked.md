@@ -1,15 +1,5 @@
 # Networked Setup
 
-```{warning}
-**Development Branch — Subject to Change**
-
-The wireless dashboard features described on this page are currently on the `wireless-display` branch and have not yet been merged into `main`. The setup process and behaviour may change before the final release.
-
-To use these features, you must clone from the branch:
-
-    git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
-```
-
 This guide walks you through connecting multiple OWL units to a shared WiFi network so they can all be monitored and controlled from a single dashboard. By the end, you'll have a working system where every OWL reports back to one central screen in the tractor cab.
 
 ## Overview
@@ -181,7 +171,7 @@ Use the free [Raspberry Pi Imager](https://www.raspberrypi.com/software/) tool t
 Connect the controller Pi to a monitor and keyboard (or access it via SSH), then run:
 
 ```bash
-git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
+git clone https://github.com/geezacoleman/OpenWeedLocator owl
 cd owl
 sudo bash controller/networked/in-cab_controller_setup.sh
 ```
@@ -375,7 +365,7 @@ Each OWL unit on the boom needs to be set up individually. The process is the sa
 On each OWL Pi, clone the repository and run the installer:
 
 ```bash
-git clone -b wireless-display https://github.com/geezacoleman/OpenWeedLocator owl
+git clone https://github.com/geezacoleman/OpenWeedLocator owl
 cd owl
 bash owl_setup.sh
 ```

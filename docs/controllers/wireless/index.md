@@ -63,9 +63,13 @@ In `GENERAL_CONFIG.ini`, set both controller types:
 [Controller]
 controller_type = ute
 
+# Shared LED pins (BOARD numbering)
+status_led_pin = 40
+gps_led_pin = 38
+
 # Ute controller pins
 switch_purpose = recording
-switch_pin = 37
+switch_pin = 36
 ```
 
 The wireless dashboard is enabled separately during `owl_setup.sh`.

@@ -97,12 +97,14 @@ actuation_zone = 100
 
 [Controller]
 controller_type = none
-detection_mode_pin_up = 36
-detection_mode_pin_down = 35
-recording_pin = 38
-sensitivity_pin = 40
+status_led_pin = 40
+gps_led_pin = 38
 switch_purpose = recording
 switch_pin = 36
+detection_mode_pin_up = 36
+detection_mode_pin_down = 35
+recording_pin = 33
+sensitivity_pin = 32
 
 [Visualisation]
 image_loop_time = 5
@@ -250,12 +252,14 @@ speed_avg_window = 5.0
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `controller_type` | `none` | Wired controller type: `none`, `ute`, or `advanced`. |
-| `detection_mode_pin_up` | `36` | GPIO board pin for detection mode up (advanced controller). |
-| `detection_mode_pin_down` | `35` | GPIO board pin for detection mode down (advanced controller). |
-| `recording_pin` | `38` | GPIO board pin for recording toggle. |
-| `sensitivity_pin` | `40` | GPIO board pin for sensitivity switch. |
+| `status_led_pin` | `40` | BOARD pin for status indicator LED (shared by Ute and Advanced). |
+| `gps_led_pin` | `38` | BOARD pin for GPS status LED (shared by Ute and Advanced). |
 | `switch_purpose` | `recording` | Ute controller switch function: `recording` or `detection`. |
-| `switch_pin` | `36` | GPIO board pin for ute controller switch. Avoid BOARD 37 if using Sixfab HAT. |
+| `switch_pin` | `36` | BOARD pin for Ute controller toggle switch. Avoid BOARD 37 if using Sixfab HAT. |
+| `detection_mode_pin_up` | `36` | BOARD pin for detection mode up (Advanced controller). |
+| `detection_mode_pin_down` | `35` | BOARD pin for detection mode down (Advanced controller). |
+| `recording_pin` | `33` | BOARD pin for recording toggle (Advanced controller). |
+| `sensitivity_pin` | `32` | BOARD pin for sensitivity switch (Advanced controller). |
 
 ### Camera
 
