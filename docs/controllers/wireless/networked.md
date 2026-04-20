@@ -2,6 +2,16 @@
 
 This guide walks you through connecting multiple OWL units to a shared WiFi network so they can all be monitored and controlled from a single dashboard. By the end, you'll have a working system where every OWL reports back to one central screen in the tractor cab.
 
+## Example networked controller interface
+
+```{raw} html
+<div class="owl-demo-shell owl-demo-tablet">
+  <iframe src="../../_static/demos/networked/index.html"
+          loading="lazy"
+          title="Networked controller interface"></iframe>
+</div>
+```
+
 ## Overview
 
 A networked OWL connects to your existing WiFi and communicates with other devices using a lightweight messaging system called MQTT. This enables:
@@ -83,12 +93,10 @@ This guide follows **Option B** (controller + OWLs). If you're using Option A, s
 
 ---
 
-## Understanding your network
-
-Before you start, here are the networking terms you'll see during setup, explained in plain language.
+## Networking terms used during setup
 
 **WiFi network name (SSID)**
-: The name of your WiFi that appears when you connect your phone. You'll enter this during setup so the OWLs and controller can join the same network.
+: The name of your WiFi. Both the OWLs and the controller need to join the same network.
 
 **Password**
 : Your WiFi password — the same one you use on your phone or laptop.
@@ -216,18 +224,33 @@ If you enable kiosk mode, the script will ask you to choose a screen resolution:
 Select resolution (1-4, default 1): 1
 ```
 
-The script will also ask about GPS. If you have a Teltonika router that provides GPS data, enable this for speed-adaptive spray timing:
+The script will also ask about GPS. The controller supports four GPS sources — pick whichever matches your hardware. A valid fix enables speed-adaptive spray timing, breadcrumb track recording, and the live map on the GPS tab:
 
 ```{code-block} text
 :caption: GPS configuration
 
 [INFO] GPS Configuration
-  The controller can receive GPS data from a Teltonika router
-  via NMEA-over-TCP on port 8500. This enables speed-adaptive
-  actuation and track recording.
+  Select a GPS source for the controller. This enables
+  speed-adaptive actuation and track recording.
 
-Enable GPS from Teltonika router? (y/n, default: n): n
+    1) None           — no GPS (default)
+    2) USB serial     — a Ublox or similar USB dongle on /dev/ttyACM* or /dev/ttyUSB*
+    3) Teltonika TCP  — NMEA forwarded by a router to port 8500
+    4) gpsd           — read from the local gpsd daemon (localhost:2947)
+
+Select GPS source (1-4, default 1): 2
+[INFO] Detected serial device: /dev/ttyACM0
+Serial device path (default: /dev/ttyACM0):
+Serial baud rate (default: 9600):
+Enter boom width in metres (default: 12.0): 12
 ```
+
+Which one should I pick?
+
+- **None** — good for bench testing or if you don't care about speed-adaptive timing or track maps.
+- **USB serial** — the simplest option. Plug a Ublox USB dongle (e.g. UBX-G7020-KT) into the controller Pi. The setup script auto-probes `/dev/ttyACM0`, `/dev/ttyACM1`, `/dev/ttyUSB0`, `/dev/ttyUSB1` and offers the first one it finds. Ublox factory baud is 9600.
+- **Teltonika TCP** — use this if a Teltonika RUTX14 (or similar router) is already handling the GPS hardware and pushing NMEA over the network. Configure the router to forward NMEA to `<controller-ip>:8500`.
+- **gpsd** — use this if you want the Linux `gpsd` daemon to manage the device (useful when multiple apps on the same Pi need GPS, or when you need SBAS corrections). **The script only installs the `gpsd` apt packages if you pick this option** — the other three sources add zero system dependencies.
 
 Finally, review the configuration summary and confirm:
 
@@ -243,7 +266,7 @@ Gateway: 192.168.1.1
 Hostname: owl-controller
 Kiosk Mode: y
 Screen Resolution: 1280x800
-GPS: Disabled
+GPS: USB serial (/dev/ttyACM0 @ 9600, boom 12.0m)
 
 Access Information:
   Dashboard: https://owl-controller.local/ or https://192.168.1.2/
@@ -545,6 +568,34 @@ If the MQTT test completes silently (no output), it worked. If you see `Error: T
 If OWLs don't appear on the dashboard, see the [Troubleshooting](#troubleshooting) section below.
 ```
 
+### Check GPS (if enabled)
+
+If you selected a GPS source during setup, open the **GPS** tab on the dashboard. You'll see:
+
+- **A live map** filling the tab, centred on your current fix. When internet is available, the map loads OpenStreetMap tiles; when offline (common in the cab) it falls back to a dark grid so breadcrumbs still render. Use the **Centre** button to re-centre on the current fix and **Fit all** to zoom to the whole recorded track.
+- **A breadcrumb trail** showing where you've been during the current session. Points are buffered in memory and polled every 5 seconds, so you'll see the track extend as you drive. The coloured dot is your current position: green = HDOP ≤ 1 (excellent), amber = HDOP ≤ 2 (good), red = HDOP > 2 (poor).
+- **Compact dials** overlayed on the corners: compass with heading top-left, speed (km/h) top-right, and a stats strip at the bottom showing satellites/distance/time/area.
+- **A status banner** along the top — `GPS Connected` (green), `Searching for Satellites…` (amber), or `GPS Disconnected` (grey).
+
+If the banner stays grey, check:
+
+```bash
+# USB GPS: confirm the device is enumerating
+ls /dev/ttyACM* /dev/ttyUSB*
+
+# USB GPS: see raw NMEA lines (Ctrl+C to stop)
+sudo cat /dev/ttyACM0
+
+# gpsd: verify the daemon is running
+sudo systemctl status gpsd
+gpsmon
+
+# Teltonika TCP: tail the controller log for connection attempts
+journalctl -u owl-controller -f | grep -i gps
+```
+
+A cold Ublox fix typically takes ~30 seconds outdoors with a clear sky view; warm/hot starts are faster.
+
 ---
 
 ## Downloading recorded images
@@ -669,6 +720,16 @@ Each OWL publishes to device-specific topics. Replace `{id}` with the device ID 
 | `owl/{id}/config` | Configuration data |
 | `owl/{id}/indicators` | LED and buzzer indicator state |
 | `owl/{id}/gps` | GPS data from the controller |
+
+The controller also exposes these HTTP endpoints for the dashboard:
+
+| Endpoint | Returns |
+|----------|---------|
+| `GET /api/gps` | Current fix, connection status (`gps_connected`, `source`), and session stats |
+| `GET /api/gps/breadcrumbs` | Live in-memory track points (`coordinates: [[lon, lat], …]`, `recording: bool`) — used by the GPS tab map |
+| `GET /api/gps/tracks` | List of saved GeoJSON track files |
+| `GET /api/gps/tracks/<filename>` | Download a saved GeoJSON track |
+| `POST /api/gps/config` | Update runtime values like `boom_width` |
 
 To watch all messages from all OWLs:
 

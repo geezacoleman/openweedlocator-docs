@@ -106,6 +106,7 @@ html_theme_options = {
 # Static files (CSS, JavaScript, images)
 html_static_path = ['_static']
 html_css_files = ['css/custom.css']
+html_js_files = ['js/owl-demo-autoscale.js']
 
 # Custom sidebar
 html_sidebars = {

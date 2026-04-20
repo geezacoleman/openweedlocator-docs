@@ -444,3 +444,49 @@ body[data-theme="dark"] abbr[title] {
 body[data-theme="dark"] abbr[title]:hover {
     text-decoration: underline dotted var(--owl-secondary);
 }
+
+/* --------------------------------------------------------------------------
+   20. Embedded Dashboard Demos
+   Minimal frame — iframe loads at its native viewport so the real kiosk
+   layout renders correctly, then we scale it down to fit the docs column.
+   -------------------------------------------------------------------------- */
+
+/* The outer shell is an invisible scaling wrapper. It has a fixed aspect
+   ratio matching the real viewport so it takes up the right vertical space,
+   and `overflow: hidden` clips the scaled iframe to the shell. */
+.owl-demo-shell {
+    margin: 1.5rem auto;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Iframe sizing is set per-instance by owl-demo-autoscale.js on load and
+   resize. The shell's aspect-ratio reserves vertical space before JS runs;
+   if JS never runs the iframe renders at its CSS default (typically 300×150)
+   — ugly but visible. We don't add pixel fallbacks here because they would
+   just be silently overwritten by the script on every resize. */
+.owl-demo-shell iframe {
+    display: block;
+    border: 0;
+    background: #ffffff;
+    transform-origin: top left;
+}
+
+.owl-demo-shell.owl-demo-tablet {
+    aspect-ratio: 1280 / 800;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.22);
+    border-radius: 6px;
+}
+
+.owl-demo-shell.owl-demo-phone {
+    aspect-ratio: 414 / 760;
+    max-width: 380px;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.22);
+    border-radius: 6px;
+}
+
+/* Dark-theme shadow tweak */
+body[data-theme="dark"] .owl-demo-shell {
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.55);
+}

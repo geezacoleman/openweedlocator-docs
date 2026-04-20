@@ -8,6 +8,16 @@ Standalone mode turns a single OWL into a self-contained unit — it creates its
 Complete the [Two-Step Install](../../software/two-step-install.md) first, then return here when prompted for dashboard setup.
 ```
 
+## Example standalone controller interface
+
+```{raw} html
+<div class="owl-demo-shell owl-demo-phone">
+  <iframe src="../../_static/demos/standalone/index.html"
+          loading="lazy"
+          title="Standalone controller interface"></iframe>
+</div>
+```
+
 ## How it works
 
 The OWL creates a WiFi hotspot (like a mobile phone sharing its connection). You connect your device to this hotspot and open the dashboard in a browser. Everything runs locally on the OWL Pi — no internet connection needed.

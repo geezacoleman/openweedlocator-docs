@@ -213,14 +213,16 @@ static_ip = localhost
 controller_ip = localhost
 
 [GPS]
-# GPS data source for owl.py (none / serial / tcp)
+# GPS data source (none / serial / tcp / gpsd)
 source = none
-# Serial GPS settings (only when source = serial)
-port = /dev/ttyUSB1
-baudrate = 115200
-# Networked controller GPS server (Teltonika NMEA-over-TCP)
+# Serial device path and baud (only used when source = serial)
+port = /dev/ttyACM0
+baudrate = 9600
+# TCP listener (only when source = tcp). `enable = True` is a deprecated
+# back-compat alias for `source = tcp`.
 enable = False
 nmea_port = 8500
+# Session / coverage tracking (applies to every non-none source)
 boom_width = 12.0
 track_save_directory = tracks
 
@@ -367,15 +369,19 @@ speed_avg_window = 5.0
 
 ### GPS
 
+The networked controller supports four GPS input modes, selected via the `source` key. Pick whichever matches your hardware — only the keys relevant to your chosen source are read.
+
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `source` | `none` | GPS data source for owl.py: `none`, `serial`, or `tcp`. |
-| `port` | `/dev/ttyUSB1` | Serial GPS device path (when source = serial). Use `/dev/ttyUSB1` for Sixfab 4G HAT GNSS. |
-| `baudrate` | `115200` | Serial GPS baud rate. Sixfab modem uses 115200. |
-| `enable` | `False` | Enable GPS server on the networked controller. |
-| `nmea_port` | `8500` | TCP port for incoming NMEA data (Teltonika router). |
-| `boom_width` | `12.0` | Spray boom width in metres (for track recording). |
-| `track_save_directory` | `tracks` | Directory for saved GPS track files. |
+| `source` | `none` | GPS data source. One of: `none` (disabled), `serial` (USB/UART device on this Pi), `tcp` (NMEA pushed over TCP, e.g. from a Teltonika router), or `gpsd` (read from the local `gpsd` daemon on `localhost:2947`). |
+| `port` | `/dev/ttyACM0` | Serial device path (used when `source = serial`, also passed to `gpsd` as its `DEVICES` hint). Ublox USB dongles enumerate as `/dev/ttyACM0`; CP2102/CH340 adapters as `/dev/ttyUSB0`; Pi primary UART is `/dev/ttyAMA0` (or `/dev/serial0` on Bookworm). To find yours: `ls /dev/ttyACM* /dev/ttyUSB*` after plugging in the GPS. |
+| `baudrate` | `9600` | Serial link speed (used when `source = serial`). Ublox factory default is 9600; Sixfab GNSS HAT and some marine modules use 115200. Wrong baud = silent failure (garbled unicode in the log). |
+| `enable` | `False` | **DEPRECATED.** Kept as a back-compat alias: if `source = none` and `enable = True`, the controller behaves as if `source = tcp`. New configs should set `source` directly. |
+| `nmea_port` | `8500` | TCP port the controller listens on when `source = tcp`. Configure your router to forward NMEA to `<controller-ip>:<nmea_port>`. Port 8500 is pre-opened in the UFW firewall rules. |
+| `boom_width` | `12.0` | Spray boom width in metres. Used to convert distance into hectares: `area_ha = distance_km × boom_width_m / 10`. |
+| `track_save_directory` | `tracks` | Directory (relative to project root) where session GeoJSON track files are written as `track_YYYY-MM-DD_HHMMSS.geojson`. Files are never auto-deleted — monitor disk on long-running kiosks. |
+
+The GPS tab in the dashboard renders these breadcrumbs on a Leaflet map (OpenStreetMap tiles when online, dark grid fallback when offline) with a HDOP-coloured current-position marker and Centre/Fit-all controls.
 
 ### Actuation
 
