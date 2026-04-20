@@ -551,8 +551,7 @@ body[data-theme="dark"] .owl-demo-shell {
     background: #0b1020;
     color: #d1d9e6;
     font: 13px/1.45 "SF Mono", Menlo, Consolas, "Courier New", monospace;
-    min-height: 360px;
-    max-height: 520px;
+    height: 460px;           /* fixed so the box never grows as content streams */
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-word;
@@ -600,8 +599,13 @@ body[data-theme="dark"] .owl-demo-shell {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(180deg, rgba(11, 16, 32, 0.92), rgba(11, 16, 32, 0.98));
-    backdrop-filter: blur(2px);
+    background: linear-gradient(180deg, #0b1020 0%, #0b1020 100%);
+}
+/* [hidden] must win over display: flex / inline-flex above */
+.owl-term-poster[hidden],
+.owl-term-btn[hidden],
+.owl-term-chip[hidden] {
+    display: none !important;
 }
 
 .owl-term-play {

@@ -38,8 +38,7 @@ Once your hardware is assembled with a Raspberry Pi and camera connected, the in
 ```{raw} html
 <div class="owl-term"
      data-script="../_static/terminals/owl-setup.json"
-     data-title="pi@raspberrypi: ~/owl — installing OWL"
-     data-label="owl_setup.sh — ~90 seconds"></div>
+     data-title="pi@raspberrypi: ~/owl — installing OWL"></div>
 ```
 
 ::::{grid} 1 1 2 2
