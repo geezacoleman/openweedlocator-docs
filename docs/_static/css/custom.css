@@ -490,3 +490,233 @@ body[data-theme="dark"] abbr[title]:hover {
 body[data-theme="dark"] .owl-demo-shell {
     box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.55);
 }
+
+/* --------------------------------------------------------------------------
+   21. Install terminal player (owl-term)
+   Real-terminal feel — dark background, macOS-style traffic lights,
+   monospace output with proper ANSI-ish colour classes.
+   -------------------------------------------------------------------------- */
+.owl-term {
+    margin: 2rem auto;
+    max-width: 820px;
+}
+
+.owl-term-frame {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #0b1020;
+    box-shadow:
+        0 18px 40px -18px rgba(8, 14, 32, 0.45),
+        0 2px 6px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+/* macOS-style title bar */
+.owl-term-chrome {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, #252a34 0%, #1c212b 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.45);
+    position: relative;
+}
+
+.owl-term-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.25);
+}
+.owl-term-dot-r { background: #ff5f57; }
+.owl-term-dot-y { background: #febc2e; }
+.owl-term-dot-g { background: #28c840; }
+
+.owl-term-title {
+    position: absolute;
+    left: 0; right: 0;
+    text-align: center;
+    font: 500 12px/1 "SF Mono", Menlo, Consolas, "Courier New", monospace;
+    color: #c9d1d9;
+    letter-spacing: 0.2px;
+    pointer-events: none;
+}
+
+/* Terminal body */
+.owl-term-body {
+    margin: 0;
+    padding: 14px 16px;
+    background: #0b1020;
+    color: #d1d9e6;
+    font: 13px/1.45 "SF Mono", Menlo, Consolas, "Courier New", monospace;
+    min-height: 360px;
+    max-height: 520px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    tab-size: 4;
+}
+
+.owl-term-body::-webkit-scrollbar { width: 10px; }
+.owl-term-body::-webkit-scrollbar-track { background: transparent; }
+.owl-term-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 5px;
+}
+
+/* Output classes — a restrained ANSI-ish palette readable on dark */
+.owl-term-prompt { color: #8bd88b; font-weight: 600; }  /* green like real $ */
+.owl-term-cmd    { color: #f0f4ff; font-weight: 500; }  /* bright cmd text */
+.owl-term-info   { color: #60a5fa; }                    /* [INFO] — blue */
+.owl-term-ok     { color: #34d399; font-weight: 600; }  /* [OK] — green */
+.owl-term-warn   { color: #fbbf24; }                    /* [WARN] — amber */
+.owl-term-err    { color: #f87171; font-weight: 600; }  /* [FAIL] — red */
+.owl-term-muted  { color: #6b7280; }                    /* apt / pip noise */
+.owl-term-plain  { color: #d1d9e6; }
+
+/* Blinking cursor */
+.owl-term-cursor {
+    display: inline-block;
+    width: 8px;
+    background: #d1d9e6;
+    vertical-align: text-bottom;
+    margin-left: 1px;
+    opacity: 0;
+}
+.owl-term-cursor-blink {
+    animation: owlTermCursor 1s steps(2, end) infinite;
+}
+@keyframes owlTermCursor {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* Play-button poster */
+.owl-term-poster {
+    position: absolute;
+    inset: 36px 0 0 0;  /* below the chrome bar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, rgba(11, 16, 32, 0.92), rgba(11, 16, 32, 0.98));
+    backdrop-filter: blur(2px);
+}
+
+.owl-term-play {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(17, 78, 209, 0.9);
+    color: #ffffff;
+    font: 600 14px/1 "Quicksand", -apple-system, sans-serif;
+    cursor: pointer;
+    transition: transform 120ms ease, background 120ms ease;
+    box-shadow: 0 8px 24px -6px rgba(17, 78, 209, 0.55);
+}
+.owl-term-play:hover {
+    background: var(--owl-primary);
+    transform: translateY(-1px);
+}
+.owl-term-play:focus-visible {
+    outline: 2px solid #9fb7ff;
+    outline-offset: 2px;
+}
+
+.owl-term-play-tri {
+    font-size: 14px;
+    line-height: 1;
+    margin-right: -2px;
+}
+
+/* Controls row */
+.owl-term-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    font: 500 13px/1 "Quicksand", -apple-system, sans-serif;
+    flex-wrap: wrap;
+}
+
+.owl-term-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--owl-border);
+    background: #ffffff;
+    color: var(--owl-text);
+    font: inherit;
+    cursor: pointer;
+    transition: background 100ms ease, border-color 100ms ease;
+}
+.owl-term-btn:hover {
+    background: var(--owl-bg-light);
+    border-color: var(--owl-accent);
+    color: var(--owl-primary);
+}
+
+.owl-term-chip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--owl-success);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    animation: owlTermChip 300ms ease;
+}
+@keyframes owlTermChip {
+    from { opacity: 0; transform: translateY(-2px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.owl-term-caption {
+    margin-left: auto;
+    color: var(--owl-text);
+    opacity: 0.65;
+    font-size: 12px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Dark theme — keep terminal body dark (it always is), just refine outer glow
+   and the controls row since the page background flips. */
+body[data-theme="dark"] .owl-term-frame {
+    box-shadow:
+        0 18px 40px -18px rgba(131, 199, 255, 0.2),
+        0 2px 6px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+body[data-theme="dark"] .owl-term-btn {
+    background: #161b22;
+    color: var(--owl-light);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+body[data-theme="dark"] .owl-term-btn:hover {
+    background: #1f2630;
+    color: var(--owl-secondary);
+    border-color: var(--owl-secondary);
+}
+body[data-theme="dark"] .owl-term-caption {
+    color: var(--owl-secondary);
+    opacity: 0.55;
+}
+
+/* Mobile */
+@media (max-width: 540px) {
+    .owl-term-body {
+        font-size: 11.5px;
+        padding: 12px;
+        min-height: 320px;
+    }
+    .owl-term-title {
+        font-size: 11px;
+        left: 80px;  /* get out of the way of the dots on narrow screens */
+    }
+    .owl-term-caption { display: none; }
+}

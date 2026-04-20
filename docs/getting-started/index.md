@@ -33,7 +33,14 @@ Jump straight to the assembly guides for the [Original OWL](../hardware/original
 
 ## How do I install the software?
 
-Once your hardware is assembled with a Raspberry Pi and camera connected:
+Once your hardware is assembled with a Raspberry Pi and camera connected, the installer is three commands. Click **Run install** to watch what that looks like:
+
+```{raw} html
+<div class="owl-term"
+     data-script="../_static/terminals/owl-setup.json"
+     data-title="pi@raspberrypi: ~/owl — installing OWL"
+     data-label="owl_setup.sh — ~90 seconds"></div>
+```
 
 ::::{grid} 1 1 2 2
 :gutter: 3
