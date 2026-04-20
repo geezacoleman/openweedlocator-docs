@@ -1,16 +1,14 @@
 // ============================================
 // OWL Central Controller - GPS Map overlay
 // Leaflet map + breadcrumb polyline + current-fix marker.
-// Online OSM tiles with an offline grid fallback (for cabs without
-// internet). Listens for `gps:update` events dispatched by _gps.js.
+// Always-on lat/lon grid background; OSM tiles overlay on top when the
+// network reaches them. Listens for `gps:update` events from _gps.js.
 // ============================================
 
 (function () {
     'use strict';
 
     const BREADCRUMB_POLL_MS = 5000;
-    const TILE_ERROR_LIMIT = 3;
-    const TILE_ERROR_WINDOW_MS = 10000;
 
     let map = null;
     let tileLayer = null;
@@ -20,8 +18,6 @@
     let breadcrumbTimer = null;
     let lastFix = null;
     let hasAutoFit = false;
-    let tileErrors = [];
-    let usingFallback = false;
 
     function initMap() {
         if (map) return;
@@ -39,73 +35,55 @@
             zoom: 2,
             preferCanvas: true,
         });
-
-        L.control.attribution({ position: 'bottomleft' }).addTo(map);
-        // Zoom control in bottom-right keeps the top corners clear for the dials.
         map.zoomControl.setPosition('bottomright');
 
+        // Always-on dark grid layer — keeps the map from ever looking empty
+        // when tiles are slow, blocked, or the cab has no internet.
+        gridLayer = buildGridLayer();
+        gridLayer.addTo(map);
+
+        // OSM tile overlay — shows over the grid when it loads. Kept as a
+        // separate layer so the grid remains visible through gaps.
         tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; OpenStreetMap contributors',
+            crossOrigin: true,
         });
-        tileLayer.on('tileerror', onTileError);
         tileLayer.addTo(map);
 
         trackLine = L.polyline([], {
             color: '#1abc9c',
             weight: 4,
-            opacity: 0.85,
+            opacity: 0.9,
         }).addTo(map);
 
         addCustomControls();
 
-        window.addEventListener('online', () => {
-            if (usingFallback && map && tileLayer) {
-                map.addLayer(tileLayer);
-                if (gridLayer) map.removeLayer(gridLayer);
-                usingFallback = false;
-                tileErrors = [];
+        // If we already have a fix from an earlier `gps:update` event,
+        // render the marker immediately so the map isn't empty.
+        if (lastFix) updatePositionMarker(lastFix);
+    }
+
+    function buildGridLayer() {
+        const Grid = L.GridLayer.extend({
+            createTile: function (coords) {
+                const size = this.getTileSize();
+                const tile = document.createElement('canvas');
+                tile.width = size.x;
+                tile.height = size.y;
+                const ctx = tile.getContext('2d');
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, size.x, size.y);
+                ctx.strokeStyle = 'rgba(127, 140, 141, 0.25)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(0, 0, size.x, size.y);
+                ctx.fillStyle = 'rgba(127, 140, 141, 0.35)';
+                ctx.font = '10px monospace';
+                ctx.fillText(coords.z + '/' + coords.x + '/' + coords.y, 6, 14);
+                return tile;
             }
         });
-    }
-
-    function onTileError() {
-        const now = Date.now();
-        tileErrors.push(now);
-        tileErrors = tileErrors.filter(t => now - t < TILE_ERROR_WINDOW_MS);
-        if (tileErrors.length >= TILE_ERROR_LIMIT && !usingFallback) {
-            switchToFallback();
-        }
-    }
-
-    function switchToFallback() {
-        if (!map || usingFallback) return;
-        usingFallback = true;
-        try { map.removeLayer(tileLayer); } catch (e) { /* noop */ }
-
-        if (!gridLayer) {
-            const Grid = L.GridLayer.extend({
-                createTile: function (coords) {
-                    const size = this.getTileSize();
-                    const tile = document.createElement('canvas');
-                    tile.width = size.x;
-                    tile.height = size.y;
-                    const ctx = tile.getContext('2d');
-                    ctx.fillStyle = '#1a1a2e';
-                    ctx.fillRect(0, 0, size.x, size.y);
-                    ctx.strokeStyle = 'rgba(127, 140, 141, 0.25)';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(0, 0, size.x, size.y);
-                    ctx.fillStyle = 'rgba(127, 140, 141, 0.45)';
-                    ctx.font = '10px monospace';
-                    ctx.fillText(coords.z + '/' + coords.x + '/' + coords.y, 6, 14);
-                    return tile;
-                }
-            });
-            gridLayer = new Grid({ maxZoom: 19 });
-        }
-        gridLayer.addTo(map);
-        console.info('[gps_map] Offline fallback active — tiles unreachable');
+        return new Grid({ maxZoom: 19 });
     }
 
     function addCustomControls() {
@@ -203,12 +181,8 @@
                 .filter(c => Array.isArray(c) && c.length >= 2)
                 // Incoming is [lon, lat, (alt)] — Leaflet wants [lat, lon]
                 .map(c => [c[1], c[0]]);
-            if (trackLine) {
-                trackLine.setLatLngs(coords);
-            }
-        } catch (e) {
-            // Non-fatal — show empty track on error
-        }
+            if (trackLine) trackLine.setLatLngs(coords);
+        } catch (e) { /* non-fatal */ }
     }
 
     function onGPSUpdate(e) {
@@ -218,11 +192,19 @@
         updatePositionMarker(fix);
     }
 
+    function kickLayout() {
+        if (!map) return;
+        // Leaflet only measures the container when told to. Fire several
+        // invalidateSize() calls after the tab becomes visible so slow layouts
+        // (fonts, iframes, flex reflow) are all caught.
+        [0, 60, 250, 600].forEach(ms => {
+            setTimeout(() => { try { map.invalidateSize(); } catch (e) {} }, ms);
+        });
+    }
+
     window.gpsMapShow = function () {
         initMap();
-        if (!map) return;
-        // Leaflet needs a nudge after its container becomes visible.
-        setTimeout(() => { try { map.invalidateSize(); } catch (e) {} }, 50);
+        kickLayout();
         if (!breadcrumbTimer) {
             pollBreadcrumbs();
             breadcrumbTimer = setInterval(pollBreadcrumbs, BREADCRUMB_POLL_MS);
@@ -235,6 +217,14 @@
             breadcrumbTimer = null;
         }
     };
+
+    // Initialise the map as soon as the DOM is ready so it's already sized
+    // and laid out before the user switches to the GPS tab.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMap);
+    } else {
+        initMap();
+    }
 
     window.addEventListener('gps:update', onGPSUpdate);
 })();
