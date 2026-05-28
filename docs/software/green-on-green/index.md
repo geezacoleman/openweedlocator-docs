@@ -13,6 +13,17 @@ GoG uses YOLO object detection models to identify weeds directly, regardless of 
 
 Models are loaded automatically from the `models/` directory. The OWL auto-detects the model format.
 
+## Hardware Requirements
+
+The OWL runs YOLO inference natively on the Raspberry Pi via NCNN. The Google Coral USB Accelerator that earlier
+documentation referenced is no longer recommended — it has been superseded by the Raspberry Pi AI Hat+, which is the
+current recommended accelerator for in-field Green-on-Green deployments.
+
+**Recommended:** Raspberry Pi AI Hat+. The Waveshare variant is widely available — [Waveshare AI Hat+](https://www.waveshare.com/raspberry-pi-ai-hat-plus.htm?sku=29050) — and other Hailo-based AI Hat+ variants from different vendors work the same way. Higher-compute variants cost more but let you run larger inference image sizes, which is worth it if you need higher accuracy on smaller targets.
+
+**Without an accelerator:** the Pi can run smaller NCNN models on CPU only. That works for testing and low-resolution
+inference, but the AI Hat+ is what unlocks larger image sizes and the frame rates needed for boom-speed operation.
+
 ## Detection Modes
 
 OWL supports two GoG detection strategies, selected by the `algorithm` config key:

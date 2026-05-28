@@ -58,7 +58,7 @@ Base class for configuration errors.
 
 | Error | Common Causes | Solutions |
 |-------|---------------|-----------|
-| **AlgorithmError** | Missing dependencies, invalid model files, Coral device issues | 1. Install required packages<br>2. Verify model files<br>3. Check Coral device connection |
+| **AlgorithmError** | Missing dependencies, invalid model files, AI accelerator issues | 1. Install required packages<br>2. Verify model files<br>3. Check AI accelerator (AI Hat+) connection |
 | **OpenCVError** | OpenCV not installed, wrong virtual environment | 1. Run `workon owl`<br>2. Install opencv-python<br>3. Run owl_setup.sh |
 | **DependencyError** | Missing Python packages, wrong virtual environment | 1. Activate owl environment<br>2. Run pip install for package<br>3. Install from requirements.txt |
 

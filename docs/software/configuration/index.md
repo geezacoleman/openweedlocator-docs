@@ -273,6 +273,33 @@ speed_avg_window = 5.0
 | `crop_factor_horizontal` | `0.02` | Fraction of width to crop from each side (0.0-0.5). |
 | `crop_factor_vertical` | `0.02` | Fraction of height to crop from each side (0.0-0.5). |
 | `camera_type` | `auto` | Camera selection: `auto` (auto-detect), `rpi` (force Pi camera), `usb` (force USB webcam). |
+| `allow_high_resolution` | `False` | Bypass the Pi 3/4 832x640 safety clamp. Leave `False` unless you've verified your hardware handles the target resolution. |
+
+#### Setting the resolution
+
+Resolution can be changed two ways — pick whichever fits your workflow.
+
+**Dashboard Config tab.** Open the dashboard → **CONFIG** tab → **Camera** section → **Resolution** dropdown. The
+dropdown offers the supported presets (1456x1088, 1280x960, 1280x720, 1024x768, 800x600, 640x480, 416x320, 320x240) and
+writes both `resolution_width` and `resolution_height` to the active config in a single step. Changes are persisted via
+the copy-on-write mechanism described above.
+
+**Direct INI editing.** Set `resolution_width` and `resolution_height` independently under `[Camera]`, then restart OWL
+for the change to take effect. This route is fine when you're already editing the file for other reasons, or when you
+need a resolution outside the dashboard preset list.
+
+```{admonition} Pi 3 / Pi 4 safety clamp
+:class: warning
+
+On the Raspberry Pi 3 and Pi 4, requests above **832x640** are silently clamped to 640x480. Older Pi models are known
+to lock up at higher resolutions, and the clamp prevents bricked devices in the field.
+
+To override the clamp, set `[Camera] allow_high_resolution = True` — but only after verifying that the specific Pi
+hardware in front of you actually copes with the resolution you're requesting. The dashboard surfaces an active clamp
+via a banner in the Camera section.
+
+The Pi 5 is not affected by the clamp.
+```
 
 ### Visualisation
 

@@ -83,6 +83,29 @@ graph TB
     style C fill:#4CAF50,color:#fff
 ```
 
+## Recommended hardware
+
+For multi-OWL boom systems, the following parts are the proven combination. The first three (router, antenna, screen)
+are the minimum kit for a working networked setup; PUR cable becomes relevant once you decide to add wired Ethernet.
+
+- **Router** — [Teltonika RUT956](https://www.teltonika-networks.com/products/routers/rut956). Cellular failover plus
+  built-in GPS, so remote access and GPS-driven actuation are covered by the same unit.
+- **Outdoor antenna** — [QuWireless QuSpot for RUT955/956](https://www.quwireless.com/product/quspot-for-rut955-rut956).
+  IP-rated, designed to mount on the tractor cab or boom with the cable run into the cab.
+- **In-cab touchscreen** — [Edatec ED-HMI3010-101C](https://www.digikey.dk/da/products/detail/edatec/ED-HMI3010-101C-0432/22032904).
+  10.1" 1280x800 touchscreen, native resolution matches the dashboard's kiosk default.
+- **PUR-jacketed network cable** — CAT 6 S/FTP with PUR jacket. The PUR jacket holds up to UV, oil, and agricultural
+  chemicals on the boom; standard PVC patch cable does not.
+
+```{admonition} Ethernet is optional
+:class: note
+
+Ethernet to each OWL is the most reliable option but adds cost — a cable gland or weatherproof RJ45 connector per OWL,
+plus the cable run from the cab. For smaller systems, a pure WiFi setup (router + antenna + screen, no per-OWL cabling)
+is usually fine when there is line-of-sight from the antenna to each OWL. You can start with WiFi and add Ethernet
+later if reliability becomes an issue.
+```
+
 ```{admonition} Haven't run the installer yet?
 :class: tip
 
@@ -379,6 +402,7 @@ After reboot, the controller is ready. If kiosk mode is enabled, the dashboard w
 
 ---
 
+(step-2-set-up-each-owl)=
 ## Step 2 — Set up each OWL
 
 Each OWL unit on the boom needs to be set up individually. The process is the same for each one — just change the OWL ID number and IP address.

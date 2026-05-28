@@ -98,6 +98,15 @@ OWL units can be controlled via GPIO-based controllers for managing 1-4 units. C
 
 For complete controller wiring, GPIO pin mapping, and configuration, see the Controller Setup Guide (coming soon in the Software section).
 
+## How many OWLs do I need?
+
+Around one OWL per metre of spray boom. A 7-8 m boom needs 7-8 OWLs; a 12 m boom needs about 12. Boom coverage scales
+linearly — each OWL sees its own slice of the ground, and adjacent units overlap slightly at the edges.
+
+Once you are running more than around four OWLs on the same boom, a networked controller becomes the practical option —
+see [Networked Setup](../controllers/wireless/networked.md) for the in-cab dashboard, router, and screen used for
+multi-OWL systems.
+
 ## Required Tools
 
 Before starting any OWL build, ensure you have these tools:
