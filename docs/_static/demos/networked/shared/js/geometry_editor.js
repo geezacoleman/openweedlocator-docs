@@ -283,7 +283,12 @@ const GeometryEditor = (function () {
         _buildOverlay();
         _buildPanel();
         render();
-        if (o.host) o.host.classList.add('geo-editing');
+        if (o.host) {
+            o.host.classList.add('geo-editing');
+            // Mark the container (column / preview box) so its CSS can switch to a
+            // fit-the-screen layout while editing.
+            if (o.host.parentElement) o.host.parentElement.classList.add('geo-host-active');
+        }
     }
 
     function numOr(v, d) {
@@ -293,7 +298,10 @@ const GeometryEditor = (function () {
 
     function _teardown() {
         if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-        if (opts && opts.host) opts.host.classList.remove('geo-editing');
+        if (opts && opts.host) {
+            opts.host.classList.remove('geo-editing');
+            if (opts.host.parentElement) opts.host.parentElement.classList.remove('geo-host-active');
+        }
         if (opts && opts.panel) opts.panel.innerHTML = '';
         overlay = null;
         dragEdge = null;

@@ -108,7 +108,7 @@ OWL only acts on a rectangle of the camera frame, and only fires a relay when a 
 
 You can set these two ways:
 
-1. **Visually** — on a [standalone](../../controllers/wireless/standalone.md#tuning-detection-and-geometry) or [networked](../../controllers/wireless/networked.md#visual-geometry-editor) controller, click **Adjust geometry** and drag the crop edges and band handles on the live feed.
+1. **Visually** — on a [standalone](../../controllers/wireless/standalone.md#tuning-detection-and-geometry) or [networked](../../controllers/wireless/networked.md#tuning-detection-config-tab) controller, click **Adjust geometry** and drag the crop edges and band handles on the live feed.
 2. **By hand** — edit the keys directly in the config file (works without any controller). See the [Configuration Guide](../../software/configuration/index.md).
 
 ```{note}
