@@ -17,7 +17,9 @@ const CONFIG_FIELD_DEFS = {
         'relay_num': { type: 'select', options: ['1', '2', '4', '8', '12', '16'], help: 'Number of relays' },
         'actuation_duration': { type: 'number', step: 0.01, min: 0.01, max: 2.0, help: 'Spray duration in seconds' },
         'delay': { type: 'number', step: 0.01, min: 0, max: 5.0, help: 'Delay before actuation' },
-        'actuation_zone': { type: 'number', min: 1, max: 100, help: 'Actuation zone (% of frame from bottom)' }
+        'actuation_zone': { type: 'number', min: 1, max: 100, help: 'Legacy bottom-anchored zone (%). Use actuation_top/bottom instead.' },
+        'actuation_top': { type: 'number', step: 0.01, min: 0, max: 1.0, help: 'Actuation band top (fraction of cropped height; 0 = top)' },
+        'actuation_bottom': { type: 'number', step: 0.01, min: 0, max: 1.0, help: 'Actuation band bottom (fraction of cropped height; 1 = bottom)' }
     },
     'MQTT': {
         'enable': { type: 'boolean', help: 'Enable MQTT communication' },
@@ -33,9 +35,14 @@ const CONFIG_FIELD_DEFS = {
             keys: { width: 'resolution_width', height: 'resolution_height' }
         },
         'exp_compensation': { type: 'select', options: ['-4', '-3', '-2', '-1', '0', '1', '2', '3', '4'], help: 'Exposure compensation' },
-        'crop_factor_horizontal': { type: 'number', step: 0.01, min: 0, max: 0.5, help: 'Horizontal crop factor' },
-        'crop_factor_vertical': { type: 'number', step: 0.01, min: 0, max: 0.5, help: 'Vertical crop factor' },
-        'camera_type': { type: 'select', options: ['auto', 'rpi', 'usb'], help: 'Camera type (auto detects Pi camera or USB webcam)' }
+        'crop_factor_horizontal': { type: 'number', step: 0.01, min: 0, max: 0.5, help: 'Legacy symmetric horizontal crop. Use crop_left/crop_right instead.' },
+        'crop_factor_vertical': { type: 'number', step: 0.01, min: 0, max: 0.5, help: 'Legacy symmetric vertical crop. Use crop_top/crop_bottom instead.' },
+        'crop_left': { type: 'number', step: 0.01, min: 0, max: 0.49, help: 'Crop inset from left edge (fraction)' },
+        'crop_right': { type: 'number', step: 0.01, min: 0, max: 0.49, help: 'Crop inset from right edge (fraction)' },
+        'crop_top': { type: 'number', step: 0.01, min: 0, max: 0.49, help: 'Crop inset from top edge (fraction)' },
+        'crop_bottom': { type: 'number', step: 0.01, min: 0, max: 0.49, help: 'Crop inset from bottom edge (fraction)' },
+        'camera_type': { type: 'select', options: ['auto', 'rpi', 'usb'], help: 'Camera type (auto detects Pi camera or USB webcam)' },
+        'allow_high_resolution': { type: 'boolean', help: 'Bypass the 832x640 safety clamp on Pi 3/4. Only enable if you have verified your hardware handles the target resolution.' }
     },
     'GreenOnBrown': {
         'exg_min': { type: 'number', min: 0, max: 255 },
@@ -105,13 +112,23 @@ const CONFIG_FIELD_DEFS = {
     'WebDashboard': {
         'port': { type: 'number', min: 1, max: 65535, help: 'Dashboard web server port' }
     },
+    'Cloud': {
+        'enable': { type: 'boolean', help: 'Enable cloud bridge (managed by owl_cloud_provision.sh)' },
+        'broker_host': { type: 'text', help: 'Cloud MQTT broker hostname (managed by owl_cloud_provision.sh)' },
+        'broker_port': { type: 'number', min: 1, max: 65535, help: 'Cloud MQTT broker TLS port' },
+        'device_id': { type: 'text', help: 'Cloud platform device ID (issued at registration)' },
+        'username': { type: 'text', help: 'Cloud bridge username (managed by owl_cloud_provision.sh)' },
+        'ca_cert': { type: 'text', help: 'CA certificate path for the cloud broker' },
+        'password_file': { type: 'text', help: 'Path to bridge password file (mode 600)' },
+        'portal_url': { type: 'text', help: 'Noktura web portal base URL (optional) — enables a manage link + QR to <portal_url>/d/<device_id>' }
+    },
     'Tracking': {
         'tracking_enabled': { type: 'boolean', help: 'Enable weed tracking (class smoothing + crop mask persistence)' },
         'track_high_thresh': { type: 'number', min: 0.01, max: 0.5, step: 0.01, help: 'First-pass confidence threshold (lower = more detections matched)' },
         'track_low_thresh': { type: 'number', min: 0.01, max: 0.3, step: 0.01, help: 'Second-pass threshold for marginal detections' },
         'new_track_thresh': { type: 'number', min: 0.01, max: 0.5, step: 0.01, help: 'Minimum confidence to start a new track' },
         'track_buffer': { type: 'number', min: 10, max: 150, step: 5, help: 'Frames to keep lost tracks alive (higher = more persistent)' },
-        'match_thresh': { type: 'number', min: 0.1, max: 0.95, step: 0.05, help: 'IoU matching threshold (lower = tolerates more camera vibration)' },
+        'match_thresh': { type: 'number', min: 0.1, max: 0.95, step: 0.05, help: 'Match leniency (higher = tolerates more camera vibration)' },
         'track_class_window': { type: 'number', min: 1, max: 20, help: 'Frames of class history for majority vote' },
         'track_crop_persist': { type: 'number', min: 1, max: 10, help: 'Frames to persist crop mask after detection drops' },
         'detection_persist_frames': { type: 'number', min: 0, max: 15, step: 1, help: 'Frames to persist lost detections via Kalman prediction (0=disabled, 5=~0.5s)' }
@@ -127,7 +144,7 @@ const RESTART_SECTIONS = ['MQTT', 'Network', 'WebDashboard', 'Controller'];
 /**
  * Preferred display order for config sections.
  */
-const SECTION_ORDER = ['System', 'Camera', 'GreenOnBrown', 'GreenOnGreen', 'Tracking', 'Actuation', 'DataCollection', 'Visualisation', 'Controller', 'Network', 'WebDashboard', 'MQTT', 'GPS', 'Relays', 'Sensitivity'];
+const SECTION_ORDER = ['System', 'Camera', 'GreenOnBrown', 'GreenOnGreen', 'Tracking', 'Actuation', 'DataCollection', 'Visualisation', 'Controller', 'Network', 'WebDashboard', 'MQTT', 'GPS', 'Cloud', 'Relays', 'Sensitivity'];
 
 /**
  * Create a collapsible config section element.
@@ -286,6 +303,18 @@ function createConfigField(section, key, value, fieldDef) {
         field.appendChild(h);
     }
 
+    // Pi-version context badge for the high-res override. The text is
+    // populated by the controller once it knows the connected OWL's
+    // rpi_version (see decorateHighResField in shared/js/config.js callers).
+    if (section === 'Camera' && key === 'allow_high_resolution') {
+        const ctx = document.createElement('span');
+        ctx.className = 'field-context-badge js-pi-version-context';
+        ctx.dataset.deviceField = 'rpi_version';
+        // Empty by default — controller fills in once heartbeat arrives.
+        ctx.textContent = '';
+        field.appendChild(ctx);
+    }
+
     // Lock MQTT enable field to prevent accidental disconnection
     if (section === 'MQTT' && key === 'enable') {
         const input = field.querySelector('input');
@@ -300,6 +329,26 @@ function createConfigField(section, key, value, fieldDef) {
     }
 
     return field;
+}
+
+/**
+ * Populate the "Detected: Pi N" badge next to the allow_high_resolution
+ * checkbox. Called by each controller after a heartbeat lands with a
+ * known rpi_version. No-op if the badge isn't currently rendered.
+ *
+ * @param {string} rpiVersion - 'rpi-3' / 'rpi-4' / 'rpi-5' / 'unknown'
+ */
+function setHighResContextBadge(rpiVersion) {
+    var pretty;
+    if (rpiVersion === 'rpi-3') pretty = 'Detected: Pi 3';
+    else if (rpiVersion === 'rpi-4') pretty = 'Detected: Pi 4';
+    else if (rpiVersion === 'rpi-5') pretty = 'Detected: Pi 5 (clamp does not apply)';
+    else pretty = '';
+
+    var nodes = document.querySelectorAll('.js-pi-version-context');
+    for (var i = 0; i < nodes.length; i++) {
+        nodes[i].textContent = pretty;
+    }
 }
 
 /**

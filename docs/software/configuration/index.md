@@ -93,6 +93,8 @@ input_file_or_directory =
 relay_num = 4
 actuation_duration = 0.15
 delay = 0
+actuation_top = 0.0
+actuation_bottom = 1.0
 actuation_zone = 100
 
 [Controller]
@@ -113,6 +115,10 @@ image_loop_time = 5
 resolution_width = 1456
 resolution_height = 1088
 exp_compensation = -2
+crop_left = 0.02
+crop_right = 0.02
+crop_top = 0.02
+crop_bottom = 0.02
 crop_factor_horizontal = 0.02
 crop_factor_vertical = 0.02
 camera_type = auto
@@ -247,7 +253,9 @@ speed_avg_window = 5.0
 | `relay_num` | `4` | Number of relay lanes (1-4). |
 | `actuation_duration` | `0.15` | Relay activation time in seconds. |
 | `delay` | `0` | Delay between detection and actuation in seconds. |
-| `actuation_zone` | `100` | Percentage of the frame width used for relay lane mapping (1-100). |
+| `actuation_top` | `0.0` | Top of the **actuation band** as a fraction of the cropped height (`0.0` = top of crop). A weed fires its relay only while its centre is inside the band. Raise this to ignore weeds too far ahead. |
+| `actuation_bottom` | `1.0` | Bottom of the actuation band as a fraction of the cropped height (`1.0` = bottom of crop). Lower this to ignore weeds too close (where the solenoid can't react in time). |
+| `actuation_zone` | `100` | **Legacy** bottom-anchored zone (% from bottom). Used only if `actuation_top`/`actuation_bottom` are absent (then `actuation_top = 1 - actuation_zone/100`, `actuation_bottom = 1.0`). Prefer the band keys above. |
 
 ### Controller
 
@@ -270,10 +278,27 @@ speed_avg_window = 5.0
 | `resolution_width` | `1456` | Camera capture width in pixels. |
 | `resolution_height` | `1088` | Camera capture height in pixels. |
 | `exp_compensation` | `-2` | Exposure compensation (-8 to 8). Negative values give faster shutter speed. |
-| `crop_factor_horizontal` | `0.02` | Fraction of width to crop from each side (0.0-0.5). |
-| `crop_factor_vertical` | `0.02` | Fraction of height to crop from each side (0.0-0.5). |
+| `crop_left` | `0.02` | Fraction of width cropped from the **left** edge (0.0-0.49). |
+| `crop_right` | `0.02` | Fraction of width cropped from the **right** edge (0.0-0.49). |
+| `crop_top` | `0.02` | Fraction of height cropped from the **top** edge (0.0-0.49). |
+| `crop_bottom` | `0.02` | Fraction of height cropped from the **bottom** edge (0.0-0.49). Detection runs only inside the remaining rectangle; relay lanes are spread across the cropped width and recenter automatically. |
+| `crop_factor_horizontal` | `0.02` | **Legacy** symmetric horizontal crop. Used only if `crop_left`/`crop_right` are absent (then both fall back to this value). |
+| `crop_factor_vertical` | `0.02` | **Legacy** symmetric vertical crop. Used only if `crop_top`/`crop_bottom` are absent. |
 | `camera_type` | `auto` | Camera selection: `auto` (auto-detect), `rpi` (force Pi camera), `usb` (force USB webcam). |
 | `allow_high_resolution` | `False` | Bypass the Pi 3/4 832x640 safety clamp. Leave `False` unless you've verified your hardware handles the target resolution. |
+
+```{admonition} Geometry lives in GEOMETRY.ini
+:class: note
+The crop edges (`crop_left/right/top/bottom`) and the actuation band
+(`actuation_top/bottom`) are **mount geometry** — physical to how a unit is
+bolted on. They live in their own `config/GEOMETRY.ini`, which OWL reads **last**
+so it always wins over any values in the active config. This means switching or
+saving a named detection config (sensitivity, algorithm, thresholds) never
+changes a unit's geometry, and geometry is never copied into named configs. Set
+it with the dashboard's **Adjust geometry** editor (which writes `GEOMETRY.ini`)
+or by editing `GEOMETRY.ini` by hand. The keys are documented in the `[Camera]`
+and `[System]` tables for reference.
+```
 
 #### Setting the resolution
 

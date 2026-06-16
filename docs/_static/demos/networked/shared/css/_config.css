@@ -5,6 +5,17 @@
    Usage: @import after _forms.css
    ========================================================================== */
 
+/* Library caption — display_name + notes + save date under a config selector */
+.config-library-caption {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    min-height: 1rem;
+}
+.config-library-caption:empty {
+    display: none;
+}
+
 /* -------------------------------------------------------------------------
    Config Badges
    ------------------------------------------------------------------------- */
@@ -230,6 +241,22 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
+}
+
+/* Inline context badge (e.g. "Detected: Pi 4" next to the high-res override). */
+.config-field .field-context-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    color: #1565c0;
+    background: #e3f2fd;
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+    margin-top: 0.25rem;
+    align-self: flex-start;
+}
+
+.config-field .field-context-badge:empty {
+    display: none;
 }
 
 /* -------------------------------------------------------------------------

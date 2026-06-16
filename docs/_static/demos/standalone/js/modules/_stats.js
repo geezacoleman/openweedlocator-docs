@@ -19,14 +19,34 @@ function updateSystemStats() {
     apiRequest('/api/system_stats')
         .then(r => r.json())
         .then(data => {
-            // Cache resolution for recording warning check
+            // Cache resolution + clamp state for recording warning check
             lastResWidth = data.resolution_width || 0;
             lastResHeight = data.resolution_height || 0;
+            lastRequestedResWidth = data.requested_resolution_width || data.resolution_width || 0;
+            lastRequestedResHeight = data.requested_resolution_height || data.resolution_height || 0;
+            lastResolutionClamped = !!data.resolution_clamped;
+            lastRpiVersion = data.rpi_version || 'unknown';
+            lastAllowHighResolution = !!data.allow_high_resolution;
+            if (typeof setHighResContextBadge === 'function') {
+                setHighResContextBadge(lastRpiVersion);
+            }
 
             // Gradient chips
             setText('cpuChipVal', `${data.cpu_percent}%`);
             setText('memChipVal', `${data.memory_percent}%`);
             setText('tempChipVal', `${data.cpu_temp}°C`);
+
+            // Active config chip (hidden until we know the name)
+            const cfgChip = document.getElementById('chipConfig');
+            if (cfgChip) {
+                const cfgName = (data.config_name || '').replace(/\.ini$/, '');
+                if (cfgName) {
+                    setText('configChipVal', cfgName);
+                    cfgChip.classList.remove('hidden');
+                } else {
+                    cfgChip.classList.add('hidden');
+                }
+            }
 
             // Power button reflects owl_running
             setPowerButtonState(!!data.owl_running);
@@ -90,6 +110,16 @@ function updateSystemStats() {
             if (statusDot && statusText) {
                 statusDot.classList.toggle('connected', !!data.owl_running);
                 statusText.textContent = data.owl_running ? 'Online' : 'Offline';
+            }
+
+            // Header cloud (Noktura) link status
+            renderCloudStatus(
+                document.getElementById('cloudStatusDot'),
+                document.getElementById('cloudStatusText'),
+                data
+            );
+            if (typeof updateCloudManageBlock === 'function') {
+                updateCloudManageBlock(data);
             }
 
             // Sync AI tab if function exists

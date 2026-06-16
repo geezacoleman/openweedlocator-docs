@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="shared/css/numpad.css" />
+    <link rel="stylesheet" href="shared/css/_geometry.css" />
     <script src="lib/leaflet/leaflet.js"></script>
     <script>window.OWL_DEMO = true;</script>
     <script src="mock_data.js"></script>
@@ -19,9 +20,16 @@
         <div class="logo-section">
             <h1>OWL Controller</h1>
         </div>
-        <div class="mqtt-status">
-            <span class="status-dot" id="mqtt-status-dot"></span>
-            <span id="mqtt-status-text">MQTT Connecting...</span>
+        <div class="header-status-group">
+            <div class="mqtt-status">
+                <span class="status-dot" id="mqtt-status-dot"></span>
+                <span id="mqtt-status-text">MQTT Connecting...</span>
+            </div>
+            <!-- Cloud (Noktura) link — fleet-level; always shown, neutral when off -->
+            <div class="cloud-status" id="cloud-status">
+                <span class="status-dot neutral" id="cloud-status-dot"></span>
+                <span id="cloud-status-text">Cloud: not linked</span>
+            </div>
         </div>
     </div>
 </header>
@@ -32,6 +40,7 @@
     <button class="view-tab" id="tab-gps" onclick="switchToGPSTab()">GPS</button>
     <button class="view-tab" id="tab-ai" onclick="switchToAITab()">AI</button>
     <button class="view-tab" id="tab-config" onclick="switchToConfigTab()">Config</button>
+    <button class="view-tab" id="tab-downloads" onclick="window.location.href='/downloads'">Downloads</button>
     <button class="view-tab" id="tab-agent" onclick="switchToAgentTab()">Agent</button>
 </div>
 
@@ -134,17 +143,17 @@
                         <button class="action-button btn-detection" id="main-detection-btn" onclick="toggleMainDetection()">
                             Start Detection
                         </button>
+                        <button class="action-button btn-recording" id="main-recording-btn" onclick="toggleMainRecording()">
+                            Start Recording
+                        </button>
                         <div class="hero-split-row">
-                            <button class="action-button btn-recording" id="main-recording-btn" onclick="toggleMainRecording()">
-                                Start Recording
-                            </button>
                             <button class="action-button btn-nozzles" id="main-nozzles-btn" onclick="toggleAllNozzles()">
                                 All Nozzles
                             </button>
+                            <button class="action-button btn-tracking" id="main-tracking-btn" onclick="toggleTracking()">
+                                Tracking
+                            </button>
                         </div>
-                        <button class="action-button btn-tracking" id="main-tracking-btn" onclick="toggleTracking()">
-                            Tracking
-                        </button>
                     </div>
                     <div class="mode-panel" id="track-stability-panel" style="display: none;">
                         <div class="mode-panel-title">Track stability</div>
@@ -336,6 +345,19 @@
     <!-- Config View -->
     <div id="view-config" class="view-panel" style="display:none;">
         <div class="config-tab-content">
+            <!-- Noktura cloud link (fleet-level) -->
+            <div class="cloud-manage-card" id="cloud-manage-block">
+                <div class="cloud-manage-head">
+                    <span class="status-dot neutral" id="cloud-manage-dot"></span>
+                    <h3>Noktura cloud</h3>
+                </div>
+                <p class="cloud-manage-status" id="cloud-manage-status">This controller is not linked to Noktura.</p>
+                <div class="cloud-manage-detail">
+                    <a class="cloud-manage-link hidden" id="cloud-manage-link" target="_blank" rel="noopener noreferrer"></a>
+                    <div class="cloud-manage-qr hidden" id="cloud-manage-qr"></div>
+                </div>
+            </div>
+
             <!-- Toolbar -->
             <div class="config-toolbar">
                 <div class="config-toolbar-group">
@@ -345,12 +367,19 @@
                         <option value="" disabled>No OWLs connected</option>
                     </select>
                     <button class="config-action-btn preview" id="config-preview-btn" onclick="toggleConfigPreview()">Preview</button>
+                    <button class="config-action-btn secondary" id="config-geometry-btn" onclick="toggleGeometryEditor()">Adjust geometry</button>
                 </div>
                 <div class="config-toolbar-spacer"></div>
                 <span class="config-badge" id="config-active-badge">--</span>
                 <div id="config-editor-unsaved" class="config-unsaved hidden">
                     <span>Unsaved changes</span>
                 </div>
+            </div>
+
+            <!-- Restart-required notice (resolution / relay_num can't apply live) -->
+            <div class="config-restart-notice hidden" id="config-restart-notice">
+                <span class="config-restart-text" id="config-restart-text">Some changes need a restart to take effect.</span>
+                <button class="config-action-btn restart" id="config-restart-btn">Restart OWLs</button>
             </div>
 
             <!-- Detection Mode (syncs with Dashboard mode buttons) -->
@@ -551,20 +580,59 @@
                 <!-- Preview column -->
                 <div class="config-preview-col">
                     <span class="config-preview-label" id="config-preview-label"></span>
-                    <img id="config-preview-img" class="config-preview-img" src="" alt="Live Preview" />
+                    <div class="config-preview-frame" id="config-preview-frame">
+                        <img id="config-preview-img" class="config-preview-img" src="" alt="Live Preview" />
+                    </div>
+                    <div class="geo-panel" id="config-geometry-panel"></div>
                 </div>
             </div>
 
             <!-- Action bar -->
             <div class="config-action-bar">
-                <button class="config-action-btn send" id="apply-all-btn">Apply to All</button>
-                <button class="config-action-btn save" id="save-all-btn">Save to All</button>
+                <button class="config-action-btn test" id="apply-all-btn">Test on OWLs</button>
+                <button class="config-action-btn save" id="save-all-btn">Save&hellip;</button>
                 <div class="config-action-bar-spacer"></div>
                 <select id="config-library-selector">
-                    <option value="">Presets...</option>
+                    <option value="">Library&hellip;</option>
                 </select>
-                <button class="config-action-btn secondary" id="load-preset-btn">Load Preset</button>
+                <button class="config-action-btn secondary" id="load-preset-btn">Load</button>
+                <button class="config-action-btn star" id="set-default-btn" title="Make this the config OWLs load on reboot">&#9733; Set default</button>
                 <button class="config-action-btn danger" id="delete-preset-btn">Delete</button>
+            </div>
+            <div class="config-library-caption" id="config-library-caption"></div>
+        </div>
+    </div>
+
+    <!-- Save configuration dialog -->
+    <div class="config-modal-overlay hidden" id="config-save-modal">
+        <div class="config-modal">
+            <h3>Save configuration</h3>
+            <div class="config-modal-form">
+                <div class="form-group" id="config-save-mode-group" style="display:none">
+                    <label class="radio-line"><input type="radio" name="config-save-mode" value="update" id="config-save-mode-update"> Update &ldquo;<span id="config-save-target"></span>&rdquo;</label>
+                    <label class="radio-line"><input type="radio" name="config-save-mode" value="new" id="config-save-mode-new" checked> Save as new</label>
+                </div>
+                <div class="form-group">
+                    <label for="config-save-name">Name this setup</label>
+                    <input type="text" class="form-input" id="config-save-name" data-numpad
+                           placeholder="e.g. High sensitivity - wheat" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="config-save-notes">Notes (optional)</label>
+                    <input type="text" class="form-input" id="config-save-notes" data-numpad
+                           placeholder="e.g. dewy mornings, low light" autocomplete="off">
+                </div>
+                <div class="checkbox-group">
+                    <label for="config-save-active">
+                        <input type="checkbox" id="config-save-active" checked>
+                        Make active on reboot
+                    </label>
+                </div>
+                <p class="config-modal-hint">Applies to all connected OWLs and saves a copy to the controller library. A date is added automatically so saves never overwrite each other.</p>
+            </div>
+            <div class="config-modal-actions">
+                <button class="config-action-btn secondary" id="config-save-cancel">Cancel</button>
+                <button class="config-action-btn save" id="config-save-confirm">Save</button>
             </div>
         </div>
     </div>
@@ -652,6 +720,50 @@
     </div>
 </div>
 
+<!-- Session Metadata Modal (opens when Start Recording is clicked) -->
+<!-- Landscape layout for kiosk: 2x2 grid of big inputs. Each input auto-opens -->
+<!-- the shared on-screen QWERTY keyboard (Numpad.init) via data-numpad. -->
+<div id="session-metadata-modal" class="modal session-metadata-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Session info</h3>
+            <button class="modal-close" onclick="closeSessionMetadataModal(false)">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p class="session-metadata-hint">Tap a field to open the on-screen keyboard.</p>
+            <div class="session-metadata-grid">
+                <div class="session-metadata-field">
+                    <label for="meta-field-name">Field name <span class="required-marker">*</span></label>
+                    <input type="text" id="meta-field-name" placeholder="e.g. North paddock"
+                           autocomplete="off" data-numpad="true" data-label="Field name">
+                </div>
+                <div class="session-metadata-field">
+                    <label for="meta-crop">Crop</label>
+                    <input type="text" id="meta-crop" placeholder="e.g. Wheat, Canola"
+                           autocomplete="off" data-numpad="true" data-label="Crop">
+                </div>
+                <div class="session-metadata-field">
+                    <label for="meta-weather">Weather</label>
+                    <input type="text" id="meta-weather" placeholder="e.g. Sunny, 22C"
+                           autocomplete="off" data-numpad="true" data-label="Weather">
+                </div>
+                <div class="session-metadata-field">
+                    <label for="meta-vehicle">Vehicle</label>
+                    <input type="text" id="meta-vehicle" placeholder="e.g. John Deere 6120M"
+                           autocomplete="off" data-numpad="true" data-label="Vehicle">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer session-metadata-footer">
+            <button class="session-metadata-btn session-metadata-btn--cancel"
+                    onclick="closeSessionMetadataModal(false)">Skip</button>
+            <button class="session-metadata-btn session-metadata-btn--save"
+                    id="session-metadata-save-btn"
+                    onclick="closeSessionMetadataModal(true)" disabled>Save &amp; Start</button>
+        </div>
+    </div>
+</div>
+
 <!-- Frame Viewer Modal (grab frame for inspection) -->
 <div id="frame-viewer-modal" class="frame-viewer-modal" style="display:none">
     <div class="frame-viewer-header">
@@ -666,13 +778,16 @@
 <!-- Toast Notification -->
 <div id="toast" class="toast"></div>
 <!-- Shared JS utilities -->
+<script src="shared/js/vendor/qrcode.js"></script>
 <script src="shared/js/hardware.js"></script>
 <script src="shared/js/api.js"></script>
 <script src="shared/js/utils.js"></script>
 <script src="shared/js/toast.js"></script>
 <script src="shared/js/config.js"></script>
 <script src="shared/js/numpad.js"></script>
+<script src="shared/js/geometry_editor.js"></script>
 <script src="shared/js/resolution_warning.js"></script>
+<script src="shared/js/high_res_warning.js"></script>
 
 <!-- App-specific JS modules -->
 <script src="js/modules/_core.js"></script>

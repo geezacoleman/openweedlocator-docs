@@ -46,6 +46,7 @@
             model_name: null, model_available: false,
             tracking_enabled: false, nozzles_all: false,
             ip: '192.168.1.11',
+            config_name: 'high-sensitivity-wheat_20260616_120000.ini',
         },
         {
             device_id: 'owl-2', connected: true, status: 'online',
@@ -58,6 +59,7 @@
             model_name: null, model_available: false,
             tracking_enabled: false, nozzles_all: false,
             ip: '192.168.1.12',
+            config_name: 'high-sensitivity-wheat_20260616_120000.ini',
         },
         {
             device_id: 'owl-3', connected: true, status: 'online',
@@ -70,7 +72,45 @@
             model_name: null, model_available: false,
             tracking_enabled: false, nozzles_all: false,
             ip: '192.168.1.13',
+            config_name: 'midday-dry_20260615_143000.ini',
         },
+    ];
+
+    // A representative device config (returned by /api/config and
+    // /api/config/<id>). Crop edges are deliberately asymmetric and the
+    // actuation band is a subset so the geometry editor opens with something
+    // visible to drag.
+    const CONFIG = {
+        System: {
+            algorithm: 'exhsv', relay_num: '4',
+            actuation_duration: '0.15', delay: '0',
+            actuation_top: '0.35', actuation_bottom: '1.0',
+        },
+        Camera: {
+            resolution_width: '1280', resolution_height: '960',
+            crop_left: '0.06', crop_right: '0.04', crop_top: '0.03', crop_bottom: '0.14',
+        },
+        GreenOnBrown: {
+            exg_min: '25', exg_max: '200', hue_min: '39', hue_max: '83',
+            saturation_min: '50', saturation_max: '220',
+            brightness_min: '60', brightness_max: '190', min_detection_area: '10',
+        },
+        GreenOnGreen: { confidence: '0.5', crop_buffer_px: '20' },
+    };
+
+    // Saved config library (shown by name + notes + date; powers the Update
+    // vs Save-as-new option and the notes caption).
+    const CONFIGS = [
+        { name: 'GENERAL_CONFIG.ini', path: 'config/GENERAL_CONFIG.ini', is_default: true,
+          display_name: '', notes: '', created: '' },
+        { name: 'high-sensitivity-wheat_20260616_120000.ini',
+          path: 'config/high-sensitivity-wheat_20260616_120000.ini', is_default: false,
+          display_name: 'High sensitivity – wheat', notes: 'Dewy mornings, low light',
+          created: '2026-06-16T08:12:00' },
+        { name: 'midday-dry_20260615_143000.ini',
+          path: 'config/midday-dry_20260615_143000.ini', is_default: false,
+          display_name: 'Midday dry', notes: 'Bright sun, dusty headlands',
+          created: '2026-06-15T14:30:00' },
     ];
 
     // Live GPS state — mutated by the runtime.
@@ -110,6 +150,6 @@
     };
 
     window.OWL_DEMO_STATE = {
-        TRACK, OWLS, GPS, ACTUATION, GREENONBROWN_DEFAULTS,
+        TRACK, OWLS, GPS, ACTUATION, GREENONBROWN_DEFAULTS, CONFIG, CONFIGS,
     };
 })();

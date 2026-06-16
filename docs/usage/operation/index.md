@@ -99,6 +99,22 @@ Key parameters affecting field operation:
 
 See [Configuration Guide](../../software/configuration/index.md) for full parameter reference.
 
+## Adjusting the crop and actuation band
+
+OWL only acts on a rectangle of the camera frame, and only fires a relay when a weed reaches a defined band within that rectangle:
+
+- **Crop** trims each edge independently (`crop_left`, `crop_right`, `crop_top`, `crop_bottom`, as fractions 0.0-0.49). Use it to exclude a boom, wheel track, or shaded edge. Relay lanes are spread across the remaining width and recenter automatically when you change the crop.
+- **Actuation band** (`actuation_top`, `actuation_bottom`, as fractions of the cropped height) is where a weed must be for its relay to fire. Defaults to the whole frame. Raise the top to ignore weeds too far ahead; lower the bottom to ignore weeds too close (where the solenoid can't react in time).
+
+You can set these two ways:
+
+1. **Visually** — on a [standalone](../../controllers/wireless/standalone.md#tuning-detection-and-geometry) or [networked](../../controllers/wireless/networked.md#visual-geometry-editor) controller, click **Adjust geometry** and drag the crop edges and band handles on the live feed.
+2. **By hand** — edit the keys directly in the config file (works without any controller). See the [Configuration Guide](../../software/configuration/index.md).
+
+```{note}
+`actuation_top`/`actuation_bottom` replace the older single `actuation_zone` percentage. Old configs still work: if the band keys are absent, OWL derives them from `actuation_zone` so behaviour is unchanged.
+```
+
 ---
 
 ## Next Steps

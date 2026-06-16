@@ -99,6 +99,22 @@
             },
             model_available: false,
             algorithm_error: null,
+            config_name: S.OWLS[0].config_name || '',
+        };
+    }
+
+    function configPayload() {
+        // Shared by /api/config (standalone) and /api/config/<id> (networked) —
+        // a realistic config so the editor, library selector and geometry editor
+        // all have something to render.
+        return {
+            success: true,
+            config: S.CONFIG,
+            config_name: S.CONFIGS[1].name,
+            active_config: 'config/' + S.CONFIGS[1].name,
+            is_default: false,
+            available_configs: S.CONFIGS,
+            default_config: 'config/GENERAL_CONFIG.ini',
         };
     }
 
@@ -150,11 +166,17 @@
         '/api/actuation/config':        { POST: ok },
         '/api/greenonbrown/defaults':   { GET: () => S.GREENONBROWN_DEFAULTS },
         '/api/command':                 { POST: ok },
-        '/api/config':                  { GET: () => ({}), POST: ok },
+        '/api/config':                  { GET: configPayload, POST: ok },
+        '/api/config/list':             { GET: () => ok({ configs: S.CONFIGS,
+                                            active_config: 'config/' + S.CONFIGS[1].name,
+                                            default_config: 'config/GENERAL_CONFIG.ini' }) },
+        '/api/config/library':          { GET: () => ok({ configs: S.CONFIGS }) },
         '/api/config/param':            { POST: ok, GET: () => ({}) },
         '/api/config/section':          { POST: ok },
         '/api/config/reset-default':    { POST: ok },
         '/api/config/set-active':       { POST: ok },
+        '/api/geometry':                { POST: ok },
+        '/api/preview-mode':            { POST: ok },
         '/api/widgets':                 { GET: () => ({ widgets: [] }) },
         '/api/system/shutdown':         { POST: ok },
         '/api/system/reboot':           { POST: ok },
@@ -210,10 +232,20 @@
     const PATTERNS = [
         // /api/owl/<id>/restart
         { re: /^\/api\/owl\/[^/]+\/restart$/, handle: () => json(ok()) },
+        // /api/config/<id>  (networked: load device config / seed geometry editor)
+        { re: /^\/api\/config\/[^/]+$/, handle: (raw, init) => {
+            const method = ((init && init.method) || 'GET').toUpperCase();
+            return json(method === 'GET' ? configPayload() : ok());
+        }},
+        // /api/geometry/<id> and /api/preview-mode/<id>  (networked, incl. 'all')
+        { re: /^\/api\/geometry\/[^/]+$/, handle: () => json(ok()) },
+        { re: /^\/api\/preview-mode\/[^/]+$/, handle: () => json(ok()) },
         // /api/snapshot/<id>  — return the placeholder image as a binary blob
         { re: /^\/api\/snapshot\/[^/]+$/, handle: () => {
             return fetch('./assets/video-placeholder.jpg');
         }},
+        // /api/video_feed[/<id>]  — never reached via <img>, but guard fetch() too
+        { re: /^\/api\/video_feed(\/[^/]+)?$/, handle: () => fetch(MEDIA_SRC) },
         // /api/gps/tracks/<filename>  — return empty geojson
         { re: /^\/api\/gps\/tracks\/[^/]+$/, handle: () => json({
             type: 'FeatureCollection', features: [],
@@ -265,12 +297,32 @@
         return json(ok({ message: 'demo' }));
     };
 
-    // Replace video-feed / preview imgs as soon as the DOM is ready
+    // Mock camera frame used for every live-feed <img> so the video tab, config
+    // preview and geometry editor all have a field to work on. The UI sets these
+    // imgs to /api/video_feed/<id> or /video_feed (which 404 in the static demo),
+    // so we force the mock frame on load AND whenever the src changes.
+    const MEDIA_SRC = './assets/mock-field.svg';
+    const MEDIA_IDS = ['video-feed-img', 'config-preview-img', 'stream-img', 'frame-viewer-img'];
+
+    function forceMockFrame(el) {
+        if (!el) return;
+        const src = el.getAttribute('src') || '';
+        if (src === MEDIA_SRC) return;   // already the mock — avoid a mutation loop
+        if (src === '' || src.indexOf('/api/') !== -1 || src.indexOf('/video_feed') !== -1
+            || src.indexOf('video-placeholder') !== -1) {
+            el.setAttribute('src', MEDIA_SRC);
+        }
+    }
+
     function swapMediaPlaceholders() {
-        const ids = ['video-feed-img', 'config-preview-img', 'frame-viewer-img'];
-        ids.forEach(id => {
+        MEDIA_IDS.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.src = './assets/video-placeholder.jpg';
+            forceMockFrame(el);
+            if (el && !el._owlObserved) {
+                el._owlObserved = true;
+                new MutationObserver(() => forceMockFrame(el))
+                    .observe(el, { attributes: true, attributeFilter: ['src'] });
+            }
         });
     }
     if (document.readyState === 'loading') {

@@ -4,6 +4,8 @@ This guide walks you through connecting multiple OWL units to a shared WiFi netw
 
 ## Example networked controller interface
 
+This is a live, fully interactive mock of the dashboard running on sample data — click around, switch tabs, drag the sliders. On the **CONFIG** tab try **Test on OWLs** and **Save…**, and open **Adjust geometry** to drag the crop edges and actuation band over the (mock) camera feed.
+
 ```{raw} html
 <div class="owl-demo-shell owl-demo-tablet">
   <iframe src="../../_static/demos/networked/index.html"
@@ -759,6 +761,38 @@ To watch all messages from all OWLs:
 
 ```bash
 mosquitto_sub -h 192.168.1.2 -t "owl/#" -v
+```
+
+### Tuning detection (Config tab)
+
+The **Config** tab tunes detection across all connected OWLs from the cab. The model is: **make a change, see it take effect, then Save it under a name you choose.**
+
+- **Sliders apply live.** Dragging a threshold slider (ExG, hue, saturation, brightness, etc.) pushes the change to every connected OWL immediately — watch the live preview update as you drag. Nothing is saved yet.
+- **Test on OWLs** pushes any changes made in *Advanced Settings* (the full INI editor) to all OWLs live, without saving.
+- **Save…** opens a dialog where you give the setup a **name** and optional **notes**, and tick **Make active on reboot**. The config is stored in the controller library and on each OWL's disk. A date is appended automatically so saves never overwrite each other. If a saved config is currently selected, the dialog also offers **Update "&lt;name&gt;"** to overwrite it in place instead of creating a new file.
+- **Library + ★ Set default.** The library dropdown lists saved configs by name and date; selecting one shows its notes and save date beneath. **Load** applies one live; **★ Set default** makes the selected config the one OWLs load on reboot. The active config is shown in the toolbar as `★ On reboot: <name>` and on each OWL card as `Running: <name>` — no need to touch `active_config.txt`.
+
+```{admonition} Mount geometry is separate
+:class: note
+Detection configs do **not** include the crop or actuation band — that is per-unit
+mount geometry kept in each OWL's `GEOMETRY.ini`. Loading or saving a detection
+config never changes a unit's geometry. Use **Adjust geometry** (below) to change it.
+```
+- **Restart notice.** A few settings (camera `resolution`, `relay_num`) can't change live. If you edit one, a notice appears with a **Restart OWLs** button.
+
+#### Visual geometry editor
+
+Click **Adjust geometry** on the Config tab to drag the crop and actuation band directly on the live feed. The editor automatically switches that OWL's preview to the **full uncropped frame** while open (and back to the normal cropped view when you close), so the overlay always lines up — you don't need to touch detection.
+
+- Drag the four **edge handles** to crop independently from the left, right, top and bottom — useful to exclude a boom, wheel track, or shaded edge. The **relay lane lines** redraw as you drag so you can see them recenter across the cropped width.
+- Drag the two **band handles** to set the **actuation band** — a weed fires its relay only while its centre is inside the band. Raise the top to ignore weeds too far ahead; lower the bottom to ignore weeds too close.
+- Use the **± nudge buttons** for fine adjustment in a bumpy cab.
+- **Done** saves the geometry to that OWL's `GEOMETRY.ini` (it persists across reboots). **Cancel** reverts to how it was when you opened the editor. Tick **Apply to all OWLs** before Done to write the same geometry to every connected unit (handy for an identically-mounted boom).
+
+These same values can be set by hand in `GEOMETRY.ini` (`crop_left/right/top/bottom`, `actuation_top/bottom`) — see [Configuration](../../software/configuration/index.md) — so OWLs running without a controller get the feature too.
+
+```{note}
+The normal live feed always shows the **cropped** frame (what the detector sees), with detection on or off. Only the geometry editor temporarily shows the full frame.
 ```
 
 ### Configuration files

@@ -10,6 +10,8 @@ Complete the [Two-Step Install](../../software/two-step-install.md) first, then 
 
 ## Example standalone controller interface
 
+This is a live, fully interactive mock running on sample data. Open the **Video Feed** and click **Adjust geometry** to drag the crop edges and actuation band over the (mock) camera feed, or use the **Config** tab to try **Save As…** with a name and notes.
+
 ```{raw} html
 <div class="owl-demo-shell owl-demo-phone">
   <iframe src="../../_static/demos/standalone/index.html"
@@ -248,6 +250,18 @@ If you have a wired controller connected, a GPS status LED on the controller box
 | Regular flashing | Acquiring — waiting for signal |
 | Double flash, pause | Error or stale — phone disconnected or no signal |
 | Off | GPS not active |
+
+### Tuning detection and geometry
+
+The **Config** tab edits the full configuration. When you change values and press **Save As…**, a dialog asks for a **name** and optional **notes**, and whether to **Make active on reboot** — saved configs are listed by name (with notes and date shown beneath the selector). If the active config is a custom one, the dialog also offers **Update "&lt;name&gt;"** to overwrite it in place rather than make a new file. The config selector switches the active boot config, a `Config` chip on the dashboard shows what's running, and a warning appears if a change (e.g. camera resolution) needs a restart.
+
+To set the crop and actuation band visually, open the **Video Feed** and click **Adjust geometry**. The editor switches the preview to the full uncropped frame while open (and back afterwards), so the overlay lines up without touching detection:
+
+- Drag the four **edge handles** to crop independently from each side (exclude a boom, wheel track, or shaded edge). Relay **lane lines** redraw live and recenter across the cropped width.
+- Drag the two **band handles** to set the **actuation band** — a weed fires only while its centre is inside it. Raise the top to ignore weeds too far ahead; lower the bottom to ignore weeds too close.
+- Use the **± nudge buttons** for fine adjustment. **Done** saves the geometry to `GEOMETRY.ini`; **Cancel** reverts to how it was when you opened the editor.
+
+Geometry lives in its own `GEOMETRY.ini` (separate from named detection configs) and maps to the `crop_left/right/top/bottom` and `actuation_top/bottom` keys, which can also be set by hand — see [Configuration](../../software/configuration/index.md).
 
 ## Downloading recorded images
 
