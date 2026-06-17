@@ -791,6 +791,12 @@ Click **Adjust geometry** on the Config tab to drag the crop and actuation band 
 
 These same values can be set by hand in `GEOMETRY.ini` (`crop_left/right/top/bottom`, `actuation_top/bottom`) — see [Configuration](../../software/configuration/index.md) — so OWLs running without a controller get the feature too.
 
+#### Two feeds side by side + zoom
+
+With more than one OWL you can tune two at once. Use the **1 feed / 2 feeds** toggle, and pick which OWL shows in each slot. Both feeds show their own crop/band handles and are dragged independently — **each feed pushes to its own OWL**. Tap a feed to make it **active** (highlighted); the shared controls panel then acts on that one. **Apply to all OWLs** still copies the active feed's geometry to every unit.
+
+Each feed has its own **zoom**: the `[−] / [+]` buttons (or scroll wheel / pinch) magnify the feed *and* its overlay together so you can place edges precisely on small weeds or rows; drag the feed to pan when zoomed in. Zoom is purely a closer look — the crop fractions don't change.
+
 ```{note}
 The normal live feed always shows the **cropped** frame (what the detector sees), with detection on or off. Only the geometry editor temporarily shows the full frame.
 ```

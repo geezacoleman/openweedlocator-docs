@@ -302,7 +302,8 @@
     // imgs to /api/video_feed/<id> or /video_feed (which 404 in the static demo),
     // so we force the mock frame on load AND whenever the src changes.
     const MEDIA_SRC = './assets/mock-field.svg';
-    const MEDIA_IDS = ['video-feed-img', 'config-preview-img', 'stream-img', 'frame-viewer-img'];
+    const MEDIA_IDS = ['video-feed-img', 'config-preview-img', 'stream-img', 'frame-viewer-img',
+                       'geo-img-0', 'geo-img-1'];
 
     function forceMockFrame(el) {
         if (!el) return;
