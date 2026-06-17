@@ -177,6 +177,11 @@
         '/api/config/set-active':       { POST: ok },
         '/api/geometry':                { POST: ok },
         '/api/preview-mode':            { POST: ok },
+
+        // --- Downloads page (separate /downloads page in the demo) ---
+        '/api/downloads/files':         { GET: () => ok({ files: [] }) },
+        '/api/downloads/request':       { POST: ok },
+        '/api/downloads/delete-remote': { POST: ok },
         '/api/widgets':                 { GET: () => ({ widgets: [] }) },
         '/api/system/shutdown':         { POST: ok },
         '/api/system/reboot':           { POST: ok },
@@ -246,6 +251,10 @@
         }},
         // /api/video_feed[/<id>]  — never reached via <img>, but guard fetch() too
         { re: /^\/api\/video_feed(\/[^/]+)?$/, handle: () => fetch(MEDIA_SRC) },
+        // Downloads page data
+        { re: /^\/api\/downloads\/sessions\/[^/]+$/, handle: () => json(ok({ sessions: [] })) },
+        { re: /^\/api\/downloads\/status\/[^/]+$/, handle: () => json(ok({ status: 'idle', progress: 0, files: [] })) },
+        { re: /^\/api\/downloads\/file\/[^/]+$/, handle: () => json(ok()) },
         // /api/gps/tracks/<filename>  — return empty geojson
         { re: /^\/api\/gps\/tracks\/[^/]+$/, handle: () => json({
             type: 'FeatureCollection', features: [],
@@ -338,6 +347,22 @@
 
     // No-op helpers some modules expect on the window
     window.sendMQTTCommand = window.sendMQTTCommand || function () {};
+
+    // Suppress navigation to app-origin /api/ links (e.g. file-download anchors)
+    // — they'd 404 in the static demo. fetch()-based calls are already mocked.
+    document.addEventListener('click', function (e) {
+        var a = e.target && e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var href = a.getAttribute('href') || '';
+        if (href.indexOf('/api/') === 0) {
+            e.preventDefault();
+            if (!window._owlDemoMissing) window._owlDemoMissing = new Set();
+            if (!window._owlDemoMissing.has(href)) {
+                window._owlDemoMissing.add(href);
+                console.info('[demo] suppressed download link (no backend):', href);
+            }
+        }
+    }, true);
 
     // Stub navigator.geolocation so the standalone's GPS toggle never
     // triggers the browser permission prompt. Replays the same breadcrumb

@@ -53,13 +53,18 @@ CSS_SHARED_IMPORT_RE = re.compile(r"(@import\s+['\"])\.\./\.\./\.\./shared/")
 
 
 def rewrite_index_html(html: str) -> str:
-    """Convert Flask/Jinja asset refs to plain relative paths.
+    """Convert Flask/Jinja asset refs + cross-page nav to plain relative paths.
 
     - {{ url_for('static', filename='X') }}  ->  X
     - "/shared/...                           ->  "shared/...
+    - window.location.href='/downloads'      ->  '...downloads.html'  (separate page)
+    - href="/"  (Back to Dashboard)          ->  href="index.html"
     """
     html = URL_FOR_RE.sub(lambda m: m.group(1), html)
     html = SHARED_PATH_RE.sub(r'\1shared/', html)
+    html = html.replace("window.location.href='/downloads'", "window.location.href='downloads.html'")
+    html = html.replace("window.location.href='/models'", "window.location.href='models.html'")
+    html = html.replace('href="/"', 'href="index.html"')
     return html
 
 
@@ -136,13 +141,17 @@ def build_one(variant: str, controller_dir: Path) -> None:
             copy_tree(src, shared_dst / sub)
             print(f"  + shared/{sub}/")
 
-    # Main template -> index.html (with rewrites and injections)
-    tpl = controller_dir / 'templates' / 'index.html'
-    html = tpl.read_text(encoding='utf-8')
-    html = rewrite_index_html(html)
-    html = inject_demo_scaffolding(html)
-    (dest / 'index.html').write_text(html, encoding='utf-8')
-    print(f"  + index.html  (rewritten from controller/{variant}/templates/index.html)")
+    # Templates -> static pages (with rewrites and injections). downloads.html
+    # is a separate page reached from the Downloads nav button.
+    for page in ('index.html', 'downloads.html'):
+        tpl = controller_dir / 'templates' / page
+        if not tpl.is_file():
+            continue
+        html = tpl.read_text(encoding='utf-8')
+        html = rewrite_index_html(html)
+        html = inject_demo_scaffolding(html)
+        (dest / page).write_text(html, encoding='utf-8')
+        print(f"  + {page}  (rewritten from controller/{variant}/templates/{page})")
 
 
 def copy_shared_demo_assets() -> None:
