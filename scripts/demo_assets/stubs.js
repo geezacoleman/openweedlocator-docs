@@ -302,16 +302,20 @@
     // imgs to /api/video_feed/<id> or /video_feed (which 404 in the static demo),
     // so we force the mock frame on load AND whenever the src changes.
     const MEDIA_SRC = './assets/mock-field.svg';
+    const MEDIA_SRC_2 = './assets/mock-field-2.svg';   // second OWL looks different
     const MEDIA_IDS = ['video-feed-img', 'config-preview-img', 'stream-img', 'frame-viewer-img',
                        'geo-img-0', 'geo-img-1'];
 
+    function mediaSrcFor(id) { return id === 'geo-img-1' ? MEDIA_SRC_2 : MEDIA_SRC; }
+
     function forceMockFrame(el) {
         if (!el) return;
+        const want = mediaSrcFor(el.id);
         const src = el.getAttribute('src') || '';
-        if (src === MEDIA_SRC) return;   // already the mock — avoid a mutation loop
+        if (src === want) return;        // already the mock — avoid a mutation loop
         if (src === '' || src.indexOf('/api/') !== -1 || src.indexOf('/video_feed') !== -1
             || src.indexOf('video-placeholder') !== -1) {
-            el.setAttribute('src', MEDIA_SRC);
+            el.setAttribute('src', want);
         }
     }
 
