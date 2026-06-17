@@ -36,15 +36,17 @@ function updateSystemStats() {
             setText('memChipVal', `${data.memory_percent}%`);
             setText('tempChipVal', `${data.cpu_temp}°C`);
 
-            // Active config chip (hidden until we know the name)
-            const cfgChip = document.getElementById('chipConfig');
-            if (cfgChip) {
-                const cfgName = (data.config_name || '').replace(/\.ini$/, '');
+            // Active config indicator (subtle line below the feed). Trim the
+            // .ini and the _YYYYMMDD_HHMMSS timestamp to a readable name.
+            const cfgLine = document.getElementById('activeConfigLine');
+            if (cfgLine) {
+                let cfgName = (data.config_name || '').replace(/\.ini$/, '');
+                cfgName = cfgName.replace(/_\d{8}_\d{6}$/, '').replace(/[-_]+/g, ' ').trim();
                 if (cfgName) {
-                    setText('configChipVal', cfgName);
-                    cfgChip.classList.remove('hidden');
+                    setText('activeConfigName', cfgName);
+                    cfgLine.classList.remove('hidden');
                 } else {
-                    cfgChip.classList.add('hidden');
+                    cfgLine.classList.add('hidden');
                 }
             }
 
