@@ -141,7 +141,7 @@ saturation_min = 50
 saturation_max = 220
 brightness_min = 60
 brightness_max = 190
-min_detection_area = 10
+min_detection_area_percent = 0.0075
 invert_hue = False
 
 [DataCollection]
@@ -176,7 +176,7 @@ saturation_min = 52
 saturation_max = 218
 brightness_min = 62
 brightness_max = 188
-min_detection_area = 20
+min_detection_area_percent = 0.015
 
 [Sensitivity_Medium]
 exg_min = 25
@@ -187,7 +187,7 @@ saturation_min = 50
 saturation_max = 220
 brightness_min = 60
 brightness_max = 190
-min_detection_area = 10
+min_detection_area_percent = 0.0075
 
 [Sensitivity_High]
 exg_min = 22
@@ -198,7 +198,7 @@ saturation_min = 40
 saturation_max = 225
 brightness_min = 50
 brightness_max = 200
-min_detection_area = 5
+min_detection_area_percent = 0.004
 ```
 
 ## Complete CONTROLLER.ini Reference
@@ -356,8 +356,11 @@ The Pi 5 is not affected by the clamp.
 | `saturation_max` | `220` | Maximum saturation threshold (0-255). |
 | `brightness_min` | `60` | Minimum brightness threshold (0-255). |
 | `brightness_max` | `190` | Maximum brightness threshold (0-255). |
-| `min_detection_area` | `10` | Minimum pixel area for a valid detection. Increase to ignore small noise. |
+| `min_detection_area_percent` | `0.0075` | Minimum weed size as a percentage of the detection frame area (0.0005-5). Increase to ignore small noise. Resolution-independent. |
 | `invert_hue` | `False` | When True, detects colours outside the hue range instead of inside. Useful for detecting non-green targets. |
+
+!!! note "Legacy `min_detection_area`"
+    Older configs used `min_detection_area` (contour area in pixels). It is still accepted: OWL converts it to `min_detection_area_percent` at startup and removes the px key the next time the config is saved. New configs should use the percent key only.
 
 ### DataCollection
 
@@ -426,7 +429,7 @@ The networked controller supports four GPS input modes, selected via the `source
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `source` | `none` | GPS data source. One of: `none` (disabled), `serial` (USB/UART device on this Pi), `tcp` (NMEA pushed over TCP, e.g. from a Teltonika router), or `gpsd` (read from the local `gpsd` daemon on `localhost:2947`). |
-| `port` | `/dev/ttyACM0` | Serial device path (used when `source = serial`, also passed to `gpsd` as its `DEVICES` hint). Ublox USB dongles enumerate as `/dev/ttyACM0`; CP2102/CH340 adapters as `/dev/ttyUSB0`; Pi primary UART is `/dev/ttyAMA0` (or `/dev/serial0` on Bookworm). To find yours: `ls /dev/ttyACM* /dev/ttyUSB*` after plugging in the GPS. |
+| `port` | `/dev/ttyACM0` | Serial device path (used when `source = serial`, also passed to `gpsd` as its `DEVICES` hint). Ublox USB dongles enumerate as `/dev/ttyACM0`; CP2102/CH340 adapters as `/dev/ttyUSB0`; Pi primary UART is `/dev/ttyAMA0` (or `/dev/serial0` on Raspberry Pi OS). To find yours: `ls /dev/ttyACM* /dev/ttyUSB*` after plugging in the GPS. |
 | `baudrate` | `9600` | Serial link speed (used when `source = serial`). Ublox factory default is 9600; Sixfab GNSS HAT and some marine modules use 115200. Wrong baud = silent failure (garbled unicode in the log). |
 | `enable` | `False` | **DEPRECATED.** Kept as a back-compat alias: if `source = none` and `enable = True`, the controller behaves as if `source = tcp`. New configs should set `source` directly. |
 | `nmea_port` | `8500` | TCP port the controller listens on when `source = tcp`. Configure your router to forward NMEA to `<controller-ip>:<nmea_port>`. Port 8500 is pre-opened in the UFW firewall rules. |

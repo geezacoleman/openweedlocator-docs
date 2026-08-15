@@ -13,9 +13,9 @@
   { "wait": 500 },
 
   { "out": "[INFO] Updating and upgrading the system...", "class": "info" },
-  { "out": "Hit:1 http://deb.debian.org/debian bookworm InRelease", "class": "muted", "speed": 1 },
-  { "out": "Hit:2 http://deb.debian.org/debian-security bookworm-security InRelease", "class": "muted", "speed": 1 },
-  { "out": "Hit:3 http://archive.raspberrypi.com/debian bookworm InRelease", "class": "muted", "speed": 1 },
+  { "out": "Hit:1 http://deb.debian.org/debian trixie InRelease", "class": "muted", "speed": 1 },
+  { "out": "Hit:2 http://deb.debian.org/debian-security trixie-security InRelease", "class": "muted", "speed": 1 },
+  { "out": "Hit:3 http://archive.raspberrypi.com/debian trixie InRelease", "class": "muted", "speed": 1 },
   { "out": "Reading package lists... Done", "class": "muted", "speed": 1 },
   { "out": "Building dependency tree... Done", "class": "muted", "speed": 1 },
   { "out": "Calculating upgrade... Done", "class": "muted", "speed": 1 },

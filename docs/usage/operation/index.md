@@ -94,7 +94,7 @@ Key parameters affecting field operation:
 |-----------|---------|-------------|
 | `actuation_duration` | 0.15s | How long relay stays activated |
 | `delay` | 0 | Delay between detection and actuation |
-| `min_detection_area` | 10 | Minimum pixel area for valid detection |
+| `min_detection_area_percent` | 0.0075 | Minimum weed size as % of the detection frame (legacy `min_detection_area` px values are converted automatically) |
 | `relay_num` | 4 | Number of relay channels |
 
 See [Configuration Guide](../../software/configuration/index.md) for full parameter reference.

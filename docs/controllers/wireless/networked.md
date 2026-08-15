@@ -235,18 +235,37 @@ Enable kiosk mode on boot? (y/n, default: y): y
 **Kiosk mode** means the dashboard opens automatically in full-screen when the Pi boots — you won't see a normal desktop. This is ideal for a touchscreen in the cab. Enter **n** if you want a normal desktop environment.
 ```
 
-If you enable kiosk mode, the script will ask you to choose a screen resolution:
+If you enable kiosk mode, the script will ask which display you're using:
 
 ```{code-block} text
-:caption: Screen resolution selection (kiosk mode only)
+:caption: Display selection (kiosk mode only)
 
-[INFO] Select display resolution (for kiosk/touchscreen):
-  1) 1280x800  (EDATEC HMI3010 default)
-  2) 1024x600  (7" alternative)
-  3) 1920x1080 (Full HD)
-  4) Custom
+[INFO] Select your display:
+  1) EDATEC HMI3010 10.1"         (1280x800, landscape — OWL default)
+  2) Raspberry Pi Touch Display 2  (720x1280 panel — rotates to 1280x720 landscape)
+  3) Generic HDMI / other          (pick a resolution)
 
-Select resolution (1-4, default 1): 1
+Select display (1-3, default 1): 2
+```
+
+**Raspberry Pi Touch Display 2.** This panel is 720x1280 (portrait) in hardware, so to run the dashboard in landscape it has to be rotated. If you pick it, the script asks for an orientation:
+
+```{code-block} text
+:caption: Orientation (Touch Display 2 only)
+
+[INFO] Select display orientation (landscape strongly recommended):
+  1) Landscape             (recommended)
+  2) Landscape (inverted)  (use if it comes up upside down)
+  3) Portrait              (native, tall)
+  4) Portrait (inverted)
+
+Select orientation (1-4, default 1): 1
+```
+
+```{important}
+**Always choose Landscape** for the Touch Display 2. The dashboard is laid out for landscape (1280x720 or wider) and portrait cuts off panels.
+
+Rotating this panel on Raspberry Pi OS is fiddly — **Bookworm and Trixie both use the labwc/Wayland compositor**, and the `config.txt` panel rotation only turns the *boot logo*: the desktop ignores it, so the kiosk stays portrait. The script handles it correctly for you by rotating the desktop with `wlr-randr --transform` from the labwc autostart, and — because wlroots on the Pi does not move the touch digitizer with the display — realigning touch with a libinput calibration matrix in a udev rule (`/etc/udev/rules.d/99-owl-touch-rotate.rules`). It also clears any rotation you saved earlier in the desktop **Screen Configuration** tool (a kanshi transform), which otherwise re-applies on login and rotates the picture without the touch — the "landscape screen but the touch is sideways" fault. Everything takes effect after the reboot at the end of setup. If it comes up upside down, re-run setup and pick the *inverted* landscape option.
 ```
 
 The script will also ask about GPS. The controller supports four GPS sources — pick whichever matches your hardware. A valid fix enables speed-adaptive spray timing, breadcrumb track recording, and the live map on the GPS tab:
@@ -290,7 +309,7 @@ Static IP: 192.168.1.2
 Gateway: 192.168.1.1
 Hostname: owl-controller
 Kiosk Mode: y
-Screen Resolution: 1280x800
+Display: rpi_touch2 (1280x720, landscape)
 GPS: USB serial (/dev/ttyACM0 @ 9600, boom 12.0m)
 
 Access Information:

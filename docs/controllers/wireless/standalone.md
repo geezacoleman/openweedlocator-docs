@@ -169,10 +169,27 @@ The network MQTT test (`10.42.0.1`) may show a warning during setup — this is 
 
 </details>
 
+In standalone mode the script then asks whether to arm phone-app first-boot
+setup. Answer `n` for a unit you are configuring yourself; answer `y` only
+when preparing a unit to ship to an end user (it resets the hotspot password
+to the setup default and the phone app takes over on their first boot):
+
+```text
+Arm phone-app first-boot setup (for shipping to an end user)? (y/n): n
+```
+
 When prompted, reboot the OWL:
 
 ```text
 Reboot now? (y/n): y
+```
+
+```{note}
+Factory provisioning: `bash owl_setup.sh --ship` runs the whole install
+non-interactively (standalone mode, hotspot `OWL-XXXX` derived from the Pi
+serial, first-boot armed). `setup.sh` also accepts flags for scripted
+installs: `--mode standalone --owl-id N --ssid SSID --password PSK
+[--arm-firstboot] [--yes]`.
 ```
 
 ```{tip}
