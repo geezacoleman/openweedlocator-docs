@@ -152,6 +152,10 @@ sample_frequency = 30
 save_directory = /media/owl/SanDisk
 log_fps = False
 camera_name = cam1
+storage_location = usb
+internal_save_directory = /home/owl/owl_images
+min_free_gb = 4
+image_quota_gb = 12
 
 [Relays]
 0 = 13
@@ -373,6 +377,10 @@ The Pi 5 is not affected by the clamp.
 | `save_directory` | `/media/owl/SanDisk` | Directory for saved images. Typically a USB drive mount point. |
 | `log_fps` | `False` | Log frame processing times to file. |
 | `camera_name` | `cam1` | Camera identifier used in saved file names. |
+| `storage_location` | `usb` | Where recordings go: `usb` (a drive mounted under `/media`), `internal` (the Pi's own eMMC/SD storage — used by sealed OWL 3.0 units), or `auto` (USB when a drive is mounted, otherwise internal). |
+| `internal_save_directory` | `/home/owl/owl_images` | Recording path used in internal storage mode. |
+| `min_free_gb` | `4` | Internal mode only: recording is refused, and stops within seconds, when free disk space falls below this floor. Recording becomes available again once sessions are deleted or downloaded. |
+| `image_quota_gb` | `12` | Image allowance shown on the app/dashboard storage bar. Display only — the enforced limit is `min_free_gb`. |
 
 ### Tracking
 
