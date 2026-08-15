@@ -118,6 +118,7 @@ exp_compensation = -2
 awb_mode = daylight
 awb_red_gain = 2.0
 awb_blue_gain = 2.0
+rotation = auto
 crop_left = 0.02
 crop_right = 0.02
 crop_top = 0.02
@@ -155,7 +156,7 @@ sample_frequency = 30
 save_directory = /media/owl/SanDisk
 log_fps = False
 camera_name = cam1
-storage_location = usb
+storage_location = auto
 internal_save_directory = /home/owl/owl_images
 min_free_gb = 4
 image_quota_gb = 12
@@ -298,6 +299,7 @@ device_token = <minted-at-provisioning>
 | `awb_mode` | `daylight` | White balance: `auto`, `daylight`, `cloudy`, `tungsten`, `fluorescent`, `indoor` or `manual`. `daylight` preserves the historical fixed outdoor WB. `manual` disables auto white balance and applies the gains below - useful for the Arducam IMX296, which renders very red with the default. Applied live from the dashboard's Advanced Settings editor or the phone app. |
 | `awb_red_gain` | `2.0` | Red colour gain (0.1-8.0), used only when `awb_mode = manual`. Higher = redder. |
 | `awb_blue_gain` | `2.0` | Blue colour gain (0.1-8.0), used only when `awb_mode = manual`. |
+| `rotation` | `auto` | Image rotation: `auto`, `0` or `180`. `auto` is upright for the Global Shutter camera (IMX296, OWL 3.0 mount) and `180` for the classic enclosure, where the HQ/Camera Module 3 sensors mount upside down. Set `0` or `180` explicitly if your mount differs. Applied at startup - restart detection after changing it. |
 | `crop_left` | `0.02` | Fraction of width cropped from the **left** edge (0.0-0.49). |
 | `crop_right` | `0.02` | Fraction of width cropped from the **right** edge (0.0-0.49). |
 | `crop_top` | `0.02` | Fraction of height cropped from the **top** edge (0.0-0.49). |
@@ -393,7 +395,7 @@ The Pi 5 is not affected by the clamp.
 | `save_directory` | `/media/owl/SanDisk` | Directory for saved images. Typically a USB drive mount point. |
 | `log_fps` | `False` | Log frame processing times to file. |
 | `camera_name` | `cam1` | Camera identifier used in saved file names. |
-| `storage_location` | `usb` | Where recordings go: `usb` (a drive mounted under `/media`), `internal` (the Pi's own eMMC/SD storage — used by sealed OWL 3.0 units), or `auto` (USB when a drive is mounted, otherwise internal). |
+| `storage_location` | `auto` | Where recordings go: `auto` (default - USB when a drive is mounted, otherwise the Pi's internal storage with the `min_free_gb` floor protecting the system disk), `usb` (recording requires a drive mounted under `/media`), or `internal` (always the Pi's own eMMC/SD storage - sealed OWL 3.0 units). |
 | `internal_save_directory` | `/home/owl/owl_images` | Recording path used in internal storage mode. |
 | `min_free_gb` | `4` | Internal mode only: recording is refused, and stops within seconds, when free disk space falls below this floor. Recording becomes available again once sessions are deleted or downloaded. |
 | `image_quota_gb` | `12` | Image allowance shown on the app/dashboard storage bar. Display only — the enforced limit is `min_free_gb`. |
