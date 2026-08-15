@@ -102,6 +102,7 @@ The installation runs automatically. Watch for `[OK]` messages — if everything
 [OK] UFW Firewall Configuration
 [OK] Fan Control Permissions
 [OK] Service Control Permissions
+[OK] Device Settings Permissions
 [OK] Nginx Configuration
 [OK] SSL Certificate Generation
 [OK] Avahi Service Configuration
@@ -143,6 +144,8 @@ The script installs and configures each component in order:
 [OK] Fan control sudo permissions completed successfully.
 [INFO] Configuring sudo permissions for OWL service control...
 [OK] Service control sudo permissions completed successfully.
+[INFO] Configuring device settings permissions (network, passwords)...
+[OK] Device settings permissions completed successfully.
 [INFO] Generating SSL certificates...
 [OK] SSL certificate generation completed successfully.
 [INFO] Setting up Nginx web server...
@@ -166,6 +169,14 @@ The script installs and configures each component in order:
 ```
 
 The network MQTT test (`10.42.0.1`) may show a warning during setup — this is normal because the hotspot isn't fully active yet. It resolves after the reboot.
+
+The device-settings step (v3.11+) installs a root-owned password helper
+(`/usr/local/sbin/owl-set-user-password`) and sudoers entries for `nmcli` and
+`reboot`. These back the phone app's device settings: in-place Wi-Fi changes,
+Pi user and hotspot password changes, and restart/shutdown. Re-running
+`controller/shared/setup.sh` on an already-deployed OWL adds them to older
+units — the script is idempotent. Units without them return
+`503 Device settings permissions not installed` from those routes.
 
 </details>
 

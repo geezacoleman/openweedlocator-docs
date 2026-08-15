@@ -553,6 +553,13 @@ In networked mode, the OWL installs MQTT clients (not a broker) and configures n
 
 The setup writes configuration to `GENERAL_CONFIG.ini` and `CONTROLLER.ini` automatically — you don't need to edit any config files manually.
 
+The script also installs the device-settings permissions (v3.11+): a root-owned
+password helper (`/usr/local/sbin/owl-set-user-password`) and sudoers entries for
+`nmcli` and `reboot`, which the phone app's device settings (network changes,
+password changes, restart) rely on. Re-running `controller/shared/setup.sh` on an
+already-deployed OWL is the supported way to add these to older units — the
+script is idempotent.
+
 </details>
 
 When prompted, reboot the OWL:

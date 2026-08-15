@@ -115,6 +115,9 @@ image_loop_time = 5
 resolution_width = 1456
 resolution_height = 1088
 exp_compensation = -2
+awb_mode = daylight
+awb_red_gain = 2.0
+awb_blue_gain = 2.0
 crop_left = 0.02
 crop_right = 0.02
 crop_top = 0.02
@@ -244,6 +247,16 @@ delay = 0.0
 actuation_length_cm = 10
 offset_cm = 30
 speed_avg_window = 5.0
+
+[Security]
+# Per-device API token, minted automatically when the OWL is provisioned
+# through the phone app (v3.11+). Guards mutating dashboard routes
+# (network changes, passwords, shutdown/reboot, session delete) via the
+# X-Device-Token header. Absent on units set up before v3.11 - those
+# accept requests without the header (legacy behaviour). Deleting the
+# section restores legacy behaviour; re-running first-boot setup mints
+# a fresh token.
+device_token = <minted-at-provisioning>
 ```
 
 ## Parameter Reference — GENERAL_CONFIG.ini
@@ -281,7 +294,10 @@ speed_avg_window = 5.0
 |-----------|---------|-------------|
 | `resolution_width` | `1456` | Camera capture width in pixels. |
 | `resolution_height` | `1088` | Camera capture height in pixels. |
-| `exp_compensation` | `-2` | Exposure compensation (-8 to 8). Negative values give faster shutter speed. |
+| `exp_compensation` | `-2` | Exposure compensation (-8 to 8). Negative values give faster shutter speed. Applied live (no restart) on picamera2. |
+| `awb_mode` | `daylight` | White balance: `auto`, `daylight`, `cloudy`, `tungsten`, `fluorescent`, `indoor` or `manual`. `daylight` preserves the historical fixed outdoor WB. `manual` disables auto white balance and applies the gains below - useful for the Arducam IMX296, which renders very red with the default. Applied live from the dashboard's Advanced Settings editor or the phone app. |
+| `awb_red_gain` | `2.0` | Red colour gain (0.1-8.0), used only when `awb_mode = manual`. Higher = redder. |
+| `awb_blue_gain` | `2.0` | Blue colour gain (0.1-8.0), used only when `awb_mode = manual`. |
 | `crop_left` | `0.02` | Fraction of width cropped from the **left** edge (0.0-0.49). |
 | `crop_right` | `0.02` | Fraction of width cropped from the **right** edge (0.0-0.49). |
 | `crop_top` | `0.02` | Fraction of height cropped from the **top** edge (0.0-0.49). |
@@ -455,6 +471,12 @@ The GPS tab in the dashboard renders these breadcrumbs on a Leaflet map (OpenStr
 | `actuation_length_cm` | `10` | Physical spray patch length in cm (speed-adaptive calculation). |
 | `offset_cm` | `30` | Distance from camera to nozzle in cm (speed-adaptive calculation). |
 | `speed_avg_window` | `5.0` | Time window in seconds for GPS speed averaging. |
+
+### Security
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `device_token` | *(minted at provisioning)* | Per-device API token created automatically when the OWL is set up through the phone app (v3.11+, contract 2). Mutating dashboard routes (network reconfiguration, password changes, shutdown/reboot, recording-session delete) require it in the `X-Device-Token` header. Units without the key accept requests without the header (legacy behaviour). There is deliberately no localhost bypass: nginx proxies every request from 127.0.0.1, so a bypass would disable the check entirely. Note this means a plain browser cannot call these routes on a token-minted unit - use the phone app, or remove the `[Security]` section to revert to legacy behaviour. |
 
 ---
 
