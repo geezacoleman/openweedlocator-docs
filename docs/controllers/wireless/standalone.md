@@ -59,7 +59,7 @@ Then configure your hotspot:
 ```{code-block} text
 Enter OWL ID number (default: 1): 1
 [INFO] Configuring WiFi Hotspot (Standalone Mode)
-Enter WiFi hotspot name/SSID (default: OWL-1): OWL-1
+Enter WiFi hotspot name/SSID (default: OWL-4B7D): OWL-4B7D
 Enter WiFi hotspot password (min 8 characters): ********
 Re-enter WiFi password to confirm: ********
 Confirm and save this password? (y/n): y
@@ -68,7 +68,7 @@ Confirm and save this password? (y/n): y
 | Setting | Default | Description |
 |---------|---------|-------------|
 | OWL ID | 1 | Unique identifier — sets the hostname to `owl-1` |
-| Hotspot SSID | OWL-1 | WiFi network name others will see |
+| Hotspot SSID | OWL-XXXX | WiFi network name others will see. The default is derived from the Pi's hardware serial (last 4 characters), so every unit gets a unique name — two OWLs broadcasting the same SSID cannot be told apart by the phone app |
 | Hotspot Password | (none) | Minimum 8 characters |
 
 ### Review and confirm
@@ -79,7 +79,7 @@ Check the configuration summary and confirm:
 [INFO] Standalone Configuration Summary:
   Mode: Standalone
   Hostname: owl-1
-  WiFi Hotspot SSID: OWL-1
+  WiFi Hotspot SSID: OWL-4B7D
   Hotspot IP: 10.42.0.1/24
   MQTT Broker: localhost:1883 (local)
   Dashboard: https://owl-1.local/
@@ -88,7 +88,7 @@ Continue with these settings? (y/n): y
 ```
 
 ```{warning}
-**If you're connected via SSH:** The Pi will switch from your current WiFi to creating its own hotspot. Your SSH connection will drop. After setup completes and the Pi reboots, connect to the new hotspot (e.g., `OWL-1`) to regain access.
+**If you're connected via SSH:** The Pi will switch from your current WiFi to creating its own hotspot. Your SSH connection will drop. After setup completes and the Pi reboots, connect to the new hotspot (e.g., `OWL-4B7D`) to regain access.
 ```
 
 The installation runs automatically. Watch for `[OK]` messages — if everything passes, you'll see:
@@ -133,7 +133,7 @@ The script installs and configures each component in order:
 [OK] MQTT configuration file is correct
 [OK] MQTT broker core functionality verified
 [OK] MQTT broker configuration and testing completed successfully.
-[INFO] Setting up WiFi hotspot: OWL-1...
+[INFO] Setting up WiFi hotspot: OWL-4B7D...
 [OK] WiFi hotspot configuration completed successfully.
 [INFO] Configuring firewall (UFW)...
 [OK] UFW firewall configuration completed successfully.
@@ -210,7 +210,7 @@ The summary will show error details. Review the specific error, fix the issue, a
 
 After the reboot:
 
-1. On your phone, tablet, or laptop, look for the WiFi network (e.g., `OWL-1`)
+1. On your phone, tablet, or laptop, look for the WiFi network (e.g., `OWL-4B7D`)
 2. Connect using the password you set during setup
 3. Open a browser and go to `https://owl-1.local/` or `https://10.42.0.1/`
 
@@ -313,7 +313,7 @@ Deleting a session permanently removes the images from the USB drive. There is n
 nmcli con show --active
 
 # If the hotspot isn't listed, start it manually
-sudo nmcli con up "OWL-1"
+sudo nmcli con up "OWL-4B7D"
 
 # Check all services are running
 sudo systemctl status owl-dash nginx mosquitto
