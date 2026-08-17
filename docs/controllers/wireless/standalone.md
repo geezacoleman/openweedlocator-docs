@@ -172,11 +172,15 @@ The network MQTT test (`10.42.0.1`) may show a warning during setup — this is 
 
 The device-settings step (v3.11+) installs a root-owned password helper
 (`/usr/local/sbin/owl-set-user-password`) and sudoers entries for `nmcli` and
-`reboot`. These back the phone app's device settings: in-place Wi-Fi changes,
-Pi user and hotspot password changes, and restart/shutdown. Re-running
+`reboot`; v3.12 adds `date` and `timedatectl` so the phone app can correct
+the clock on RTC-less units (`/api/time/sync` — the Pi's clock freezes while
+powered off and NTP never comes on a paddock hotspot). These back the phone
+app's device settings: in-place Wi-Fi changes, Pi user and hotspot password
+changes, clock sync, and restart/shutdown. Re-running
 `controller/shared/setup.sh` on an already-deployed OWL adds them to older
 units — the script is idempotent. Units without them return
-`503 Device settings permissions not installed` from those routes.
+`503 Device settings permissions not installed` from those routes (the time
+sync route returns 503 with a re-run-setup hint).
 
 </details>
 
