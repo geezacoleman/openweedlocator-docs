@@ -115,7 +115,7 @@ image_loop_time = 5
 resolution_width = 1456
 resolution_height = 1088
 exp_compensation = -2
-awb_mode = daylight
+awb_mode = auto
 awb_red_gain = 2.0
 awb_blue_gain = 2.0
 rotation = auto
@@ -296,9 +296,9 @@ device_token = <minted-at-provisioning>
 | `resolution_width` | `1456` | Camera capture width in pixels. |
 | `resolution_height` | `1088` | Camera capture height in pixels. |
 | `exp_compensation` | `-2` | Exposure compensation (-8 to 8). Negative values give faster shutter speed. Applied live (no restart) on picamera2. |
-| `awb_mode` | `daylight` | White balance: `auto`, `daylight`, `cloudy`, `tungsten`, `fluorescent`, `indoor` or `manual`. `daylight` preserves the historical fixed outdoor WB. `manual` disables auto white balance and applies the gains below - useful for the Arducam IMX296, which renders very red with the default. Applied live from the dashboard's Advanced Settings editor or the phone app. |
-| `awb_red_gain` | `2.0` | Red colour gain (0.1-8.0), used only when `awb_mode = manual`. Higher = redder. |
-| `awb_blue_gain` | `2.0` | Blue colour gain (0.1-8.0), used only when `awb_mode = manual`. |
+| `awb_mode` | `auto` | White balance: `auto`, `daylight`, `cloudy`, `tungsten`, `fluorescent`, `indoor` or `manual`. `auto` lets libcamera balance the scene, the same as `rpicam-hello`. The presets pin the colour temperature to a narrow window of the Pi sensor tuning file (`daylight` = 5500-6500 K) and render Arducam IMX296 modules strongly red. `manual` disables auto white balance and applies the gains below. Applied live from the dashboard's Advanced Settings editor or the phone app. |
+| `awb_red_gain` | `2.0` | Red colour gain (0.1-8.0), used only when `awb_mode = manual`. Higher = redder. Filled in by **Calibrate white balance** (dashboard Config tab or phone app): point the camera at bare soil or a grey card, tap once, and OWL samples the auto gains and locks them as `manual` so colours stay fixed for detection. The dashboard also shows the live gains and estimated colour temperature the camera is using. |
+| `awb_blue_gain` | `2.0` | Blue colour gain (0.1-8.0), used only when `awb_mode = manual`. Set by the same calibration. |
 | `rotation` | `auto` | Image rotation: `auto`, `0` or `180`. `auto` is upright for the Global Shutter camera (IMX296, OWL 3.0 mount) and `180` for the classic enclosure, where the HQ/Camera Module 3 sensors mount upside down. Set `0` or `180` explicitly if your mount differs. Applied at startup - restart detection after changing it. |
 | `crop_left` | `0.02` | Fraction of width cropped from the **left** edge (0.0-0.49). |
 | `crop_right` | `0.02` | Fraction of width cropped from the **right** edge (0.0-0.49). |
