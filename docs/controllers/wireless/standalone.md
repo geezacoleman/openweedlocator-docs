@@ -182,6 +182,15 @@ units — the script is idempotent. Units without them return
 `503 Device settings permissions not installed` from those routes (the time
 sync route returns 503 with a re-run-setup hint).
 
+v3.15 adds a software-update step: `/etc/sudoers.d/96-owl-update` lets the
+dashboard launch `owl_update.sh` in a transient `systemd-run` unit, and the
+service-control alias gains `systemctl restart owl-dash.service` so the
+dashboard can restart itself after a successful update. These back the phone
+app's Maintenance card (version and update, internet via the phone's hotspot,
+reset network setup, factory reset of detection settings). Without the rule,
+`POST /api/settings/update/start` returns
+`503 Software update permissions not installed`.
+
 </details>
 
 In standalone mode the script then asks whether to arm phone-app first-boot

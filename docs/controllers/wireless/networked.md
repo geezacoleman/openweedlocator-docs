@@ -558,7 +558,11 @@ password helper (`/usr/local/sbin/owl-set-user-password`) and sudoers entries fo
 `nmcli` and `reboot`, which the phone app's device settings (network changes,
 password changes, restart) rely on. v3.12 adds `date` and `timedatectl` to the
 same sudoers alias so the app can correct the clock on RTC-less units
-(`/api/time/sync`). Re-running `controller/shared/setup.sh` on an
+(`/api/time/sync`). v3.15 adds the software-update rule
+(`/etc/sudoers.d/96-owl-update`, a transient `systemd-run` unit for
+`owl_update.sh`) and `systemctl restart owl-dash.service`, which the phone
+app's Maintenance card uses to update the OWL and bring the new dashboard
+up. Re-running `controller/shared/setup.sh` on an
 already-deployed OWL is the supported way to add these to older units — the
 script is idempotent.
 
