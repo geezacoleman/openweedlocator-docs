@@ -84,6 +84,7 @@ Check the configuration summary and confirm:
   MQTT Broker: localhost:1883 (local)
   Dashboard: https://owl-1.local/
 
+Allow VNC remote desktop (port 5900) through the firewall? (y/n, default: n): n
 Continue with these settings? (y/n): y
 ```
 
@@ -211,7 +212,9 @@ Reboot now? (y/n): y
 ```{note}
 Factory provisioning: `bash owl_setup.sh --ship` runs the whole install
 non-interactively (standalone mode, hotspot `OWL-XXXX` derived from the Pi
-serial, first-boot armed). `setup.sh` also accepts flags for scripted
+serial, first-boot armed). On the production CM5 carrier board,
+`bash owl_setup.sh --ship-gps` does the same and also configures the
+on-board nRF9151 GPS. `setup.sh` also accepts flags for scripted
 installs: `--mode standalone --owl-id N --ssid SSID --password PSK
 [--arm-firstboot] [--yes]`.
 ```

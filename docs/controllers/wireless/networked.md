@@ -516,6 +516,7 @@ Review the summary and confirm:
   MQTT Broker: 192.168.1.2:1883 (remote)
   Video Feed: https://owl-1.local/video_feed
 
+Allow VNC remote desktop (port 5900) through the firewall? (y/n, default: n): n
 Continue with these settings? (y/n): y
 ```
 

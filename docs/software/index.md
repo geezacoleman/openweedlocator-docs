@@ -9,6 +9,7 @@
 two-step-install
 detailed-install
 configuration/index
+image-metadata
 green-on-green/index
 agent/index
 development/index

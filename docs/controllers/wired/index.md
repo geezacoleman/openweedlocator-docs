@@ -49,7 +49,7 @@ Suitable for connecting a single OWL device. TinkerCAD model available [here](ht
 |---------|--------|----------|---------------|
 | Power +12V | Red | N/A - connect to 12V of OWL Driver Board | A (#16) |
 | Power GND | Black | N/A - connect to GND of OWL Driver Board | B (#16) |
-| Recording/Detection Toggle Switch | White | BOARD 37 | C (#16) |
+| Recording/Detection Toggle Switch | White | BOARD 36 | C (#16) |
 | Recording status LED (blinks on image save) | Green | BOARD 38 | D (#20) |
 | Storage status indicator | Yellow | BOARD 40 | E (#20) |
 | GPIO GND | Brown | BOARD 39 | F (#20) |
@@ -99,12 +99,12 @@ TinkerCAD models (1, 2, and 4 OWLs) available [here](https://www.tinkercad.com/t
 | All nozzles on | Blue (trailer cable) | BOARD 36 | C (#16) |
 | Recording toggle | Green (trailer cable) | BOARD 38 | D (#16) |
 | Sensitivity toggle | Yellow/Orange (trailer cable) | BOARD 40 | E (#16) |
-| Status LED | White (trailer cable) | BOARD 37 | F (#16) |
+| Status LED | White (trailer cable) | BOARD 40 | F (#16) |
 | Spot spray enable | Red (trailer cable) | BOARD 35 | G (#16) |
 | GPIO GND | Brown (trailer cable) | BOARD 39 | H (#16) |
 
 ```{note}
-The Advanced controller uses BOARD 37 for the status LED by default. If you are using a Sixfab 4G HAT (which also uses BOARD 37), you will need to remap the status LED to an unused pin in `GENERAL_CONFIG.ini`. The UTE controller does not have this conflict — it uses BOARD 40 for the status LED.
+Older Advanced controller builds wired the status LED to BOARD 37. The default `status_led_pin` is now BOARD 40. If you use a Sixfab 4G HAT or the production CM5 carrier's nRF9151 modem (both switch modem power on BOARD 37), move that wire to BOARD 40.
 ```
 
 ---
@@ -165,7 +165,7 @@ sensitivity_pin = 32
 **Advanced Controller:** The sensitivity switch cycles through built-in presets (Low and High) stored as `[Sensitivity_Low]` and `[Sensitivity_High]` sections in `GENERAL_CONFIG.ini`. Custom presets can also be saved from the dashboard. When active, recording, detection, and sensitivity are locked on the dashboard.
 
 ```{warning}
-**Sixfab 4G HAT users:** If you have a Sixfab Base HAT for cellular/GPS, do not use pin BOARD 37 for any OWL function — the Sixfab HAT uses that pin to control modem power, and toggling it (e.g., with a blinking LED) will repeatedly power-cycle the modem. The default pin assignments have been moved to avoid this conflict (`switch_pin` to BOARD 36, status LED to BOARD 40).
+**Modem power on BOARD 37:** the Sixfab Base HAT and the production CM5 carrier's nRF9151 modem both switch modem power on BOARD 37, and toggling it (for example with a blinking LED) power-cycles the modem. The defaults avoid it (`switch_pin` BOARD 36, status LED BOARD 40). With `[GPS] source = nrf91` the OWL enforces this: a relay, LED or switch on BOARD 37, 21 or 24 is disabled and the dashboards refuse it.
 ```
 
 ```{admonition} Final Steps

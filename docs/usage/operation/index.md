@@ -44,9 +44,9 @@ Once green locations are identified and a binary (black/white) mask is generated
 | Algorithm | Sensitivity | Best For |
 |-----------|-------------|----------|
 | `exg` | Most sensitive | Maximum weed detection, accepts more false positives |
-| `exgr` | Medium | Balanced detection |
 | `exhsv` | Balanced (default) | Good precision with reasonable recall |
 | `hsv` | Least sensitive | Minimum false positives, may miss smaller weeds |
+| `lut` | Tunable | A profile painted on your own imagery, for colours the thresholds miss |
 
 ### Algorithm Selection
 

@@ -244,10 +244,10 @@ track_save_directory = tracks
 # Relay timing — used as fallback when no GPS speed data
 actuation_duration = 0.15
 delay = 0.0
-# Speed-adaptive actuation geometry (networked controller)
+# Speed-adaptive actuation geometry (networked controller, or an OWL with its own GPS)
 actuation_length_cm = 10
 offset_cm = 30
-speed_avg_window = 5.0
+speed_avg_window = 2.0
 
 [Security]
 # Per-device API token, minted automatically when the OWL is provisioned
@@ -266,7 +266,7 @@ device_token = <minted-at-provisioning>
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `algorithm` | `exhsv` | Detection algorithm: `exg`, `exgr`, `maxg`, `nexg`, `exhsv`, `hsv`, `gndvi`, `gog`, `gog-hybrid` |
+| `algorithm` | `exhsv` | Detection algorithm: `exg`, `exhsv`, `hsv`, `lut`, `gog`, `gog-hybrid` |
 | `input_file_or_directory` | *(empty)* | Path to image, video, or directory for offline processing. Leave empty for live camera. |
 | `relay_num` | `4` | Number of relay lanes (1-4). |
 | `actuation_duration` | `0.15` | Relay activation time in seconds. |
@@ -283,7 +283,7 @@ device_token = <minted-at-provisioning>
 | `status_led_pin` | `40` | BOARD pin for status indicator LED (shared by Ute and Advanced). |
 | `gps_led_pin` | `38` | BOARD pin for GPS status LED (shared by Ute and Advanced). |
 | `switch_purpose` | `recording` | Ute controller switch function: `recording` or `detection`. |
-| `switch_pin` | `36` | BOARD pin for Ute controller toggle switch. Avoid BOARD 37 if using Sixfab HAT. |
+| `switch_pin` | `36` | BOARD pin for Ute controller toggle switch. Avoid BOARD 37 if using a Sixfab HAT. Pins used by on-device GPS hardware are refused (see below). |
 | `detection_mode_pin_up` | `36` | BOARD pin for detection mode up (Advanced controller). |
 | `detection_mode_pin_down` | `35` | BOARD pin for detection mode down (Advanced controller). |
 | `recording_pin` | `33` | BOARD pin for recording toggle (Advanced controller). |
@@ -448,15 +448,17 @@ The Pi 5 is not affected by the clamp.
 | `static_ip` | `localhost` | Static IP for the OWL on the network. |
 | `controller_ip` | `localhost` | IP address of the networked controller (networked mode only). |
 
+**Pins used by on-device GPS.** When `[GPS] source = nrf91`, BOARD 37 (GPIO 26, modem power) and BOARD 21 and 24 (the modem UART) belong to the modem. When `source = serial` with `port = /dev/ttyAMA0` or `/dev/serial0`, BOARD 8 and 10 belong to the GPS. A relay, LED or switch configured on one of these pins is disabled at startup with an error in the journal (the OWL keeps running), and the dashboards, phone app and networked controller refuse the change. Without that hardware configured, nothing is reserved.
+
 ### GPS
 
 The networked controller supports four GPS input modes, selected via the `source` key. Pick whichever matches your hardware — only the keys relevant to your chosen source are read.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `source` | `none` | GPS data source. One of: `none` (disabled), `serial` (USB/UART device on this Pi), `tcp` (NMEA pushed over TCP, e.g. from a Teltonika router), or `gpsd` (read from the local `gpsd` daemon on `localhost:2947`). |
-| `port` | `/dev/ttyACM0` | Serial device path (used when `source = serial`, also passed to `gpsd` as its `DEVICES` hint). Ublox USB dongles enumerate as `/dev/ttyACM0`; CP2102/CH340 adapters as `/dev/ttyUSB0`; Pi primary UART is `/dev/ttyAMA0` (or `/dev/serial0` on Raspberry Pi OS). To find yours: `ls /dev/ttyACM* /dev/ttyUSB*` after plugging in the GPS. |
-| `baudrate` | `9600` | Serial link speed (used when `source = serial`). Ublox factory default is 9600; Sixfab GNSS HAT and some marine modules use 115200. Wrong baud = silent failure (garbled unicode in the log). |
+| `source` | `none` | GPS data source. One of: `none` (disabled), `serial` (USB/UART device on this Pi), `nrf91` (the nRF9151 modem on the production CM5 carrier, read by the OWL itself; set up by `bash owl_setup.sh --ship-gps`), `tcp` (NMEA pushed over TCP, e.g. from a Teltonika router), or `gpsd` (read from the local `gpsd` daemon on `localhost:2947`). |
+| `port` | `/dev/ttyACM0` | Serial device path (used when `source = serial`, also passed to `gpsd` as its `DEVICES` hint). Ublox USB dongles enumerate as `/dev/ttyACM0`; CP2102/CH340 adapters as `/dev/ttyUSB0`; Pi primary UART is `/dev/ttyAMA0` (or `/dev/serial0` on Raspberry Pi OS). To find yours: `ls /dev/ttyACM* /dev/ttyUSB*` after plugging in the GPS. The production carrier's nRF9151 modem is `/dev/ttyAMA3`. |
+| `baudrate` | `9600` | Serial link speed (used when `source = serial`). Ublox factory default is 9600; Sixfab GNSS HAT and some marine modules use 115200. Wrong baud = silent failure (garbled unicode in the log). The carrier's nRF9151 modem runs at `460800`. |
 | `enable` | `False` | **DEPRECATED.** Kept as a back-compat alias: if `source = none` and `enable = True`, the controller behaves as if `source = tcp`. New configs should set `source` directly. |
 | `nmea_port` | `8500` | TCP port the controller listens on when `source = tcp`. Configure your router to forward NMEA to `<controller-ip>:<nmea_port>`. Port 8500 is pre-opened in the UFW firewall rules. |
 | `boom_width` | `12.0` | Spray boom width in metres. Used to convert distance into hectares: `area_ha = distance_km × boom_width_m / 10`. |
@@ -469,10 +471,20 @@ The GPS tab in the dashboard renders these breadcrumbs on a Leaflet map (OpenStr
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `actuation_duration` | `0.15` | Relay activation time in seconds (fallback when no GPS speed data). |
-| `delay` | `0.0` | Delay between detection and actuation in seconds. |
+| `delay` | `0.0` | Travel time from the camera's view to the nozzle, in seconds, counted from frame capture. The OWL subtracts the frame's processing time before scheduling the relay, so `0` opens the nozzle as soon as the weed is detected. |
 | `actuation_length_cm` | `10` | Physical spray patch length in cm (speed-adaptive calculation). |
 | `offset_cm` | `30` | Distance from camera to nozzle in cm (speed-adaptive calculation). |
-| `speed_avg_window` | `5.0` | Time window in seconds for GPS speed averaging. |
+| `speed_avg_window` | `2.0` | Time window in seconds for GPS speed averaging. |
+
+With GPS speed, spray duration is `actuation_length_cm / speed`, stretched to
+cover the ground travelled between frames (at most 3 patch lengths), and the
+delay is `offset_cm / speed`. An OWL with its own GPS (`[GPS] source = serial`
+or `nrf91`) computes this itself while it has a fresh fix, and that wins over
+the networked controller's broadcast; when the fix is lost it uses the
+controller's timing, or the fixed values above if there is no controller. Phone
+GPS never drives timing. When forward speed makes sprays land late or leaves
+gaps between frames, the dashboards and phone app show a warning with a speed
+to slow to.
 
 ### Security
 
