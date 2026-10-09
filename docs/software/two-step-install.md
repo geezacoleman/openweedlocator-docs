@@ -92,6 +92,14 @@ Do you want to add a web dashboard for remote control? (y/n):
 **Networked OWL** — Enter **y**, then select option 2. This connects to an existing WiFi network with a central controller. See [Networked Setup](../controllers/wireless/networked.md) for the dashboard configuration steps.
 ```
 
+After the dashboard step, the installer asks whether to create a device identity:
+
+```{code-block} text
+Create a device identity so this OWL can join Noktura from the phone app? (y/N):
+```
+
+Enter **y** if you want to connect this OWL to the Noktura cloud platform from the phone app later. This creates a key file identity (`owl_identity.sh --disk`) and adds `[OK] Device Identity (key file) Created` to the summary. Enter **n** (the default) to skip it. If the OWL already has an identity, the prompt is skipped and the installer prints `[INFO] Device identity already present (... tier).` instead.
+
 After all steps complete, you'll see the final summary:
 
 ```{code-block} text

@@ -153,6 +153,14 @@ image_sample_enable = False
 detection_enable = True
 sample_method = whole
 sample_frequency = 30
+sample_mode = frames
+sample_distance_m = 1.0
+sample_interval_s = 2.0
+jpeg_quality = 95
+record_mode = images
+video_max_s = 60
+shutter_cap = False
+smear_limit_mm = 2.0
 save_directory = /media/owl/SanDisk
 log_fps = False
 camera_name = cam1
@@ -297,6 +305,7 @@ device_token = <minted-at-provisioning>
 | `resolution_height` | `1088` | Camera capture height in pixels. |
 | `exp_compensation` | `-2` | Exposure compensation (-8 to 8). Negative values give faster shutter speed. Applied live (no restart) on picamera2. |
 | `awb_mode` | `auto` | White balance: `auto`, `daylight`, `cloudy`, `tungsten`, `fluorescent`, `indoor` or `manual`. `auto` lets libcamera balance the scene, the same as `rpicam-hello`. The presets pin the colour temperature to a narrow window of the Pi sensor tuning file (`daylight` = 5500-6500 K) and render Arducam IMX296 modules strongly red. `manual` disables auto white balance and applies the gains below. Applied live from the dashboard's Advanced Settings editor or the phone app. |
+| `max_gain` | `auto` | Gain limit while the shutter limit is active: `auto`, or a number such as `8`. Lower means less noise but darker images in poor light. Set from the collect screen's Camera settings. |
 | `awb_red_gain` | `2.0` | Red colour gain (0.1-8.0), used only when `awb_mode = manual`. Higher = redder. Filled in by **Calibrate white balance** (dashboard Config tab or phone app): point the camera at bare soil or a grey card, tap once, and OWL samples the auto gains and locks them as `manual` so colours stay fixed for detection. The dashboard also shows the live gains and estimated colour temperature the camera is using. |
 | `awb_blue_gain` | `2.0` | Blue colour gain (0.1-8.0), used only when `awb_mode = manual`. Set by the same calibration. |
 | `rotation` | `auto` | Image rotation: `auto`, `0` or `180`. `auto` is upright for the Global Shutter camera (IMX296, OWL 3.0 mount) and `180` for the classic enclosure, where the HQ/Camera Module 3 sensors mount upside down. Set `0` or `180` explicitly if your mount differs. Applied at startup - restart detection after changing it. |
@@ -391,7 +400,15 @@ The Pi 5 is not affected by the clamp.
 | `image_sample_enable` | `False` | Enable image data collection to USB drive. |
 | `detection_enable` | `True` | Enable weed detection and relay actuation. Set False for data collection only. |
 | `sample_method` | `whole` | Image sampling method: `bbox` (bounding boxes only), `square` (square crops), `whole` (full frame). |
-| `sample_frequency` | `30` | Save an image every N frames. |
+| `sample_frequency` | `30` | Save an image every N frames (when `sample_mode = frames`). |
+| `sample_mode` | `frames` | Which frames are saved: `frames` (every `sample_frequency` frames), `distance` (every `sample_distance_m` of GPS travel; every `sample_interval_s` without a fresh GPS speed; nothing while parked) or `time` (every `sample_interval_s`). The data-collection screen sets this live. |
+| `sample_distance_m` | `1.0` | Distance mode: metres travelled between images. |
+| `sample_interval_s` | `2.0` | Time mode, and distance mode without GPS: seconds between images. |
+| `jpeg_quality` | `95` | JPEG quality of saved images (50-100). |
+| `record_mode` | `images` | `images`, or `video`: one `.mp4` clip per recording in the session folder, stopped at `video_max_s`. |
+| `video_max_s` | `60` | Video clip length limit in seconds (5-60). |
+| `shutter_cap` | `False` | Limit the shutter time so ground movement during one exposure (GPS speed x shutter time) stays under `smear_limit_mm`; the gain rises instead. Released whenever GPS speed is missing. Check it on your camera first with `tools/shutter_cap_probe.py`. |
+| `smear_limit_mm` | `2.0` | Blur limit for `shutter_cap` and the collect screen's blur warning, in mm of ground movement per image. |
 | `save_directory` | `/media/owl/SanDisk` | Directory for saved images. Typically a USB drive mount point. |
 | `log_fps` | `False` | Log frame processing times to file. |
 | `camera_name` | `cam1` | Camera identifier used in saved file names. |
@@ -439,6 +456,18 @@ The Pi 5 is not affected by the clamp.
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `port` | `8000` | Gunicorn listening port (behind Nginx reverse proxy). |
+| `ui` | `full` | In-cab controller only: the screen the kiosk opens. `full` is the full dashboard; `collect` is the data-collection screen, which holds detection off on every OWL. Both stay reachable at `/full` and `/collect`. Restart `owl-controller` after changing. |
+
+### Collect
+
+In-cab controller only, written by the data-collection screen's Settings tab. Every key is optional.
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `language` | `en` | Screen language: `en` or `da`. |
+| `crops`, `seasonal_crops`, `weather`, `lighting`, `purposes` | built-in lists | Comma-separated preset slugs for the record form. Values go into image EXIF and `session_metadata.json` and are what Noktura maps onto dataset fields, so keep the slugs (for example `wheat`, `natural_sun`, `herbicide`). |
+| `sample_mode`, `sample_distance_m`, `sample_interval_s`, `jpeg_quality`, `record_mode`, `video_max_s`, `shutter_cap`, `smear_limit_mm`, `max_gain` | `distance`, `1.0`, `2.0`, `95`, `images`, `60`, `true`, `2.0`, `auto` | Capture settings pushed to every OWL (see DataCollection above). |
+| `soft_ratio`, `dark_brightness`, `dark_percent`, `clipped_percent`, `not_saving_s`, `storage_low_mb` | `0.6`, `40`, `30`, `5`, `10`, `2048` | Warning thresholds for the collect screen. |
 
 ### Network
 
@@ -456,7 +485,7 @@ The networked controller supports four GPS input modes, selected via the `source
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `source` | `none` | GPS data source. One of: `none` (disabled), `serial` (USB/UART device on this Pi), `nrf91` (the nRF9151 modem on the production CM5 carrier, read by the OWL itself; set up by `bash owl_setup.sh --ship-gps`), `tcp` (NMEA pushed over TCP, e.g. from a Teltonika router), or `gpsd` (read from the local `gpsd` daemon on `localhost:2947`). |
+| `source` | `none` | GPS data source. One of: `none` (disabled), `serial` (USB/UART device on this Pi), `nrf91` (the nRF9151 modem on the production CM5 carrier, read by the OWL itself; set up by `bash owl_setup.sh --factory`), `tcp` (NMEA pushed over TCP, e.g. from a Teltonika router), or `gpsd` (read from the local `gpsd` daemon on `localhost:2947`). |
 | `port` | `/dev/ttyACM0` | Serial device path (used when `source = serial`, also passed to `gpsd` as its `DEVICES` hint). Ublox USB dongles enumerate as `/dev/ttyACM0`; CP2102/CH340 adapters as `/dev/ttyUSB0`; Pi primary UART is `/dev/ttyAMA0` (or `/dev/serial0` on Raspberry Pi OS). To find yours: `ls /dev/ttyACM* /dev/ttyUSB*` after plugging in the GPS. The production carrier's nRF9151 modem is `/dev/ttyAMA3`. |
 | `baudrate` | `9600` | Serial link speed (used when `source = serial`). Ublox factory default is 9600; Sixfab GNSS HAT and some marine modules use 115200. Wrong baud = silent failure (garbled unicode in the log). The carrier's nRF9151 modem runs at `460800`. |
 | `enable` | `False` | **DEPRECATED.** Kept as a back-compat alias: if `source = none` and `enable = True`, the controller behaves as if `source = tcp`. New configs should set `source` directly. |
@@ -490,7 +519,28 @@ to slow to.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `device_token` | *(minted at provisioning)* | Per-device API token created automatically when the OWL is set up through the phone app (v3.11+, contract 2). Mutating dashboard routes (network reconfiguration, password changes, shutdown/reboot, recording-session delete) require it in the `X-Device-Token` header. Units without the key accept requests without the header (legacy behaviour). There is deliberately no localhost bypass: nginx proxies every request from 127.0.0.1, so a bypass would disable the check entirely. Note this means a plain browser cannot call these routes on a token-minted unit - use the phone app, or remove the `[Security]` section to revert to legacy behaviour. |
+| `device_token` | *(minted at setup)* | Per-device API token (v3.11+, contract 2). `controller/shared/setup.sh` creates one on every standalone install if the key is missing, and the phone app's first-boot setup mints one too. Mutating dashboard routes (network reconfiguration, password changes, shutdown/reboot, recording-session delete) require it in the `X-Device-Token` header. Units without the key accept requests without the header (legacy behaviour). There is deliberately no localhost bypass: nginx proxies every request from 127.0.0.1, so a bypass would disable the check entirely. Note this means a plain browser cannot call these routes on a token-minted unit - use the phone app, or remove the `[Security]` section to revert to legacy behaviour. |
+
+### Cloud
+
+Written by `owl_cloud_provision.sh` (run by hand, or by the phone app after the unit is
+claimed in Noktura). See the OWL app claim flow for how a shipped unit gets these values.
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `enable` | `False` | Master switch for the cloud bridge. `False` = fully local unit. |
+| `broker_host` / `broker_port` | `mqtt.noktura.tech` / `8883` | Cloud MQTT broker (TLS). |
+| `device_id` | *(issued at claim)* | Site slug on the cloud side, e.g. `owl-2026-000001`. Must be lowercase and equal to `username`. |
+| `username` / `password_file` | *(issued at claim)* | Bridge login. The password lives only in `password_file` (mode 600). |
+| `ca_cert` | `/home/owl/.owl/cloud/ca.crt` | CA used to verify the cloud broker certificate. The template default is the file `owl_cloud_provision.sh --ca-file` installs. When the script runs with `--system-ca` (or without `--ca-file`), it writes the system CA path `/etc/ssl/certs` instead, which is what Noktura uses. |
+| `portal_url` | *(blank)* | When set, the dashboard and app show an "Open in Noktura" link to `<portal_url>/d/<device_id>`. |
+| `storage_host` | *(blank)* | v3.18+. Every upload or download a cloud command asks for must be HTTPS on this host. The phone app sets it when it connects the OWL to Noktura. Blank (manual provisioning) accepts any HTTPS host. |
+
+Cloud-origin commands arrive on a separate local topic and pass an allowlist: list, upload,
+preview and delete recorded sessions, update the software to a release tag (`vX.Y.Z`, never a
+branch), download and select a detection model, restart the OWL service and reboot. Nothing else
+from the cloud runs: no detection toggles, no configuration edits, no branch installs. The local broker itself listens on
+loopback only (v3.18+): the phone app and kiosk reach the OWL through HTTPS, never MQTT.
 
 ---
 

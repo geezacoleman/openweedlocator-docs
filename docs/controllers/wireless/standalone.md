@@ -169,6 +169,15 @@ The script installs and configures each component in order:
 [OK] Dashboard service is responding
 ```
 
+
+```{note}
+**Broker is local-only (v3.18+).** The standalone broker listens on `127.0.0.1:1883` only
+and the firewall no longer opens port 1883. `owl.py` and the dashboard talk over loopback;
+the phone app and kiosk use HTTPS. If you need MQTT from another machine, use the networked
+controller: its broker listens on all interfaces (`0.0.0.0:1883`) and accepts anonymous
+connections, so it is open to anything on the rig network without a login.
+```
+
 The network MQTT test (`10.42.0.1`) may show a warning during setup — this is normal because the hotspot isn't fully active yet. It resolves after the reboot.
 
 The device-settings step (v3.11+) installs a root-owned password helper
@@ -194,7 +203,22 @@ reset network setup, factory reset of detection settings). Without the rule,
 
 </details>
 
-In standalone mode the script then asks whether to arm phone-app first-boot
+In standalone mode the script then installs the Noktura cloud helper, so the
+phone app can connect this OWL to Noktura later from device settings:
+
+```text
+[OK] Noktura cloud helper installed (connect from the OWL app)
+```
+
+If that step fails, you'll see a warning instead. Setup still completes, but
+the app cannot connect the OWL to Noktura until you retry:
+
+```text
+[WARN] Cloud helper not installed; the app cannot connect this OWL to Noktura.
+       Retry with: sudo bash .../controller/setup/install_firstboot.sh --cloud-helper
+```
+
+It then asks whether to arm phone-app first-boot
 setup. Answer `n` for a unit you are configuring yourself; answer `y` only
 when preparing a unit to ship to an end user (it resets the hotspot password
 to the setup default and the phone app takes over on their first boot):
@@ -210,13 +234,19 @@ Reboot now? (y/n): y
 ```
 
 ```{note}
-Factory provisioning: `bash owl_setup.sh --ship` runs the whole install
-non-interactively (standalone mode, hotspot `OWL-XXXX` derived from the Pi
-serial, first-boot armed). On the production CM5 carrier board,
-`bash owl_setup.sh --ship-gps` does the same and also configures the
-on-board nRF9151 GPS. `setup.sh` also accepts flags for scripted
+Factory provisioning: `bash owl_setup.sh --factory` runs the whole install
+non-interactively for a production unit (standalone mode, hotspot `OWL-XXXX`
+derived from the Pi serial, on-board nRF9151 GPS, first-boot armed). It
+refuses to start unless the unit already has its hardware identity
+(`sudo bash owl_identity.sh --otp`). It is for units leaving the factory:
+building your own OWL, run `bash owl_setup.sh` with no options. The old
+`--ship` and `--ship-gps` flags were removed in v3.19.0. `setup.sh` also accepts flags for scripted
 installs: `--mode standalone --owl-id N --ssid SSID --password PSK
 [--arm-firstboot] [--yes]`.
+
+Re-using a Pi that is still armed for phone-app setup? `owl_setup.sh` and
+`setup.sh` (when run by hand) first ask "Disarm it and set up by hand? [Y/n]".
+Enter disarms it; `n` leaves it for the phone app. Factory runs never ask.
 ```
 
 ```{tip}
@@ -418,6 +448,8 @@ In standalone mode, topics use a simple structure (no device ID prefix):
 | `owl/commands` | Control commands (start, stop, config changes) |
 | `owl/status` | Heartbeat and connectivity |
 | `owl/detection` | Weed detection events |
+| `owl/cloud_commands` | Commands from Noktura through the cloud bridge (only when connected). Only an allowlist is acted on, never full control |
+| `cloud_out/state` | Small status for Noktura, sent when something the cloud uses changes or every 20 s. This is what the cloud bridge sends (under 0.5 MB per running hour), not the full state. OWLs connected before v3.21.0 need **Connect** again from the app, after `sudo bash ~/owl/controller/setup/install_firstboot.sh --cloud-helper` |
 
 To test MQTT:
 

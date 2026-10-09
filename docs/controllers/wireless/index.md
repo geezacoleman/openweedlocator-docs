@@ -91,7 +91,14 @@ Both standalone and networked modes use MQTT for communication between the OWL a
 | `owl/{device_id}/config` | Configuration snapshots |
 | `owl/{device_id}/indicators` | LED and buzzer indicator state |
 | `owl/{device_id}/errors` | Error reports |
-| `owl/{device_id}/gps` | GPS position and speed data |
+| `owl/{device_id}/gps` | GPS position and speed data. Never sent to Noktura |
+| `cloud_out/{device_id}/state` | Networked: small status for Noktura (only the fields the cloud uses), sent when one changes or every 20 s. The cloud bridge forwards this, not the full state |
+| `cloud_out/state` | Standalone: the same small cloud status, through the OWL's own bridge |
+| `owl/{device_id}/capture` | One small event per saved image (count, time, position) for the controller's collection map. Local only |
+| `owl/{device_id}/thumb` | JPEG of the latest saved image (about every 2 s) for the controller's collection gallery. Local only |
+| `owl/cloud/{device_id}/commands` | Networked: commands from Noktura for one OWL, delivered through the controller's cloud bridge. Only an allowlist is acted on (list, upload, preview and delete sessions, update to a release tag, download and select a model, restart, reboot). Kept separate from `owl/{device_id}/commands` so the cloud never gets full control |
+| `owl/cloud_commands` | Standalone: the same inbound cloud commands and allowlist, through the OWL's own bridge |
+| `owl/cloud/policy` | Retained, from the controller: the Noktura upload host networked OWLs pin uploads to |
 
 ### Testing MQTT
 

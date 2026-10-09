@@ -235,6 +235,20 @@ Enable kiosk mode on boot? (y/n, default: y): y
 **Kiosk mode** means the dashboard opens automatically in full-screen when the Pi boots — you won't see a normal desktop. This is ideal for a touchscreen in the cab. Enter **n** if you want a normal desktop environment.
 ```
 
+Next, choose which screen the controller opens:
+
+```{code-block} text
+:caption: Dashboard choice
+
+[INFO] Select the dashboard this controller opens:
+  1) Full control     (detection, spraying, config, AI — OWL default)
+  2) Data collection  (one record button, images, map, upload; no spraying)
+
+Select dashboard (1-2, default 1): 2
+```
+
+Pick **Data collection** for a rig that only records images (see [Data collection mode](#data-collection-mode) below). Detection stays off on every OWL in this mode. The choice is saved as `ui` in the `[WebDashboard]` section of `config/CONTROLLER.ini`, and both screens stay reachable at `/full` and `/collect`, so you can change your mind later without re-running setup. If you re-run setup on a controller that already has `ui = collect`, the prompt defaults to 2 (`default 2`), so pressing Enter keeps the data collection screen.
+
 If you enable kiosk mode, the script will ask which display you're using:
 
 ```{code-block} text
@@ -244,8 +258,9 @@ If you enable kiosk mode, the script will ask which display you're using:
   1) EDATEC HMI3010 10.1"         (1280x800, landscape — OWL default)
   2) Raspberry Pi Touch Display 2  (720x1280 panel — rotates to 1280x720 landscape)
   3) Generic HDMI / other          (pick a resolution)
+  4) EDATEC 7"                    (1024x600, landscape)
 
-Select display (1-3, default 1): 2
+Select display (1-4, default 1): 2
 ```
 
 **Raspberry Pi Touch Display 2.** This panel is 720x1280 (portrait) in hardware, so to run the dashboard in landscape it has to be rotated. If you pick it, the script asks for an orientation:
@@ -309,6 +324,7 @@ Static IP: 192.168.1.2
 Gateway: 192.168.1.1
 Hostname: owl-controller
 Kiosk Mode: y
+Dashboard: Full control
 Display: rpi_touch2 (1280x720, landscape)
 GPS: USB serial (/dev/ttyACM0 @ 9600, boom 12.0m)
 
@@ -328,6 +344,8 @@ The installation will then run automatically. It takes around 10-15 minutes. Wat
 ============================================
 [OK] System Packages
 [OK] Python Environment
+[OK] AI Agent Dependencies
+[OK] Noktura Cloud Helper
 [OK] MQTT Broker Configuration
 [OK] SSL Certificate
 [OK] Nginx Configuration
@@ -437,6 +455,16 @@ git clone https://github.com/geezacoleman/OpenWeedLocator owl
 cd owl
 bash owl_setup.sh
 ```
+
+If the Pi was used before as a phone-app OWL, the installer first asks:
+
+```{code-block} text
+[WARN] This OWL is armed for phone-app setup (/boot/firmware/owl-firstboot.flag).
+       Left armed, it keeps detection off and brings its setup hotspot back on boot.
+Disarm it and set up by hand? [Y/n]:
+```
+
+Press **Enter** to disarm it. A networked OWL must not stay armed. On a fresh SD card you won't see this question.
 
 The installer handles everything: system updates, camera check, virtual environment, OpenCV, and dependencies. When it asks about the web dashboard, say **yes**:
 
@@ -678,6 +706,64 @@ You can also delete sessions directly from the OWL's USB drive using the "Delete
 
 ---
 
+## Data collection mode
+
+Choose **Data collection** at setup (or set `ui = collect` under `[WebDashboard]` in `config/CONTROLLER.ini` and restart `owl-controller`) for a rig that records images for training data rather than spraying. The screen is built for gloved hands on a 7" EDATEC (1024x600) or the 10" HMI3010, with English and Danish (EN/DK in the top bar).
+
+**Record tab.** One large button starts and stops recording on every OWL. Tapping it opens a short form with big buttons: crop (with winter or spring for wheat, barley, oilseed rape, rye and triticale), weather, light, purpose (herbicide, fungicide, insecticide or survey) and optional notes. These go into every image's EXIF and into `session_metadata.json` in each session folder. Beside the button, a row per OWL shows images saved, speed, shutter time and gain, and free storage, and below it the latest saved image from each OWL refreshes every couple of seconds.
+
+**Quality warnings** appear in plain language, naming the OWL and what to do:
+
+- *Blur risk*: ground movement during one exposure (GPS speed x shutter time) is over the limit, with the speed to slow to
+- *Images softer than at the start*: sharpness has dropped below 60% of the first images (check the lens)
+- *Too dark* or *Overexposed*
+- *Not saving*: moving, but no new image for 10 s
+- Offline OWL, low storage, no GPS fix, clock not set, no internet (when connected to Noktura)
+
+**Map tab.** Every image location from the current run, coloured per OWL, over map tiles (a plain grid when offline).
+
+**Settings tab.**
+
+- *Sessions and upload*: the sessions on each OWL with size; tick and tap **Upload selected** to send them to Noktura. Uploads use the router's mobile data, so nothing is ever uploaded automatically.
+- *Capture*: still images or video clips (up to 60 s), spacing by distance (every X m from GPS speed, every Y s without GPS, nothing while parked) or by time, JPEG quality, the blur limit, and **Limit shutter time for speed**, which shortens the shutter as you drive faster and raises the gain instead. It switches itself off whenever GPS speed is missing. Saved as `[Collect]` keys in `CONTROLLER.ini` and pushed to every OWL.
+- *Camera* (all OWLs at once): resolution, brightness, white balance with **Calibrate white balance**, gain limit and rotation. Resolution and rotation restart the OWLs.
+- *Noktura*: connection status and **Connect** (below).
+- *Full dashboard*: opens the full controller screen.
+
+```{note}
+The shutter limit depends on how your camera driver handles a fixed shutter with automatic gain. Before relying on it, run `python tools/shutter_cap_probe.py` on one OWL (stop `owl.service` first) and check the result as described at the top of that script.
+```
+
+### Connecting the rig to Noktura
+
+A rig connects to Noktura through the controller, with one cloud connection for the controller and every OWL. Each OWL also needs internet through your router, because uploads go straight from the OWL to storage.
+
+1. In Noktura's fleet admin, create a site for the rig and register the controller (`owl-controller`, type fleet controller) and each OWL by its local id (for example `owl-1`).
+2. Open the one-time credential link and copy the command shown.
+3. On the controller: **Settings**, **Noktura**, paste the command and tap **Connect**. This is easiest from a laptop on the same network at `https://<controller-ip>/collect`.
+
+The pill in the top bar then shows **Noktura connected**, and **Uploading n%** while an upload runs.
+
+```{note}
+**Mobile data.** From v3.21.0, the rig sends Noktura only a small status message:
+- as soon as something Noktura uses changes,
+- otherwise once every 20 seconds for each device.
+
+GPS is not streamed. With two OWLs this is under 1 MB per running hour, before any upload.
+Uploads use the size of the images you send.
+
+Earlier releases sent each OWL's full status every 2 seconds, about 20 MB per running hour.
+```
+
+```{warning}
+**Rig paired before v3.21.0?** Updating the software does not change the cloud connection. Over
+SSH on the controller, run `sudo bash ~/owl/controller/setup/install_firstboot.sh --cloud-helper`.
+Then tap **Connect** again with the same command. If you do not have the command any more,
+reissue the credential in Noktura.
+```
+
+---
+
 ## Troubleshooting
 
 ### WiFi or network problems
@@ -778,7 +864,13 @@ Each OWL publishes to device-specific topics. Replace `{id}` with the device ID 
 | `owl/{id}/detection` | Weed detection events |
 | `owl/{id}/config` | Configuration data |
 | `owl/{id}/indicators` | LED and buzzer indicator state |
-| `owl/{id}/gps` | GPS data from the controller |
+| `owl/{id}/gps` | GPS data from the controller (local only, not sent to Noktura) |
+| `cloud_out/{id}/state` | Small status for Noktura (the fields the cloud uses), sent on change or every 20 s. The controller's cloud bridge forwards this instead of the full state. Local publish only |
+| `owl/{id}/capture` | One event per saved image, for the data-collection map (local broker only) |
+| `owl/{id}/thumb` | Latest saved image as a small JPEG, for the data-collection gallery (local broker only) |
+| `owl/cloud/policy` | Retained upload-host policy the controller publishes for networked OWLs |
+| `owl/cloud/{id}/commands` | Commands from Noktura for one OWL, delivered through the controller's cloud bridge. The OWL only acts on an allowlist (list, upload, preview and delete sessions, update to a release tag, download and select a model, restart, reboot); they never reach `owl/{id}/commands` |
+| `owl/cloud/owl-controller/commands` | Noktura's replies to upload requests (`upload_request_ack`), delivered through the cloud bridge |
 
 The controller also exposes these HTTP endpoints for the dashboard:
 
