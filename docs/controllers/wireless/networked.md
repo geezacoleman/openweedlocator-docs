@@ -720,11 +720,13 @@ Choose **Data collection** at setup (or set `ui = collect` under `[WebDashboard]
 - *Not saving*: moving, but no new image for 10 s
 - Offline OWL, low storage, no GPS fix, clock not set, no internet (when connected to Noktura)
 
+**Live view.** Each OWL's row on the Record tab has a **Live view** button that opens its camera feed full screen, with buttons to switch between OWLs. **Close** stops the feed.
+
 **Map tab.** Every image location from the current run, coloured per OWL, over map tiles (a plain grid when offline).
 
 **Settings tab.**
 
-- *Sessions and upload*: the sessions on each OWL with size; tick and tap **Upload selected** to send them to Noktura. Uploads use the router's mobile data, so nothing is ever uploaded automatically.
+- *Sessions and upload*: the sessions on each OWL with size; tick and tap **Upload selected** to send them to Noktura. Uploads use the router's mobile data, so nothing is ever uploaded automatically. **Delete selected** removes the ticked sessions from the OWLs after a confirmation, usually once they are uploaded. A session that is still recording, uploading or waiting for Noktura is never deleted.
 - *Capture*: still images or video clips (up to 60 s), spacing by distance (every X m from GPS speed, every Y s without GPS, nothing while parked) or by time, JPEG quality, the blur limit, and **Limit shutter time for speed**, which shortens the shutter as you drive faster and raises the gain instead. It switches itself off whenever GPS speed is missing. Saved as `[Collect]` keys in `CONTROLLER.ini` and pushed to every OWL.
 - *Camera* (all OWLs at once): resolution, brightness, white balance with **Calibrate white balance**, gain limit and rotation. Resolution and rotation restart the OWLs.
 - *Noktura*: connection status and **Connect** (below).
