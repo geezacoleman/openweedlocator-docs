@@ -863,9 +863,9 @@ Each OWL publishes to device-specific topics. Replace `{id}` with the device ID 
 | `owl/{id}/state` | Full device state (detection mode, algorithm, settings) |
 | `owl/{id}/commands` | Control commands sent to the OWL (start, stop, config changes) |
 | `owl/{id}/status` | Heartbeat and connectivity status |
-| `owl/{id}/detection` | Weed detection events |
 | `owl/{id}/config` | Configuration data |
-| `owl/{id}/indicators` | LED and buzzer indicator state |
+| `owl/{id}/indicators` | Short events for the dashboard lights: weed detected, image written, drive full |
+| `owl/{id}/errors` | Error log lines from the OWL (level, message, time) |
 | `owl/{id}/gps` | GPS data from the controller (local only, not sent to Noktura) |
 | `cloud_out/{id}/state` | Small status for Noktura (the fields the cloud uses), sent on change or every 20 s. The controller's cloud bridge forwards this instead of the full state. Local publish only |
 | `owl/{id}/capture` | One event per saved image, for the data-collection map (local broker only) |

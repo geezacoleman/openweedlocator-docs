@@ -96,6 +96,7 @@ delay = 0
 actuation_top = 0.0
 actuation_bottom = 1.0
 actuation_zone = 100
+on_error = off
 
 [Controller]
 controller_type = none
@@ -282,6 +283,19 @@ device_token = <minted-at-provisioning>
 | `actuation_top` | `0.0` | Top of the **actuation band** as a fraction of the cropped height (`0.0` = top of crop). A weed fires its relay only while its centre is inside the band. Raise this to ignore weeds too far ahead. |
 | `actuation_bottom` | `1.0` | Bottom of the actuation band as a fraction of the cropped height (`1.0` = bottom of crop). Lower this to ignore weeds too close (where the solenoid can't react in time). |
 | `actuation_zone` | `100` | **Legacy** bottom-anchored zone (% from bottom). Used only if `actuation_top`/`actuation_bottom` are absent (then `actuation_top = 1 - actuation_zone/100`, `actuation_bottom = 1.0`). Prefer the band keys above. |
+| `on_error` | `off` | What the nozzles do on a spraying fault: the camera stops sending frames, dashboard and switch control stops updating, or a relay is stuck on. `off` turns detection off and all nozzles off. `on` blanket sprays while spraying is switched on, if detection can no longer run (camera lost); otherwise spot spraying continues. Either way the fault shows on the dashboard, the phone app and the status LED. |
+
+**Status LED fault codes.** The status LED flashes a code, repeated, while a fault or error is active:
+
+| Flashes | Meaning |
+|---------|---------|
+| 1 | Camera or software dependency failed at start |
+| 2 | Camera not found at start |
+| 3 | Camera lost while running (spraying fault) |
+| 4 | Dashboard and switch control stopped updating (spraying fault) |
+| 5 | Storage full or storage error |
+| 6 | No USB drive for recording, or the drive was removed |
+| 7 | A relay is stuck on (spraying fault) |
 
 ### Controller
 

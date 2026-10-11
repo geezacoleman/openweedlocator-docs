@@ -87,10 +87,9 @@ Both standalone and networked modes use MQTT for communication between the OWL a
 | `owl/{device_id}/state` | Full OWL state (FPS, detections, settings, mode) |
 | `owl/{device_id}/commands` | Commands to OWL (start, stop, config changes) |
 | `owl/{device_id}/status` | Heartbeat and connectivity status |
-| `owl/{device_id}/detection` | Detection events and results |
 | `owl/{device_id}/config` | Configuration snapshots |
-| `owl/{device_id}/indicators` | LED and buzzer indicator state |
-| `owl/{device_id}/errors` | Error reports |
+| `owl/{device_id}/indicators` | Short events for the dashboard lights: weed detected, image written, drive full |
+| `owl/{device_id}/errors` | Error log lines from the OWL (level, message, time) |
 | `owl/{device_id}/gps` | GPS position and speed data. Never sent to Noktura |
 | `cloud_out/{device_id}/state` | Networked: small status for Noktura (only the fields the cloud uses), sent when one changes or every 20 s. The cloud bridge forwards this, not the full state |
 | `cloud_out/state` | Standalone: the same small cloud status, through the OWL's own bridge |
