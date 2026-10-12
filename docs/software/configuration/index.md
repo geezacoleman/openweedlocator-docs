@@ -162,6 +162,7 @@ record_mode = images
 video_max_s = 60
 shutter_cap = False
 smear_limit_mm = 2.0
+min_speed_kmh = 1.0
 save_directory = /media/owl/SanDisk
 log_fps = False
 camera_name = cam1
@@ -423,6 +424,7 @@ The Pi 5 is not affected by the clamp.
 | `video_max_s` | `60` | Video clip length limit in seconds (5-60). |
 | `shutter_cap` | `False` | Limit the shutter time so ground movement during one exposure (GPS speed x shutter time) stays under `smear_limit_mm`; the gain rises instead. Released whenever GPS speed is missing. Check it on your camera first with `tools/shutter_cap_probe.py`. |
 | `smear_limit_mm` | `2.0` | Blur limit for `shutter_cap` and the collect screen's blur warning, in mm of ground movement per image. |
+| `min_speed_kmh` | `1.0` | No still images while a fresh GPS speed is below this, for example parked or turning at a headland. `0` never pauses. Without a GPS speed, images keep coming. Video clips are not paused. |
 | `save_directory` | `/media/owl/SanDisk` | Directory for saved images. Typically a USB drive mount point. |
 | `log_fps` | `False` | Log frame processing times to file. |
 | `camera_name` | `cam1` | Camera identifier used in saved file names. |
@@ -481,7 +483,7 @@ Read by the in-cab controller's data-collection screen and, since v3.23, by the 
 | `language` | `en` | Language of the record form and capture settings: `en` or `da`. |
 | `crops`, `seasonal_crops`, `weather`, `lighting`, `purposes` | built-in lists | Comma-separated preset slugs for the record form. Values go into image EXIF and `session_metadata.json` and are what Noktura maps onto dataset fields, so keep the slugs (for example `wheat`, `natural_sun`, `herbicide`). |
 | `last_crop`, `last_crop_season`, `last_weather`, `last_lighting`, `last_purpose` | empty | The choices from the last Start recording, pre-selected next time. Written automatically; notes are never saved here. |
-| `sample_mode`, `sample_distance_m`, `sample_interval_s`, `jpeg_quality`, `record_mode`, `video_max_s`, `shutter_cap`, `smear_limit_mm`, `max_gain` | `distance`, `1.0`, `2.0`, `95`, `images`, `60`, `false`, `2.0`, `auto` | In-cab controller only: capture settings pushed to every OWL (see DataCollection above). A standalone OWL keeps these in its own active config (`[DataCollection]`, and `[Camera] max_gain`) instead. |
+| `sample_mode`, `sample_distance_m`, `sample_interval_s`, `jpeg_quality`, `record_mode`, `video_max_s`, `shutter_cap`, `smear_limit_mm`, `max_gain`, `min_speed_kmh` | `distance`, `1.0`, `2.0`, `95`, `images`, `60`, `false`, `2.0`, `auto`, `1.0` | In-cab controller only: capture settings pushed to every OWL (see DataCollection above). A standalone OWL keeps these in its own active config (`[DataCollection]`, and `[Camera] max_gain`) instead. |
 | `soft_ratio`, `dark_brightness`, `dark_percent`, `clipped_percent`, `not_saving_s`, `storage_low_mb` | `0.6`, `40`, `30`, `5`, `10`, `2048` | Warning thresholds for the collect screen. |
 
 ### Network
