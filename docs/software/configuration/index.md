@@ -474,13 +474,14 @@ The Pi 5 is not affected by the clamp.
 
 ### Collect
 
-In-cab controller only, written by the data-collection screen's Settings tab. Every key is optional.
+Read by the in-cab controller's data-collection screen and, since v3.23, by the standalone dashboard (on the OWL's own `CONTROLLER.ini`). Written by the record form and the collect screen's Settings tab. Every key is optional and can be edited by hand.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `language` | `en` | Screen language: `en` or `da`. |
+| `language` | `en` | Language of the record form and capture settings: `en` or `da`. |
 | `crops`, `seasonal_crops`, `weather`, `lighting`, `purposes` | built-in lists | Comma-separated preset slugs for the record form. Values go into image EXIF and `session_metadata.json` and are what Noktura maps onto dataset fields, so keep the slugs (for example `wheat`, `natural_sun`, `herbicide`). |
-| `sample_mode`, `sample_distance_m`, `sample_interval_s`, `jpeg_quality`, `record_mode`, `video_max_s`, `shutter_cap`, `smear_limit_mm`, `max_gain` | `distance`, `1.0`, `2.0`, `95`, `images`, `60`, `true`, `2.0`, `auto` | Capture settings pushed to every OWL (see DataCollection above). |
+| `last_crop`, `last_crop_season`, `last_weather`, `last_lighting`, `last_purpose` | empty | The choices from the last Start recording, pre-selected next time. Written automatically; notes are never saved here. |
+| `sample_mode`, `sample_distance_m`, `sample_interval_s`, `jpeg_quality`, `record_mode`, `video_max_s`, `shutter_cap`, `smear_limit_mm`, `max_gain` | `distance`, `1.0`, `2.0`, `95`, `images`, `60`, `false`, `2.0`, `auto` | In-cab controller only: capture settings pushed to every OWL (see DataCollection above). A standalone OWL keeps these in its own active config (`[DataCollection]`, and `[Camera] max_gain`) instead. |
 | `soft_ratio`, `dark_brightness`, `dark_percent`, `clipped_percent`, `not_saving_s`, `storage_low_mb` | `0.6`, `40`, `30`, `5`, `10`, `2048` | Warning thresholds for the collect screen. |
 
 ### Network

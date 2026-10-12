@@ -286,7 +286,7 @@ The dashboard provides live video with detection overlay, real-time statistics, 
 The Dashboard tab has large toggle buttons for the main functions:
 
 - **Detection** / **Tracking** — tap to start or stop. Shows ON/OFF state
-- **Recording** — shows a blinking red dot when active (like a camera record indicator). Tap to toggle
+- **Recording** — shows a blinking red dot when active (like a camera record indicator). Tapping it to start opens **What are you recording?**: tap the crop (and season for winter/spring crops), weather, light and purpose, add an optional note, then **Start recording**. Your last choices are pre-selected. These labels go into every image and the session's `session_metadata.json`, which Noktura reads when the session is uploaded. While recording, the choices show as chips under the switch
 - **All Nozzles** — turns green when engaged (blanket spray mode). Tap to toggle
 - **Sensitivity** — switch between Low, Medium, and High detection presets
 - **Fan** — Auto or 100% manual override
@@ -324,6 +324,16 @@ If you have a wired controller connected, a GPS status LED on the controller box
 | Regular flashing | Acquiring — waiting for signal |
 | Double flash, pause | Error or stale — phone disconnected or no signal |
 | Off | GPS not active |
+
+### Data collection settings
+
+The **Config** tab has a **Data collection** card, the same settings as the in-cab controller's collect screen:
+
+- **Record as**: still images or video clips (5 to 60 s)
+- **Take images**: every Nth frame (the OWL default), by distance (every X metres from GPS speed, every Y seconds without GPS, nothing while parked) or by time
+- **Image quality**, **Blur limit**, **Limit shutter time for speed** and **Gain limit**
+
+Changes apply straight away, without a restart, and are saved to the active config's `[DataCollection]` section (`[Camera] max_gain` for the gain limit). The record form's preset lists and language come from `[Collect]` in `CONTROLLER.ini`; see [Configuration](../../software/configuration/index.md).
 
 ### Tuning detection and geometry
 
