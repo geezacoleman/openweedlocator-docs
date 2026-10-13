@@ -8,6 +8,7 @@
 
 standalone
 networked
+app
 ```
 
 Network-based control via WiFi and MQTT provides remote monitoring and control of your OWL system from any device with a web browser.

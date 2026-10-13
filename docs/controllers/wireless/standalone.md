@@ -20,6 +20,16 @@ This is a live, fully interactive mock running on sample data. Open the **Video 
 </div>
 ```
 
+## The dashboard layout
+
+The standalone dashboard uses the same design as the OWL app and the networked controller. It has three pages, chosen in the top bar: **Field**, **Data** and **Settings**. The camera fills the left of the Field page and the main controls sit on the right. Settings is a short list with a page for each topic. On a phone or a narrow screen everything stacks into one column and the three pages move to tabs at the bottom.
+
+![Standalone Field screen](../../_static/demos/redesign/standalone-field.png)
+
+![Standalone Settings screen](../../_static/demos/redesign/standalone-settings.png)
+
+<a href="../../_static/demos/redesign/index.html" target="_blank" rel="noopener">Open the design preview</a> to see every screen.
+
 ## How it works
 
 The OWL creates a WiFi hotspot (like a mobile phone sharing its connection). You connect your device to this hotspot and open the dashboard in a browser. Everything runs locally on the OWL Pi — no internet connection needed.
@@ -281,15 +291,36 @@ The dashboard provides live video with detection overlay, real-time statistics, 
 
 ## Using the dashboard
 
-### Controls
+### Field
 
-The Dashboard tab has large toggle buttons for the main functions:
+The top bar shows the OWL's name, the profile it is running, a state pill (**Spraying**, **Recording**, **Ready**, **Stopped** or **Fault**) and the power button.
 
-- **Detection** / **Tracking** — tap to start or stop. Shows ON/OFF state
-- **Recording** — shows a blinking red dot when active (like a camera record indicator). Tapping it to start opens **What are you recording?**: tap the crop (and season for winter/spring crops), weather, light and purpose, add an optional note, then **Start recording**. Your last choices are pre-selected. These labels go into every image and the session's `session_metadata.json`, which Noktura reads when the session is uploaded. While recording, the choices show as chips under the switch
-- **All Nozzles** — turns green when engaged (blanket spray mode). Tap to toggle
-- **Sensitivity** — switch between Low, Medium, and High detection presets
-- **Fan** — Auto or 100% manual override
+- **Live view**: the camera, with buttons to adjust the crop and spray zone, save a frame and go full screen. The stream only runs while Field is open.
+- **Spraying**: the big switch. It turns navy when the OWL is spraying and says which detection it uses.
+- **Recording**: tapping it opens **What are you recording?**: tap the crop (and season for winter/spring crops), weather, light and purpose, add an optional note, then **Start recording**. Your last choices are pre-selected. These labels go into every image and the session's `session_metadata.json`, which Noktura reads when the session is uploaded. While recording, the switch shows the photo count and the chosen labels, or **Paused below X km/h** when the tractor is too slow for still images.
+- **Detect with**: Colour, AI, Hybrid or Painted. AI and Hybrid carry an amber dot when this OWL can't run them (AI not installed, or no model yet). Tapping one then explains why and links to **Settings > AI models**; detection stays on colour.
+- **Sensitivity**: Low, Medium or High (custom presets appear next to them). It drives whichever detection is selected.
+- **Stat cells**: status, CPU temperature, free storage and GPS speed.
+
+Faults, a refused recording, a speed warning or a needed restart show as notices above **Detect with**.
+
+The **power button** offers **Shut down**, **Restart** and **Stop detection** (or **Start detection**). Shut down and Restart ask to confirm. On an OWL that was set up with the OWL app, the first time you do this from a browser it asks once for the OWL's hotspot password.
+
+### Settings
+
+| Page | What it holds |
+|------|---------------|
+| Colour tuning | Green, hue, saturation, brightness and smallest-weed sliders; painted profiles (Paint weeds, Edit, Delete) in Painted mode |
+| AI models | What runs the AI (Hailo-8, CPU only, or not installed with **Install AI**), the models on this OWL, which classes to spray, tracking, AI confidence and crop buffer |
+| Camera | White balance (Auto, Sun, Locked by calibration), brightness, crop and spray zone, picture size and rotation (these two restart the OWL program) |
+| Data collection | The capture settings described below, and tagging photos with the screen's location |
+| Profiles | The running profile, switch profile, save as a new profile, reload, reset to default |
+| Test nozzles | **Hold to spray** (every nozzle while you hold, stops after 10 s) and **Blanket spray**, plus the spray timing readout |
+| Noktura | The cloud link status, the Noktura address and a QR code |
+| Maintenance | Software update, fan (Auto or full speed), the cab switch setting for a UTE controller, messages, restart detection, download logs, USB drives and the file browser, reset network setup |
+| Advanced | The full INI editor and the AI assistant |
+
+On a phone, Settings is a list; tap a row to open its page and **Settings** at the top to go back.
 
 ### Using a wired controller
 
@@ -297,19 +328,19 @@ If you have a [wired controller](../wired/index.md) (UTE or Advanced) connected,
 
 | Controller | What the hardware controls | What you can still use on the dashboard |
 |------------|--------------------------|----------------------------------------|
-| UTE | Recording | Detection, tracking, nozzles, sensitivity, fan |
+| UTE | Recording (or spraying, set under Maintenance) | Detection, tracking, nozzles, sensitivity, fan |
 | Advanced | Recording, detection, sensitivity | Tracking, nozzles, fan |
 
-Locked controls show a small lock icon. Use the physical switch to change them.
+Locked switches are dimmed. Use the physical switch to change them.
 
 ### GPS and image tagging
 
-If you open the dashboard on a phone with GPS enabled, captured images are automatically tagged with your location. This is useful for mapping weed hotspots — you can plot geotagged images on a map later.
+If you open the dashboard on a phone with GPS enabled, captured images can be tagged with your location. This is useful for mapping weed hotspots: you can plot geotagged images on a map later.
 
 To use GPS:
 
 1. Open the dashboard on your phone (GPS must be allowed in the browser)
-2. The GPS toggle in the dashboard shows your accuracy
+2. Go to **Settings > Data collection** and set **Tag photos with this screen's location** to **On**. The accuracy shows next to it
 3. While GPS is active, every saved image includes location coordinates
 
 ```{tip}
@@ -320,32 +351,32 @@ If you have a wired controller connected, a GPS status LED on the controller box
 
 | LED pattern | Meaning |
 |-------------|---------|
-| Solid on | GPS lock — images are being tagged |
-| Regular flashing | Acquiring — waiting for signal |
-| Double flash, pause | Error or stale — phone disconnected or no signal |
+| Solid on | GPS lock: images are being tagged |
+| Regular flashing | Acquiring: waiting for signal |
+| Double flash, pause | Error or stale: phone disconnected or no signal |
 | Off | GPS not active |
 
 ### Data collection settings
 
-The **Config** tab has a **Data collection** card, the same settings as the in-cab controller's collect screen:
+**Settings > Data collection** holds the same settings as the in-cab controller's collect screen:
 
 - **Record as**: still images or video clips (5 to 60 s)
 - **Take images**: every Nth frame (the OWL default), by distance (every X metres from GPS speed, every Y seconds without GPS, nothing while parked) or by time
-- **Image quality**, **Blur limit**, **Limit shutter time for speed** and **Gain limit**
+- **Pause below**, **Image quality**, **Blur limit**, **Limit shutter time for speed** and **Gain limit**, with - and + buttons
 
 Changes apply straight away, without a restart, and are saved to the active config's `[DataCollection]` section (`[Camera] max_gain` for the gain limit). The record form's preset lists and language come from `[Collect]` in `CONTROLLER.ini`; see [Configuration](../../software/configuration/index.md).
 
 ### Tuning detection and geometry
 
-The **Config** tab edits the full configuration. When you change values and press **Save As…**, a dialog asks for a **name** and optional **notes**, and whether to **Make active on reboot** — saved configs are listed by name (with notes and date shown beneath the selector). If the active config is a custom one, the dialog also offers **Update "&lt;name&gt;"** to overwrite it in place rather than make a new file. The config selector switches the active boot config, a `Config` chip on the dashboard shows what's running, and a warning appears if a change (e.g. camera resolution) needs a restart.
+**Settings > Colour tuning** applies slider changes straight away. To keep them, open **Settings > Profiles** and tap **Save as new profile**: a dialog asks for a **name** and optional **notes**, and whether to **Make active on reboot**. If the active profile is a custom one, the dialog also offers **Update "&lt;name&gt;"** to overwrite it in place. The profile list switches the active boot config, and the top bar shows what's running. **Settings > Advanced** edits the full configuration file.
 
-To set the crop and actuation band visually, open the **Video Feed** and click **Adjust geometry**. The editor switches the preview to the full uncropped frame while open (and back afterwards), so the overlay lines up without touching detection:
+To set the crop and actuation band visually, tap the crop button on the Field live view (or **Settings > Camera > Adjust on the live view**). The editor switches the preview to the full uncropped frame while open (and back afterwards), so the overlay lines up without touching detection:
 
 - Drag the four **edge handles** to crop independently from each side (exclude a boom, wheel track, or shaded edge). Relay **lane lines** redraw live and recenter across the cropped width.
-- Drag the two **band handles** to set the **actuation band** — a weed fires only while its centre is inside it. Raise the top to ignore weeds too far ahead; lower the bottom to ignore weeds too close.
-- Use the **± nudge buttons** for fine adjustment. **Done** saves the geometry to `GEOMETRY.ini`; **Cancel** reverts to how it was when you opened the editor.
+- Drag the two **band handles** to set the **actuation band**: a weed fires only while its centre is inside it. Raise the top to ignore weeds too far ahead; lower the bottom to ignore weeds too close.
+- Use the **nudge buttons** in the right column for fine adjustment. **Done** saves the geometry to `GEOMETRY.ini`; **Cancel** reverts to how it was when you opened the editor.
 
-Geometry lives in its own `GEOMETRY.ini` (separate from named detection configs) and maps to the `crop_left/right/top/bottom` and `actuation_top/bottom` keys, which can also be set by hand — see [Configuration](../../software/configuration/index.md).
+Geometry lives in its own `GEOMETRY.ini` (separate from named detection configs) and maps to the `crop_left/right/top/bottom` and `actuation_top/bottom` keys, which can also be set by hand; see [Configuration](../../software/configuration/index.md).
 
 ## Downloading recorded images
 
@@ -355,9 +386,13 @@ You need a USB drive plugged into the OWL to record images. See [USB drive requi
 
 When recording is enabled, the OWL saves images to the USB drive in date-based folders (e.g., `20260315/`). You can download these wirelessly without unplugging the drive.
 
+### The Data page
+
+The **Data** page lists each recording with its date, photo count and size, and the crop and conditions it was recorded with. Each recording has **Download** (a ZIP of the session), **Details** (add or correct the crop and conditions of a run recorded without them) and a delete button. A storage card shows the free space.
+
 ### The downloads page
 
-Open `https://owl-1.local/downloads` in your browser, or tap "Download sessions as ZIP" at the bottom of the Storage tab.
+For previews of single images, open `https://owl-1.local/downloads` in your browser, or tap **All files and previews** on the Data page.
 
 The page lists each recording session by date, with image count and total size. From here you can:
 

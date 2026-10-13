@@ -24,6 +24,46 @@ current recommended accelerator for in-field Green-on-Green deployments.
 **Without an accelerator:** the Pi can run smaller NCNN models on CPU only. That works for testing and low-resolution
 inference, but the AI Hat+ is what unlocks larger image sizes and the frame rates needed for boom-speed operation.
 
+## Installing AI
+
+AI detection needs `ultralytics` (with PyTorch and NCNN) in the OWL's virtual environment. Units set up with
+`owl_setup.sh --factory` ship without it, so a fresh factory unit can only run colour detection until AI is installed.
+
+Every OWL reports what AI it can run in its state and in the standalone `/api/system_stats`:
+
+```json
+"ai": {
+  "cpu": {"installed": true},
+  "hailo": {"present": false, "chip": null, "runtime": false},
+  "accelerator": "cpu"
+}
+```
+
+`accelerator` is `hailo8` when a Hailo-8 card and its runtime are both present, `cpu` when only ultralytics is
+installed, and `null` when the unit has no AI. While it is `null`, the dashboards refuse the AI and Hybrid modes
+with a plain reason instead of selecting a mode the OWL cannot run.
+
+**Install AI from the dashboard or phone app.** `POST /api/ai/install` runs a normal software update at the
+branch the OWL is on and also installs `requirements-gog.txt`. It needs an internet connection (a phone hotspot
+works) and about 3 GB of free space, and can take 20 minutes or more on a Pi. Progress is the ordinary update
+progress (`GET /api/settings/update/status` on a standalone OWL, `GET /api/update/status` on the networked
+controller). On the networked controller the same route takes `{"device_ids": ["owl-1"]}` or `"all"`. If the
+install fails, or runs past the update's 30 minute limit, the update rolls back like any other.
+
+**Install AI over SSH:**
+
+```bash
+bash ~/owl/owl_update.sh --with-ai
+```
+
+### If AI cannot load
+
+Choosing AI is only saved once the OWL reports the model running. If it cannot load (no AI installed, no model,
+a damaged model), the OWL keeps detecting with its previous mode, and `algorithm_error` in the state says why.
+An OWL that starts up with `algorithm = gog` or `gog-hybrid` in its config and cannot load the model falls back
+to `exhsv` colour detection, so a unit is never left without detection after a restart. The config file is not
+changed, so the unit runs AI again once the problem is fixed.
+
 ## Detection Modes
 
 OWL supports two GoG detection strategies, selected by the `algorithm` config key:
@@ -68,6 +108,11 @@ The networked controller includes a model management page for uploading and depl
 2. Upload a `.pt` file or `.zip` containing NCNN `.param` + `.bin` files
 3. Select target OWL devices
 4. Click Deploy — the model is transferred to each OWL over the network
+
+Each OWL checks the download's SHA-256 before it touches the model it already has. For an NCNN zip it checks
+the zip file first (the hash Noktura sends), then the extracted files (the hash the controller sends). A zip
+whose files sit in one top-level folder is unpacked without that folder. If the check or the unpacking fails,
+the previous model stays in place and `model_download` in the state reports the error.
 
 ### Hot-swap via AI tab
 

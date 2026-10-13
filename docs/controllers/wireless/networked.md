@@ -14,6 +14,46 @@ This is a live, fully interactive mock of the dashboard running on sample data �
 </div>
 ```
 
+## Using the dashboard
+
+The controller uses the same design as the standalone dashboard and the OWL app, with your OWLs listed down the left. The top bar has four pages, **Field**, **Data**, **Map** and **Settings**, a state pill and the power button.
+
+![Networked Field screen](../../_static/demos/redesign/networked-field.png)
+
+![Networked Settings screen](../../_static/demos/redesign/networked-settings.png)
+
+**The OWL rail.** **All OWLs** is selected when the screen opens, and every control then acts on every OWL. Below it is one card per OWL with its state (On, Rec, Ready, Fault or Off), photos this run and speed. An OWL that drops out keeps its card, greyed, with **Seen x min ago**. Tap an OWL to see its camera and control it on its own; tap **All OWLs** to go back.
+
+**Field.** The live view shows the selected OWL (or the first one online), with buttons to grab a frame and open the full video. On the right:
+
+- **Spraying**: the big switch for the selected OWL or all of them.
+- **Recording**: one run on all OWLs. It opens **What are you recording?**, the same form as the Collect screen, and starts every OWL with the same run id. While recording it shows the photo count and the chosen labels.
+- **Detect with** and **Sensitivity**: as on the standalone. AI and Hybrid carry an amber dot when an OWL in the selection can't run AI, and tapping one explains why.
+- **Stat cells**: status, GPS speed and free storage for All OWLs; status, CPU temperature, frame rate and free storage for one OWL.
+
+Faults, speed warnings, a refused recording, a cab switch on an OWL or a needed restart show as notices above **Detect with**.
+
+**Data.** The recordings on each OWL (or the selected one) with **Upload to Noktura** and delete. **Copy to a laptop** opens the downloads page described below.
+
+**Map.** The GPS map with the track, compass, speed, satellites, distance, time and area.
+
+**Settings.** A side list next to the rail:
+
+| Page | What it holds |
+|------|---------------|
+| Colour tuning | A live snapshot, **Crop and spray zone**, the colour sliders and painted profiles, **Apply to OWLs** and **Save as profile** |
+| AI models | All OWLs: one row per OWL with its model and where its AI runs (Hailo, CPU or Needs AI), **Send model to all OWLs** (the model library page) and **Install AI** for OWLs without it. One OWL: its models, classes to spray, tracking, AI confidence and crop buffer |
+| Camera | White balance, calibration, brightness, size and rotation for all OWLs (same as the Collect screen) |
+| Data collection | The capture settings of the Collect screen |
+| Profiles | Saved profiles: load on the OWLs, use on startup, delete, save as new |
+| Spraying | Speed-adaptive timing: speed, frame rate and spray-time gauges, spray length, crop buffer and AI confidence, and the computed spray time and delay |
+| Test nozzles | **Hold to spray** (stops after 10 s) and **Blanket spray** |
+| Noktura | The cloud link status and how to connect |
+| Maintenance | Each OWL's version, temperature and load with **Restart**, **Update OWLs**, fix screen, restart controller and the model library |
+| Advanced | The per-OWL INI editor and the AI assistant |
+
+The **power button** turns off every OWL and the controller after a confirmation with a 3 second countdown. Wait 30 seconds after the screen goes dark before you switch off the power.
+
 ## Overview
 
 A networked OWL connects to your existing WiFi and communicates with other devices using a lightweight messaging system called MQTT. This enables:
@@ -730,7 +770,7 @@ Choose **Data collection** at setup (or set `ui = collect` under `[WebDashboard]
 - *Capture*: still images or video clips (up to 60 s), spacing by distance (every X m from GPS speed, every Y s without GPS, nothing while parked) or by time, JPEG quality, the blur limit, and **Limit shutter time for speed**, which shortens the shutter as you drive faster and raises the gain instead. It switches itself off whenever GPS speed is missing. Saved as `[Collect]` keys in `CONTROLLER.ini` and pushed to every OWL.
 - *Camera* (all OWLs at once): resolution, brightness, white balance with **Calibrate white balance**, gain limit and rotation. Resolution and rotation restart the OWLs.
 - *Noktura*: connection status and **Connect** (below).
-- *Full dashboard*: opens the full controller screen.
+- *Full dashboard*: opens the full controller screen (Field, Data, Map and Settings). Its top bar has a **Collect** button to come back.
 
 ```{note}
 The shutter limit depends on how your camera driver handles a fixed shutter with automatic gain. Before relying on it, run `python tools/shutter_cap_probe.py` on one OWL (stop `owl.service` first) and check the result as described at the top of that script.
@@ -890,30 +930,30 @@ To watch all messages from all OWLs:
 mosquitto_sub -h 192.168.1.2 -t "owl/#" -v
 ```
 
-### Tuning detection (Config tab)
+### Tuning detection (Settings > Colour tuning)
 
-The **Config** tab tunes detection across all connected OWLs from the cab. The model is: **make a change, see it take effect, then Save it under a name you choose.**
+**Settings > Colour tuning** tunes detection on the OWLs selected in the rail (all of them when **All OWLs** is selected). The model is: **make a change, see it take effect, then save it under a name you choose.**
 
-- **Sliders apply live.** Dragging a threshold slider (ExG, hue, saturation, brightness, etc.) pushes the change to every connected OWL immediately — watch the live preview update as you drag. Nothing is saved yet.
-- **Test on OWLs** pushes any changes made in *Advanced Settings* (the full INI editor) to all OWLs live, without saving.
-- **Save…** opens a dialog where you give the setup a **name** and optional **notes**, and tick **Make active on reboot**. The config is stored in the controller library and on each OWL's disk. A date is appended automatically so saves never overwrite each other. If a saved config is currently selected, the dialog also offers **Update "&lt;name&gt;"** to overwrite it in place instead of creating a new file.
-- **Library + ★ Set default.** The library dropdown lists saved configs by name and date; selecting one shows its notes and save date beneath. **Load** applies one live; **★ Set default** makes the selected config the one OWLs load on reboot. The active config is shown in the toolbar as `★ On reboot: <name>` and on each OWL card as `Running: <name>` — no need to touch `active_config.txt`.
+- **Sliders apply live.** Dragging a threshold slider (green, hue, saturation, brightness, smallest weed) pushes the change to the selected OWLs immediately. Nothing is saved yet.
+- **Apply to OWLs** also pushes any changes made in **Settings > Advanced** (the INI editor) live, without saving.
+- **Save as profile** opens a dialog where you give the setup a **name** and optional **notes**, and tick **Make active on reboot**. The config is stored in the controller library and on each OWL's disk. A date is appended automatically so saves never overwrite each other. If a saved config is currently selected, the dialog also offers **Update "&lt;name&gt;"** to overwrite it in place instead of creating a new file.
+- **Settings > Profiles** lists saved configs by name and date; selecting one shows its notes and save date beneath. **Load on OWLs** applies one live; **Use on startup** makes the selected config the one OWLs load on reboot. The running profile shows at the top of Profiles, with **OWLs differ** when the OWLs run different thresholds.
 
 ```{admonition} Mount geometry is separate
 :class: note
-Detection configs do **not** include the crop or actuation band — that is per-unit
+Detection configs do **not** include the crop or actuation band: that is per-unit
 mount geometry kept in each OWL's `GEOMETRY.ini`. Loading or saving a detection
-config never changes a unit's geometry. Use **Adjust geometry** (below) to change it.
+config never changes a unit's geometry. Use **Crop and spray zone** (below) to change it.
 ```
-- **Restart notice.** A few settings (camera `resolution`, `relay_num`) can't change live. If you edit one, a notice appears with a **Restart OWLs** button.
+- **Restart notice.** A few settings (camera `resolution`, `relay_num`) can't change live. If you edit one, a notice appears on Field and in Profiles with **Restart OWLs**.
 
 #### Visual geometry editor
 
-Click **Adjust geometry** on the Config tab to drag the crop and actuation band directly on the live feed. The editor automatically switches that OWL's preview to the **full uncropped frame** while open (and back to the normal cropped view when you close), so the overlay always lines up — you don't need to touch detection.
+Tap **Crop and spray zone** in **Settings > Colour tuning** (or **Settings > Camera**) to drag the crop and actuation band directly on the live feed. The editor automatically switches that OWL's preview to the **full uncropped frame** while open (and back to the normal cropped view when you close), so the overlay always lines up — you don't need to touch detection.
 
 - Drag the four **edge handles** to crop independently from the left, right, top and bottom — useful to exclude a boom, wheel track, or shaded edge. The **relay lane lines** redraw as you drag so you can see them recenter across the cropped width.
 - Drag the two **band handles** to set the **actuation band** — a weed fires its relay only while its centre is inside the band. Raise the top to ignore weeds too far ahead; lower the bottom to ignore weeds too close.
-- Use the **± nudge buttons** for fine adjustment in a bumpy cab.
+- Use the **nudge buttons** for fine adjustment in a bumpy cab.
 - **Done** saves the geometry to that OWL's `GEOMETRY.ini` (it persists across reboots). **Cancel** reverts to how it was when you opened the editor. Tick **Apply to all OWLs** before Done to write the same geometry to every connected unit (handy for an identically-mounted boom).
 
 These same values can be set by hand in `GEOMETRY.ini` (`crop_left/right/top/bottom`, `actuation_top/bottom`) — see [Configuration](../../software/configuration/index.md) — so OWLs running without a controller get the feature too.
@@ -922,7 +962,7 @@ These same values can be set by hand in `GEOMETRY.ini` (`crop_left/right/top/bot
 
 With more than one OWL you can tune two at once. Use the **1 feed / 2 feeds** toggle, and pick which OWL shows in each slot. Both feeds show their own crop/band handles and are dragged independently — **each feed pushes to its own OWL**. Tap a feed to make it **active** (highlighted); the shared controls panel then acts on that one. **Apply to all OWLs** still copies the active feed's geometry to every unit.
 
-Each feed has its own **zoom**: the `[−] / [+]` buttons (or scroll wheel / pinch) magnify the feed *and* its overlay together so you can place edges precisely on small weeds or rows; drag the feed to pan when zoomed in. Zoom is purely a closer look — the crop fractions don't change.
+Each feed has its own **zoom**: the `-` and `+` buttons (or scroll wheel / pinch) magnify the feed *and* its overlay together so you can place edges precisely on small weeds or rows; drag the feed to pan when zoomed in. Zoom is purely a closer look — the crop fractions don't change.
 
 ```{note}
 The normal live feed always shows the **cropped** frame (what the detector sees), with detection on or off. Only the geometry editor temporarily shows the full frame.

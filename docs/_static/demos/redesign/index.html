@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OWL design preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend+Deca:wght@400;500;600&display=swap">
+<style>
+/* Layout: a design review board. Page chrome follows the viewer's theme; the
+   device screens are the app's own sunlight-first light palette, on purpose. */
+:root {
+  /* page chrome */
+  --bg: #EEF1F4;
+  --fg: #17212B;
+  --muted: #5C6B7A;
+  --line: #D9E0E6;
+  --surface: #FFFFFF;
+  --accent: #336AA3;
+  --frame: #0F1F36;
+  --font-display: 'Lexend Deca', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* app palette (Noktura brand, theme.css) — fixed light */
+  --a-navy: #0F1F36;
+  --a-navy-2: #1B3556;
+  --a-blue: #336AA3;
+  --a-blue-l: #E3EDF4;
+  --a-ink: #17212B;
+  --a-mute: #5C6B7A;
+  --a-g50: #F4F6F8;
+  --a-g100: #EBEFF3;
+  --a-g200: #D9E0E6;
+  --a-white: #FFFFFF;
+  --a-hero-fg: #F2F6F9;
+  --a-hero-mute: #9DB0C4;
+  --a-ok: #1F9D55;
+  --a-ok-bg: #E9F7EF;
+  --a-warn: #A35C00;
+  --a-warn-bg: #FFF4E0;
+  --a-warn-line: #F1D3A1;
+  --a-rec: #D93025;
+  --a-soil-1: #6B5038;
+  --a-soil-2: #8A6A4C;
+  --a-leaf: #3E8E41;
+  --a-box: #9BF29E;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E141B; --fg: #E8EDF2; --muted: #9AA8B6; --line: #26313D; --surface: #151D26; --accent: #7FB0DE; --frame: #000000;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E141B; --fg: #E8EDF2; --muted: #9AA8B6; --line: #26313D; --surface: #151D26; --accent: #7FB0DE; --frame: #000000;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.page { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 64px; display: flex; flex-direction: column; gap: 56px; }
+
+/* ---------- page chrome ---------- */
+.intro { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 32px; align-items: end; }
+.eyebrow { font-size: 12.5px; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; }
+h1 { font-family: var(--font-display); font-weight: 500; font-size: clamp(30px, 4.4vw, 46px); letter-spacing: -0.025em; line-height: 1.08; margin: 6px 0 12px; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 60ch; margin: 0; }
+.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rules li { display: grid; grid-template-columns: 28px minmax(0,1fr); gap: 10px; align-items: baseline; font-size: 14px; }
+.rules b { font-family: var(--font-display); font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
+.section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 24px; }
+h2 { font-family: var(--font-display); font-weight: 500; font-size: 24px; letter-spacing: -0.015em; margin: 0; }
+.section-head p { margin: 0; color: var(--muted); font-size: 14px; max-width: 70ch; }
+
+.strip { display: flex; gap: 28px; overflow-x: auto; padding: 4px 4px 18px; scroll-snap-type: x proximity; }
+.shot { flex: none; width: 360px; display: flex; flex-direction: column; gap: 12px; scroll-snap-align: start; }
+.shot figcaption { display: flex; flex-direction: column; gap: 3px; }
+.shot figcaption strong { font-family: var(--font-display); font-weight: 500; font-size: 15.5px; }
+.shot figcaption span { font-size: 13px; color: var(--muted); }
+figure { margin: 0; }
+
+.phone { width: 360px; height: 760px; border-radius: 34px; background: var(--frame); padding: 8px; box-shadow: 0 18px 40px -18px rgba(15,31,54,.45); }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 27px; overflow: hidden; background: var(--a-g50); color: var(--a-ink); display: flex; flex-direction: column; font-size: 15px; }
+
+.kiosk-wrap { overflow-x: auto; padding-bottom: 14px; }
+.kiosk { width: 1024px; height: 600px; border-radius: 14px; background: var(--frame); padding: 10px; box-shadow: 0 18px 40px -18px rgba(15,31,54,.45); }
+.kiosk .screen { border-radius: 6px; }
+.kiosk-cap { display: flex; flex-direction: column; gap: 3px; margin-top: 12px; }
+.kiosk-cap strong { font-family: var(--font-display); font-weight: 500; }
+.kiosk-cap span { font-size: 13px; color: var(--muted); }
+.kiosk-set { display: flex; flex-direction: column; gap: 36px; }
+
+/* ---------- app components (redesign) ---------- */
+.s-status { height: 26px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-size: 12px; font-weight: 600; }
+.on-navy { background: var(--a-navy); color: var(--a-hero-fg); }
+
+.hero { background: var(--a-navy); color: var(--a-hero-fg); padding: 14px 18px 18px; display: flex; align-items: center; gap: 14px; flex: none; }
+.hero .logo { width: 56px; height: 41px; color: #fff; flex: none; }
+.hero .wm { font-family: var(--font-display); font-size: 21px; font-weight: 500; letter-spacing: -0.015em; }
+.hero .by { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--a-hero-mute); font-weight: 500; }
+.hero .nk { height: 10px; width: 52px; color: var(--a-hero-fg); }
+.hero .gear { margin-left: auto; width: 44px; height: 44px; display: grid; place-items: center; color: #fff; }
+
+.bar { background: var(--a-navy); color: var(--a-hero-fg); display: grid; grid-template-columns: 44px minmax(0,1fr) auto; align-items: center; gap: 6px; padding: 6px 12px 12px 6px; flex: none; }
+.bar .back { width: 44px; height: 44px; display: grid; place-items: center; color: #fff; }
+.bar .t { font-family: var(--font-display); font-size: 18px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar .sub { font-size: 12px; color: var(--a-hero-mute); font-weight: 500; }
+.state { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,.1); color: #fff; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; flex: none; }
+.dot.rec { background: #FF6B5E; }
+.dot.idle { background: #9DB0C4; }
+
+.body { flex: 1; min-height: 0; overflow: hidden; padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 12px; }
+.tabs { flex: none; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--a-white); border-top: 1px solid var(--a-g200); padding: 6px 6px 14px; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 6px; min-height: 58px; color: #7C8896; font-size: 11.5px; font-weight: 600; }
+.tab svg { width: 24px; height: 24px; padding: 3px 16px; box-sizing: content-box; border-radius: 999px; }
+.tab.on { color: var(--a-navy); }
+.tab.on svg { background: var(--a-blue-l); }
+
+.card { background: var(--a-white); border: 1px solid var(--a-g200); border-radius: 16px; }
+.pad { padding: 14px 16px; }
+.label { font-size: 12.5px; font-weight: 600; color: var(--a-mute); }
+.val { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.01em; }
+
+/* live view */
+.live { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 10; flex: none;
+  background:
+    radial-gradient(14% 10% at 30% 62%, var(--a-leaf) 60%, transparent 62%),
+    radial-gradient(9% 7% at 70% 34%, var(--a-leaf) 60%, transparent 62%),
+    radial-gradient(6% 5% at 82% 74%, var(--a-leaf) 60%, transparent 62%),
+    repeating-linear-gradient(100deg, var(--a-soil-1) 0 14px, var(--a-soil-2) 14px 30px); }
+.live .box { position: absolute; border: 2px solid var(--a-box); border-radius: 4px; }
+.live .chip { position: absolute; top: 10px; left: 10px; display: inline-flex; align-items: center; gap: 6px; background: rgba(10,16,24,.62); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; }
+.live .count { position: absolute; bottom: 10px; right: 10px; background: rgba(10,16,24,.62); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+
+/* primary switch row */
+.prime { display: flex; align-items: center; gap: 14px; padding: 14px 16px; min-height: 76px; }
+.prime .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.prime .txt .val { font-size: 19px; }
+.prime .txt .hint { font-size: 13px; color: var(--a-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prime.go { background: var(--a-navy); border-color: var(--a-navy); color: #fff; }
+.prime.go .hint { color: var(--a-hero-mute); }
+.sw { width: 64px; height: 38px; border-radius: 999px; background: var(--a-g200); position: relative; flex: none; }
+.sw::after { content: ""; position: absolute; top: 4px; left: 4px; width: 30px; height: 30px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.sw.on { background: #3FBF6E; }
+.sw.on::after { left: 30px; }
+.sw.on.rec { background: var(--a-rec); }
+.split { display: grid; grid-template-columns: 1fr 1fr; }
+.split > * + * { border-left: 1px solid var(--a-g200); }
+
+/* segmented */
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; background: var(--a-g100); border-radius: 14px; }
+.seg button { min-height: 46px; border: 0; border-radius: 10px; background: transparent; font: 600 13.5px var(--font-body); color: #55636F; display: flex; align-items: center; justify-content: center; gap: 6px; position: relative; cursor: pointer; }
+.seg button.on { background: var(--a-white); color: var(--a-navy); box-shadow: 0 1px 3px rgba(15,31,54,.16); }
+.seg button.blocked { color: #9AA6B2; }
+.seg button.blocked::after { content: ""; position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background: #E6A23C; }
+.group { display: flex; flex-direction: column; gap: 7px; }
+.notice { display: grid; grid-template-columns: 20px minmax(0,1fr); gap: 10px; align-items: start; background: var(--a-warn-bg); border: 1px solid var(--a-warn-line); color: #5E3B00; border-radius: 12px; padding: 10px 12px; font-size: 13px; line-height: 1.4; }
+.notice b { color: #4A2E00; }
+.notice a { color: var(--a-warn); font-weight: 700; text-decoration: none; white-space: nowrap; }
+
+.foot-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--a-mute); padding: 2px 4px; }
+.foot-line .ok { display: inline-flex; align-items: center; gap: 7px; color: var(--a-ok); font-weight: 600; }
+.foot-line .ok .dot { background: var(--a-ok); }
+.hold { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 12px; border: 1.5px dashed var(--a-g200); color: var(--a-mute); font-size: 13.5px; font-weight: 600; background: transparent; }
+
+/* lists */
+.list { background: var(--a-white); border: 1px solid var(--a-g200); border-radius: 16px; overflow: hidden; }
+.list-head { font-size: 12.5px; font-weight: 600; color: var(--a-mute); padding: 2px 6px 0; }
+.row { display: flex; align-items: center; gap: 12px; padding: 0 14px 0 16px; min-height: 58px; }
+.row + .row { border-top: 1px solid #EEF1F5; }
+.row .ic { width: 34px; height: 34px; border-radius: 10px; background: var(--a-blue-l); color: var(--a-blue); display: grid; place-items: center; flex: none; }
+.row .ic.amber { background: var(--a-warn-bg); color: var(--a-warn); }
+.row .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.row .name { font-weight: 600; font-size: 15px; }
+.row .meta { font-size: 12.5px; color: var(--a-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.row .right { font-size: 13.5px; color: var(--a-mute); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.row .right.amber { color: var(--a-warn); font-weight: 600; }
+.chev { color: #B4BEC9; flex: none; }
+
+/* stepper + field rows */
+.field { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px 8px 16px; min-height: 58px; }
+.field + .field, .field + .stack, .stack + .field { border-top: 1px solid #EEF1F5; }
+.field .fl { display: flex; flex-direction: column; min-width: 0; }
+.field .fl span:first-child { font-weight: 600; font-size: 14.5px; }
+.field .fl span + span { font-size: 12.5px; color: var(--a-mute); }
+.stepper { display: grid; grid-template-columns: 44px 58px 44px; align-items: center; background: var(--a-g100); border-radius: 12px; flex: none; }
+.stepper button { height: 44px; border: 0; background: transparent; font: 700 20px var(--font-body); color: var(--a-navy); }
+.stepper .v { text-align: center; font: 600 15px var(--font-display); font-variant-numeric: tabular-nums; }
+.stepper .v small { font: 500 11px var(--font-body); color: var(--a-mute); margin-left: 1px; }
+.mini-seg { display: inline-grid; grid-auto-flow: column; gap: 3px; padding: 3px; background: var(--a-g100); border-radius: 11px; flex: none; }
+.mini-seg button { min-height: 40px; min-width: 52px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; font: 600 13px var(--font-body); color: #55636F; }
+.mini-seg button.on { background: var(--a-white); color: var(--a-navy); box-shadow: 0 1px 3px rgba(15,31,54,.16); }
+.stack { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; }
+.stack .fl span:first-child { font-weight: 600; font-size: 14.5px; }
+.stack .fl span + span { font-size: 12.5px; color: var(--a-mute); }
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 54px; border-radius: 14px; border: 0; background: var(--a-blue); color: #fff; font: 600 16px var(--font-body); width: 100%; }
+.btn.navy { background: var(--a-navy); }
+.btn.ghost { background: var(--a-white); color: var(--a-navy); border: 1.5px solid var(--a-g200); }
+.btn.slim { min-height: 46px; font-size: 14.5px; }
+.readout { font-size: 12.5px; color: var(--a-mute); display: flex; align-items: center; gap: 6px; }
+.readout .sw-chip { width: 12px; height: 12px; border-radius: 4px; background: linear-gradient(90deg, #E9C9A8, #CFE0F0); border: 1px solid var(--a-g200); }
+.tag { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: var(--a-warn); background: var(--a-warn-bg); border: 1px solid var(--a-warn-line); border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
+.note { font-size: 12.5px; color: var(--a-mute); padding: 0 6px; }
+
+/* sheet */
+.scrim { position: absolute; inset: 0; background: rgba(10,16,24,.5); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--a-white); border-radius: 22px 22px 0 0; padding: 10px 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--a-g200); align-self: center; }
+.sheet h3 { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 20px; letter-spacing: -0.015em; }
+.sheet .sub { font-size: 13px; color: var(--a-mute); margin-top: -10px; }
+.pick { display: flex; flex-direction: column; gap: 7px; }
+.pills { display: flex; flex-wrap: wrap; gap: 7px; }
+.pill { min-height: 42px; padding: 0 14px; border-radius: 12px; border: 1.5px solid var(--a-g200); background: var(--a-white); font: 600 13.5px var(--font-body); color: var(--a-ink); display: inline-flex; align-items: center; }
+.pill.on { border-color: var(--a-navy); background: var(--a-navy); color: #fff; }
+.pill.more { color: var(--a-blue); border-style: dashed; }
+.input { min-height: 46px; border-radius: 12px; border: 1.5px solid var(--a-g200); padding: 0 14px; display: flex; align-items: center; color: #8A96A3; font-size: 14px; }
+
+/* data tab */
+.storage { display: flex; flex-direction: column; gap: 8px; }
+.meter { height: 8px; border-radius: 99px; background: var(--a-g100); overflow: hidden; }
+.meter i { display: block; height: 100%; width: 65%; background: var(--a-blue); border-radius: inherit; }
+.sess { background: var(--a-white); border: 1px solid var(--a-g200); border-radius: 16px; overflow: hidden; }
+.sess.open { border-color: var(--a-blue); box-shadow: 0 0 0 3px rgba(51,106,163,.12); }
+.sess-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+.thumb { width: 52px; height: 40px; border-radius: 8px; flex: none; background: radial-gradient(22% 26% at 40% 55%, var(--a-leaf) 60%, transparent 62%), repeating-linear-gradient(100deg, var(--a-soil-1) 0 6px, var(--a-soil-2) 6px 13px); }
+.thumb.b { background: radial-gradient(18% 22% at 64% 40%, var(--a-leaf) 60%, transparent 62%), repeating-linear-gradient(80deg, var(--a-soil-2) 0 7px, var(--a-soil-1) 7px 12px); }
+.sess .when { font-weight: 600; font-size: 15px; }
+.sess .what { font-size: 12.5px; color: var(--a-mute); font-variant-numeric: tabular-nums; }
+.sess-actions { display: grid; grid-template-columns: 1fr 1fr 48px; gap: 8px; padding: 0 14px 14px; }
+.iconbtn { min-height: 46px; border-radius: 14px; border: 1.5px solid var(--a-g200); background: var(--a-white); display: grid; place-items: center; color: #B3261E; }
+.prog { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 6px; }
+.prog .meter i { width: 46%; background: var(--a-ok); }
+.prog-line { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--a-mute); font-variant-numeric: tabular-nums; }
+.prog-line b { color: var(--a-ink); }
+.labels { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 14px 12px; }
+.lab { font-size: 11.5px; font-weight: 600; color: var(--a-navy-2); background: var(--a-blue-l); border-radius: 999px; padding: 3px 9px; }
+.lab.add { color: var(--a-blue); background: transparent; border: 1.5px dashed #BFD2E4; }
+
+/* settings sub-page bar */
+.subbar { background: var(--a-g50); display: grid; grid-template-columns: 44px minmax(0,1fr) 44px; align-items: center; padding: 6px 6px 4px; flex: none; }
+.subbar .back { width: 44px; height: 44px; display: grid; place-items: center; color: var(--a-blue); }
+.subbar .t { text-align: center; font-family: var(--font-display); font-weight: 500; font-size: 17px; }
+.big-title { font-family: var(--font-display); font-weight: 500; font-size: 26px; letter-spacing: -0.02em; padding: 2px 4px 0; }
+
+/* home additions */
+.panel { background: var(--a-white); border: 1px solid var(--a-g200); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.panel-head { font-size: 13px; font-weight: 700; color: var(--a-mute); padding: 12px 16px 10px; border-bottom: 1px solid #EEF1F5; display: flex; justify-content: space-between; align-items: center; }
+.owl-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px 12px 16px; min-height: 66px; }
+.owl-item .n { font-weight: 700; font-size: 16.5px; }
+.owl-item .m { font-size: 12.5px; color: var(--a-mute); }
+.okpill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--a-ok); background: var(--a-ok-bg); border: 1px solid #BFE8D0; border-radius: 999px; padding: 3px 11px; }
+.okpill .dot { background: #2ECC71; }
+.nk-card { display: grid; grid-template-columns: 44px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 14px 14px 14px 16px; }
+.nk-mark { width: 44px; height: 44px; border-radius: 12px; background: var(--a-navy); display: grid; place-items: center; color: #fff; }
+.nk-mark svg { width: 30px; height: 8px; }
+.nk-stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid #EEF1F5; }
+.nk-stats div { padding: 10px 12px 12px 16px; display: flex; flex-direction: column; }
+.nk-stats div + div { border-left: 1px solid #EEF1F5; }
+.nk-stats .val { font-size: 18px; }
+.nk-stats span:last-child { font-size: 11.5px; color: var(--a-mute); }
+.tile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile { background: var(--a-white); border: 1px solid var(--a-g200); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; color: var(--a-blue); box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.tile b { color: var(--a-ink); font-size: 14px; }
+.tile span { color: var(--a-mute); font-size: 12px; }
+
+/* models */
+.model-row .radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--a-g200); flex: none; }
+.model-row .radio.on { border: 7px solid var(--a-navy); }
+.classes { display: flex; flex-wrap: wrap; gap: 7px; padding: 12px 16px 14px; }
+.cls { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 12px; border-radius: 12px; border: 1.5px solid var(--a-g200); font-size: 13px; font-weight: 600; color: #8C97A3; background: var(--a-g50); }
+.cls i { width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid #C3CCD5; }
+.cls.on i { background: #C3CCD5; }
+
+/* ---------- kiosk (standalone) ---------- */
+.k-top { flex: none; height: 64px; background: var(--a-navy); color: #fff; display: flex; align-items: center; gap: 22px; padding: 0 18px 0 20px; }
+.k-top .logo { width: 40px; height: 29px; color: #fff; }
+.k-top .name { font-family: var(--font-display); font-size: 20px; font-weight: 500; letter-spacing: -0.01em; }
+.k-nav { display: flex; gap: 4px; margin-left: 10px; }
+.k-nav span { padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 15px; color: var(--a-hero-mute); }
+.k-nav span.on { background: rgba(255,255,255,.12); color: #fff; }
+.k-top .state { margin-left: auto; font-size: 14px; padding: 9px 14px; }
+.k-body { flex: 1; min-height: 0; display: grid; gap: 14px; padding: 14px; }
+.k-dash { grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); }
+.k-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.k-dash .live { aspect-ratio: auto; flex: 1; }
+.k-set { grid-template-columns: 250px minmax(0,1fr); }
+.k-side { background: var(--a-white); border: 1px solid var(--a-g200); border-radius: 16px; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+.k-side span { display: flex; align-items: center; justify-content: space-between; min-height: 52px; padding: 0 14px; border-radius: 11px; font-weight: 600; font-size: 15px; color: #3A4855; }
+.k-side span.on { background: var(--a-blue-l); color: var(--a-navy); }
+.k-side small { font-size: 12px; color: var(--a-warn); font-weight: 700; }
+.k-panel { background: var(--a-white); border: 1px solid var(--a-g200); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+.k-panel h3 { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 21px; letter-spacing: -0.015em; display: flex; justify-content: space-between; align-items: baseline; }
+.k-panel h3 small { font: 500 13px var(--font-body); color: var(--a-mute); }
+.k-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
+.k-f { display: flex; flex-direction: column; gap: 7px; }
+.k-f > span { font-size: 13.5px; font-weight: 600; color: #3A4855; }
+.k-seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1.5px solid var(--a-g200); border-radius: 12px; overflow: hidden; }
+.k-seg button { min-height: 52px; border: 0; background: var(--a-white); font: 600 15px var(--font-body); color: var(--a-ink); }
+.k-seg button + button { border-left: 1.5px solid var(--a-g200); }
+.k-seg button.on { background: var(--a-navy); color: #fff; }
+.k-step { display: grid; grid-template-columns: 56px 1fr 56px; align-items: center; border: 1.5px solid var(--a-g200); border-radius: 12px; overflow: hidden; text-align: center; }
+.k-step button { min-height: 52px; border: 0; background: var(--a-blue-l); color: var(--a-navy); font: 700 22px var(--font-body); }
+.k-step span { font: 500 18px var(--font-display); font-variant-numeric: tabular-nums; }
+.k-step small { font: 500 12px var(--font-body); color: var(--a-mute); }
+.k-modal { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 760px; background: var(--a-white); border-radius: 20px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 30px 60px -20px rgba(0,0,0,.5); }
+.k-modal h3 { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 22px; letter-spacing: -0.015em; }
+.k-mrow { display: grid; grid-template-columns: 100px minmax(0,1fr); gap: 12px; align-items: start; }
+.k-mrow > span { font-size: 14px; font-weight: 600; color: #3A4855; padding-top: 11px; }
+.k-modal .pill { min-height: 46px; font-size: 14.5px; padding: 0 16px; }
+.k-foot { display: grid; grid-template-columns: 180px 260px; justify-content: end; gap: 12px; border-top: 1px solid #EEF1F5; padding-top: 14px; }
+
+
+/* ---------- v2 additions (same tokens, no new colours) ---------- */
+.phone .live { aspect-ratio: 2 / 1; }
+.phone .body { gap: 10px; }
+.phone .seg button { min-height: 44px; }
+.hintrow { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.hintrow .hint { flex: none; }
+.hintrow .mini-labs { margin-top: 0; flex-wrap: nowrap; overflow: hidden; }
+.phone .prime { min-height: 64px; padding: 10px 16px; }
+.sep { display: inline-block; width: 1.5px; height: 0.85em; background: currentColor; opacity: .3; margin: 0 8px; vertical-align: -1px; border-radius: 1px; }
+.stats { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); background: var(--a-white); border: 1px solid var(--a-g200); border-radius: 14px; flex: none; }
+.stats > div { padding: 8px 12px 9px; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.stats > div + div { border-left: 1px solid #EEF1F5; }
+.stats span { font-size: 11.5px; font-weight: 600; color: var(--a-mute); white-space: nowrap; }
+.stats b { font: 500 16px var(--font-display); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stats .ok b { color: var(--a-ok); display: inline-flex; align-items: center; gap: 6px; }
+.stats .ok b::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--a-ok); }
+.mini-labs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.mini-labs .lab { font-size: 11px; padding: 2px 8px; }
+.prime.go .mini-labs .lab { background: rgba(255,255,255,.14); color: #fff; }
+.notice.bad { background: #FDECEA; border-color: #F2B8B2; color: #6D1A12; }
+.notice.bad b { color: #5A140D; }
+.notice.info { background: var(--a-blue-l); border-color: #BFD2E4; color: var(--a-navy-2); }
+.notice.info b { color: var(--a-navy); }
+.cap-head { display: flex; align-items: center; gap: 12px; padding: 12px 14px 10px 16px; }
+.cap-head .chip-ic { width: 38px; height: 38px; border-radius: 11px; background: var(--a-navy); color: #fff; display: grid; place-items: center; flex: none; }
+.cap-head .chip-ic.amber { background: var(--a-warn-bg); color: var(--a-warn); }
+.cap-head .chip-ic.grey { background: var(--a-g100); color: var(--a-mute); }
+.cap-head .t1 { font-weight: 700; font-size: 15.5px; }
+.cap-head .t2 { font-size: 12.5px; color: var(--a-mute); }
+.cap .stats { border: 0; border-top: 1px solid #EEF1F5; border-radius: 0; }
+.run { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.run.h { background: var(--a-navy); color: #fff; }
+.run.c { background: var(--a-g100); color: #55636F; }
+.run.w { background: var(--a-warn-bg); color: var(--a-warn); }
+.run.bad { background: #FDECEA; color: #B3261E; }
+.row.sub { min-height: 0; padding-top: 0; padding-bottom: 12px; border-top: 0 !important; padding-left: 50px; }
+.row.sub .meter { flex: 1; }
+.runon { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 14px 12px 50px; }
+.runon span { font-size: 12.5px; font-weight: 600; color: var(--a-mute); }
+.cls.act { color: var(--a-navy); background: var(--a-white); }
+.cls.act.on i { background: var(--a-navy); border-color: var(--a-navy); }
+.inst { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; }
+.inst .meter i { width: 38%; background: var(--a-blue); }
+.inst-line { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--a-mute); font-variant-numeric: tabular-nums; }
+.inst-line b { color: var(--a-ink); }
+.nk-big { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px; }
+.nk-big p { margin: 0; font-size: 13px; color: var(--a-mute); }
+.offline { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--a-mute); background: var(--a-g100); border-radius: 999px; padding: 3px 10px; }
+.offline .dot { background: #9DB0C4; }
+.panel-head .when { font-weight: 500; font-size: 12px; }
+.panel .stats, .cap .stats { border: 0; border-top: 1px solid #EEF1F5; border-radius: 0; }
+
+
+/* wide frames */
+.tablet { width: 1280px; height: 800px; zoom: 0.9; border-radius: 24px; background: var(--frame); padding: 12px; box-shadow: 0 18px 40px -18px rgba(15,31,54,.45); }
+.landscape { width: 915px; height: 412px; border-radius: 32px; background: var(--frame); padding: 8px; box-shadow: 0 18px 40px -18px rgba(15,31,54,.45); }
+.tablet .screen { border-radius: 14px; }
+.landscape .screen { border-radius: 26px; }
+.w-top { flex: none; height: 64px; background: var(--a-navy); color: #fff; display: flex; align-items: center; gap: 14px; padding: 0 14px 0 8px; }
+.w-top .back { width: 44px; height: 44px; display: grid; place-items: center; color: #fff; }
+.w-top .ttl { display: flex; flex-direction: column; min-width: 0; }
+.w-top .ttl b { font: 500 19px var(--font-display); letter-spacing: -0.01em; }
+.w-top .ttl span { font-size: 12px; color: var(--a-hero-mute); font-weight: 500; }
+.w-tabs { display: flex; gap: 4px; margin-left: 18px; }
+.w-tabs span { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 12px; font-weight: 600; font-size: 14.5px; color: var(--a-hero-mute); }
+.w-tabs span svg { width: 20px; height: 20px; }
+.w-tabs span.on { background: rgba(255,255,255,.12); color: #fff; }
+.w-top .state { margin-left: auto; }
+.w-top .pwr { width: 44px; height: 44px; display: grid; place-items: center; color: #fff; border-radius: 12px; background: rgba(255,255,255,.08); }
+.landscape .w-top { height: 54px; }
+.landscape .w-tabs span { padding: 7px 12px; font-size: 13.5px; }
+.w-body { flex: 1; min-height: 0; display: grid; gap: 14px; padding: 14px; }
+.w-field { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.w-field .live { aspect-ratio: auto; height: 100%; }
+.w-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; }
+.landscape .w-body { padding: 10px 12px; gap: 12px; }
+.landscape .w-col { gap: 8px; }
+.landscape .prime { min-height: 60px; padding: 10px 14px; }
+.landscape .seg button { min-height: 44px; }
+.w-set { grid-template-columns: 280px minmax(0, 1fr); }
+.w-set .k-panel { overflow: hidden; }
+.k-side span .ic-s { display: inline-flex; align-items: center; gap: 12px; }
+.k-side span svg { width: 19px; height: 19px; color: var(--a-blue); }
+.w-ai { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+
+/* networked: the standalone layout with the OWLs down one side */
+.n-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 200px minmax(0, 1.05fr) minmax(0, 1fr); gap: 12px; padding: 12px; }
+.n-rail { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.n-owl { background: var(--a-white); border: 1px solid var(--a-g200); border-radius: 14px; padding: 9px 12px; display: flex; flex-direction: column; gap: 3px; }
+.n-owl.on { border-color: var(--a-blue); box-shadow: 0 0 0 3px rgba(51,106,163,.14); }
+.n-owl .nm { display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 15px; }
+.n-owl .st { font-size: 12px; color: var(--a-mute); font-variant-numeric: tabular-nums; }
+.n-owl.off { background: var(--a-g50); color: var(--a-mute); }
+.n-body .live { aspect-ratio: auto; flex: 1; }
+.n-set { grid-template-columns: 200px 230px minmax(0, 1fr); }
+.scope { display: flex; flex-wrap: wrap; gap: 6px; }
+.scope .pill { min-height: 38px; font-size: 13px; }
+.k-top .pwr { width: 44px; height: 44px; display: grid; place-items: center; color: #fff; border-radius: 12px; background: rgba(255,255,255,.08); }
+
+/* ---------- critique ---------- */
+.crit { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--surface); }
+.crit-row { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: 0; }
+.crit-row > div { padding: 14px 16px; font-size: 13.5px; min-width: 0; }
+.crit-row + .crit-row { border-top: 1px solid var(--line); }
+.crit-row > div + div { border-left: 1px solid var(--line); }
+.crit-row.h > div { font-size: 12px; font-weight: 600; color: var(--muted); padding-block: 10px; }
+.crit-row b { font-family: var(--font-display); font-weight: 500; font-size: 14.5px; display: block; margin-bottom: 2px; }
+.crit-row .ref { color: var(--muted); }
+.crit-row .risk { color: var(--fg); }
+.caveat { font-size: 13px; color: var(--muted); margin: 14px 2px 0; max-width: 90ch; }
+
+.before { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
+.before figure { display: flex; flex-direction: column; gap: 8px; }
+.before img { width: 100%; border-radius: 12px; border: 1px solid var(--line); background: #fff; display: block; }
+.before figcaption { font-size: 12.5px; color: var(--muted); }
+
+@media (max-width: 860px) {
+  .intro { grid-template-columns: 1fr; }
+  .crit-row { grid-template-columns: 1fr; }
+  .crit-row > div + div { border-left: 0; border-top: 1px dashed var(--line); }
+  .crit-row.h { display: none; }
+}
+@media (max-width: 420px) {
+  .page { padding-inline: 16px; }
+  .shot { width: 330px; }
+  .phone { width: 330px; height: 700px; transform-origin: top left; }
+}
+button:focus-visible { outline: 3px solid var(--a-blue); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style></head><body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="owl-face" viewBox="0 0 20.449883 14.861092">
+            <g transform="translate(-271.58534,-163.35397)">
+                <path fill="currentColor" d="m 279.83149,177.33595 -1.74085,-0.87647 -0.68462,-0.0338 c -1.12387,-0.0556 -1.80535,-0.22208 -2.56695,-0.62722 -1.35452,-0.72057 -2.22428,-1.96235 -2.49079,-3.55616 -0.18702,-1.11849 0.0562,-2.24625 0.70562,-3.27239 0.3629,-0.57337 0.50704,-0.64899 0.94418,-0.49535 0.14916,0.0524 0.28073,0.10484 0.29237,0.11649 0.0116,0.0116 -0.0634,0.13394 -0.16677,0.27177 -0.59899,0.79879 -0.96272,1.97494 -0.87742,2.83726 0.14617,1.47768 1.01379,2.69249 2.3888,3.34472 0.57158,0.27113 1.03722,0.36412 1.69917,0.33932 0.48317,-0.0181 0.6368,-0.0444 1.02648,-0.17587 0.75161,-0.25353 1.45196,-0.69982 2.20723,-1.40654 l 0.36005,-0.3369 0.1389,0.38853 c 0.0764,0.21369 0.2743,0.78532 0.4398,1.27028 0.16549,0.48497 0.31388,0.88195 0.32975,0.88219 0.0159,2.3e-4 0.22996,-0.57554 0.47574,-1.27951 0.24578,-0.70396 0.46569,-1.2851 0.48868,-1.29143 0.023,-0.006 0.12651,0.10659 0.23002,0.25091 0.27327,0.38104 0.8773,0.9301 1.28921,1.17192 0.67159,0.39426 1.40096,0.56212 2.28197,0.52517 0.46624,-0.0196 0.65006,-0.0503 1.01618,-0.1697 1.24583,-0.40646 2.22758,-1.34522 2.65125,-2.53518 0.14007,-0.3934 0.14667,-0.44443 0.14455,-1.11796 -0.002,-0.63211 -0.0157,-0.74994 -0.13157,-1.1292 -0.14388,-0.47099 -0.44949,-1.13539 -0.70276,-1.52783 -0.0914,-0.14162 -0.15576,-0.27435 -0.14302,-0.29496 0.0385,-0.0623 0.4777,-0.27093 0.5703,-0.27093 0.27871,0 0.92602,1.1105 1.1962,2.05213 0.0904,0.31495 0.10658,0.48457 0.10745,1.12374 0.001,0.89421 -0.0802,1.26713 -0.44311,2.02927 -0.28988,0.60882 -0.54744,0.98882 -0.96398,1.42226 -0.82667,0.86022 -1.78886,1.28858 -3.17718,1.41447 -0.96205,0.0872 -1.5076,0.25134 -2.18274,0.65657 -0.51887,0.31143 -0.73706,0.4177 -1.70229,0.82907 -0.64948,0.2768 -0.87574,0.35241 -1.0486,0.3504 -0.18983,-0.002 -0.46189,-0.12413 -1.96125,-0.87902 z m 1.93152,-3.02858 c -0.0128,-0.0361 -0.0795,-0.22434 -0.14825,-0.41842 -0.64584,-1.82334 -1.94572,-3.37356 -3.80642,-4.53951 -0.78134,-0.48961 -3.79124,-1.94491 -4.47756,-2.16492 -0.97117,-0.31133 -1.50715,-0.83927 -1.69158,-1.6662 -0.12182,-0.54622 -0.0336,-1.27981 0.22967,-1.90977 0.0541,-0.12939 0.10462,-0.24351 0.11232,-0.25361 0.008,-0.0101 0.10047,0.0598 0.20613,0.15521 0.47454,0.42872 1.00229,0.68755 2.33198,1.14371 0.67804,0.23261 1.08018,0.4013 1.42187,0.59646 0.55277,0.31573 0.85036,0.41846 1.08806,0.37561 0.0921,-0.0166 0.39558,-0.13375 0.67438,-0.26033 0.83662,-0.37984 2.01728,-0.64326 3.35117,-0.7477 1.68792,-0.13215 3.62659,0.1813 5.24248,0.84764 0.19023,0.0785 0.4245,0.14263 0.5206,0.14263 0.12051,0 0.39952,-0.10793 0.89924,-0.34785 0.39848,-0.19132 1.06327,-0.46819 1.47731,-0.61527 0.93637,-0.33263 1.70648,-0.7016 2.11018,-1.01103 0.32317,-0.24769 0.47806,-0.29391 0.51897,-0.15486 0.0133,0.0453 0.0697,0.33641 0.12538,0.64694 0.13016,0.72651 0.11243,1.37064 -0.0492,1.78789 -0.18272,0.4717 -0.80743,1.00987 -1.36441,1.17541 -0.0647,0.0192 -0.43414,0.15161 -0.82099,0.29418 -2.49814,0.92064 -4.43366,2.09685 -5.83689,3.54708 -0.85274,0.8813 -1.37788,1.68986 -1.81439,2.79361 -0.13304,0.33641 -0.24974,0.61997 -0.25934,0.63015 -0.01,0.0102 -0.0279,-0.011 -0.0407,-0.047 z m 4.24843,-0.13715 c -0.92191,-0.14382 -1.78495,-0.88161 -2.01032,-1.71857 -0.089,-0.33068 -0.0138,-0.47035 0.54733,-1.01562 0.74257,-0.72163 1.50441,-1.29599 2.32151,-1.7502 0.5698,-0.31675 0.96361,-0.20964 1.39425,0.37921 0.62212,0.85066 0.79509,1.49442 0.60136,2.23817 -0.32914,1.26367 -1.56008,2.06889 -2.85413,1.86701 z m -9.44499,-0.0734 c -0.75822,-0.20389 -1.463,-0.89074 -1.69942,-1.65619 -0.11776,-0.38129 -0.1264,-1.03772 -0.0179,-1.36124 0.10458,-0.31184 0.47083,-0.92122 0.72334,-1.20354 0.22074,-0.24679 0.50125,-0.40678 0.71628,-0.40852 0.24953,-0.002 1.24842,0.5988 2.0388,1.22633 0.47997,0.38107 1.23522,1.11056 1.32048,1.27544 0.11191,0.21641 0.0802,0.467 -0.10623,0.83967 -0.31401,0.62767 -0.91131,1.10504 -1.61796,1.29309 -0.32506,0.0865 -1.02666,0.0839 -1.35739,-0.005 z" />
+            </g>
+        </symbol>
+<symbol id="noktura-wordmark" viewBox="0 0 84.528175 16.289963">
+            <path fill="currentColor" d="M1.3239 0l-1.324 15.136l2.7895 0.2439l0.5126 -5.8596c0.0177 -0.2018 0.0286 -0.4114 0.0331 -0.6289c0.0202 -0.2306 0.0276 -0.4843 0.0227 -0.7607c0.0096 -0.2752 0.0178 -0.616 0.0243 -1.0222c0.0077 -0.4206 0.0077 -0.9143 -0.0008 -1.4816c0.0039 -0.3219 0.0062 -0.6797 0.0077 -1.0733l7.228 11.5109l2.573 0.2253l1.324 -15.136l-2.789 -0.2439l-0.3974 4.5408c-0.0542 0.6199 -0.0986 1.2116 -0.1333 1.7751c-0.0335 0.549 -0.0653 1.0765 -0.0951 1.5823c-0.0153 0.5071 -0.0288 0.9924 -0.0403 1.4562c0.0031 0.4651 0.007 0.9156 0.0124 1.3519c0.0015 0.1193 0.0046 0.2378 0.0077 0.3561l-7.2249 -11.7512Zm20.7579 3.2809c-1.1432 0 -2.1631 0.2604 -3.0603 0.7813c-0.8972 0.5065 -1.6061 1.2081 -2.127 2.1053c-0.5209 0.8971 -0.7813 1.9171 -0.7813 3.0603c0 1.1431 0.2604 2.1636 0.7813 3.0608c0.5209 0.8972 1.2299 1.6061 2.127 2.127c0.8971 0.5065 1.9171 0.7596 3.0603 0.7596c1.1287 0 2.1419 -0.2532 3.0391 -0.7596c0.8972 -0.5209 1.5988 -1.2298 2.1053 -2.127c0.5209 -0.8972 0.7813 -1.9177 0.7813 -3.0608c0 -1.1432 -0.2604 -2.1631 -0.7813 -3.0603c-0.5065 -0.8972 -1.2081 -1.5988 -2.1053 -2.1053c-0.8971 -0.5209 -1.9104 -0.7813 -3.0391 -0.7813Zm49.0544 0c-0.5643 0 -1.1069 0.1374 -1.6278 0.4124c-0.5065 0.2605 -0.955 0.6222 -1.3457 1.0852c-0.1845 0.2186 -0.3431 0.4501 -0.4759 0.6945l-0.0233 -1.9534h-2.6267v11.4386h2.6918v-6.0994c0 -0.4052 0.0651 -0.7669 0.1953 -1.0852c0.1447 -0.3328 0.34 -0.6222 0.586 -0.8682c0.246 -0.246 0.5281 -0.4341 0.8465 -0.5643c0.3328 -0.1447 0.68 -0.217 1.0418 -0.217c0.2315 0 0.463 0.029 0.6945 0.0868c0.2315 0.0579 0.4268 0.1302 0.586 0.217l0.7162 -2.9301c-0.1447 -0.0579 -0.3328 -0.1085 -0.5643 -0.1519c-0.2171 -0.0434 -0.4485 -0.0651 -0.6945 -0.0651Zm7.0543 0c-0.9984 0 -1.896 0.2532 -2.6918 0.7596c-0.7959 0.5065 -1.4252 1.2081 -1.8883 2.1053c-0.4631 0.8972 -0.6945 1.9171 -0.6945 3.0603c0 1.1432 0.2315 2.1636 0.6945 3.0608c0.463 0.8972 1.0779 1.6061 1.8448 2.127c0.7669 0.5209 1.621 0.7814 2.5616 0.7814c0.5499 0 1.0635 -0.0868 1.541 -0.2604c0.492 -0.1736 0.9333 -0.3979 1.324 -0.6728c0.3721 -0.2658 0.6832 -0.5625 0.9333 -0.8894v1.6056h2.713V3.5197h-2.6913v1.618c-0.2174 -0.3342 -0.485 -0.6346 -0.803 -0.9018c-0.3618 -0.3039 -0.7813 -0.5354 -1.2588 -0.6945c-0.4775 -0.1736 -1.0056 -0.2604 -1.5844 -0.2604Zm-26.6108 0.2387v7.0538c0 0.955 0.1591 1.7802 0.4775 2.4748c0.3183 0.6801 0.7813 1.2082 1.3891 1.5844c0.6077 0.3618 1.3239 0.5426 2.1487 0.5426c0.6367 0 1.2371 -0.123 1.8014 -0.369c0.5643 -0.2605 1.0495 -0.6005 1.4547 -1.0201c0.1594 -0.1649 0.3009 -0.3382 0.4248 -0.5199l0.031 1.6919h2.6045V3.5197h-2.6696v6.8585c0 0.3618 -0.0651 0.7017 -0.1953 1.0201c-0.1302 0.3039 -0.3111 0.572 -0.5426 0.8036c-0.2315 0.2171 -0.5069 0.3907 -0.8253 0.5209c-0.3039 0.1158 -0.6439 0.1736 -1.0201 0.1736c-0.5065 0 -0.9405 -0.1157 -1.3022 -0.3473c-0.3618 -0.2315 -0.6366 -0.557 -0.8248 -0.9767c-0.1881 -0.4341 -0.2822 -0.9555 -0.2822 -1.5632v-6.4895Zm-21.1848 0.092v11.3466h2.6701v-3.6571l1.1482 -1.078l3.9088 4.7351h3.2995l-5.395 -6.4363l5.2317 -4.9103h-3.5533l-4.64 4.6586v-4.6586Zm11.7647 0v2.3823h2.2572v8.9643h2.6696v-8.9643h2.4965v-2.3823Zm-20.0778 2.035c0.6222 0 1.1725 0.1591 1.65 0.4775c0.492 0.3039 0.8754 0.7234 1.1503 1.2588c0.2894 0.5354 0.4268 1.1503 0.4124 1.8448c0.0144 0.6801 -0.123 1.2877 -0.4124 1.8231c-0.2749 0.5354 -0.6583 0.9627 -1.1503 1.2811c-0.4775 0.3184 -1.0278 0.4775 -1.65 0.4775c-0.6222 0 -1.1865 -0.1591 -1.6929 -0.4775c-0.492 -0.3183 -0.8754 -0.7457 -1.1503 -1.2811c-0.2749 -0.5354 -0.4124 -1.143 -0.4124 -1.8231c0 -0.6801 0.1374 -1.2877 0.4124 -1.8231c0.2749 -0.5499 0.6583 -0.9767 1.1503 -1.2805c0.5065 -0.3183 1.0707 -0.4775 1.6929 -0.4775Zm56.673 0c0.6222 0 1.172 0.1519 1.6495 0.4558c0.4775 0.3039 0.8464 0.7234 1.1069 1.2588c0.2749 0.5354 0.4124 1.1503 0.4124 1.8448c0 0.709 -0.1375 1.3384 -0.4124 1.8883c-0.2605 0.5354 -0.6294 0.9555 -1.1069 1.2594c-0.4775 0.3039 -1.0273 0.4558 -1.6495 0.4558c-0.6222 0 -1.172 -0.1519 -1.6495 -0.4558c-0.463 -0.3039 -0.8247 -0.724 -1.0852 -1.2594c-0.2605 -0.5499 -0.3912 -1.1792 -0.3912 -1.8883c0 -0.6946 0.1307 -1.3095 0.3912 -1.8448c0.2605 -0.5354 0.6222 -0.955 1.0852 -1.2588c0.4775 -0.3039 1.0273 -0.4558 1.6495 -0.4558Z" />
+        </symbol>
+  
+  <symbol id="i-power" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3.5v8"/><path d="M6.6 7a7.5 7.5 0 1 0 10.8 0"/></g></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 4L7 12l8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="t-field" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6 17a8 8 0 1 1 14.8 0"/><path d="M12 13.5 L15.4 9.6"/><circle cx="12" cy="13.5" r="1.6" fill="currentColor" stroke="none"/></g></symbol>
+  <symbol id="t-data" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.2c0-1 .8-1.7 1.7-1.7h3.9l2 2.1h7.7c1 0 1.7.8 1.7 1.7v7.5c0 1-.8 1.7-1.7 1.7H5.2c-1 0-1.7-.8-1.7-1.7Z"/><path d="M12 10.4v5"/><path d="M9.7 13.2L12 15.5l2.3-2.3"/></g></symbol>
+  <symbol id="t-map" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-6.2-5.4-6.2-10.6a6.2 6.2 0 0 1 12.4 0c0 5.2-6.2 10.6-6.2 10.6Z"/><circle cx="12" cy="9.9" r="2.3"/></g></symbol>
+  <symbol id="t-set" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.5v15M12 4.5v15M18 4.5v15"/><rect x="3.9" y="12.4" width="4.2" height="3.4" rx="1.1" fill="currentColor"/><rect x="9.9" y="6.6" width="4.2" height="3.4" rx="1.1" fill="currentColor"/><rect x="15.9" y="10.2" width="4.2" height="3.4" rx="1.1" fill="currentColor"/></g></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41L9.25 5.35c-.59.24-1.13.57-1.62.94L5.24 5.33c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5L2.8 19.5h18.4Z"/><path d="M12 10v4.2"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></g></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7.5 11 12 15.5 16.5 11"/><path d="M5 19.5h14"/></g></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.2V4.5h7.7l9.3 9.3-7.7 7.7Z"/><circle cx="8" cy="9" r="1.4"/></g></symbol>
+  <symbol id="i-bin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15"/><path d="M9.5 7V4.5h5V7"/><path d="M6.5 7l1 13h9l1-13"/></g></symbol>
+  <symbol id="i-cam" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4Z"/><circle cx="12" cy="13.2" r="3.4"/></g></symbol>
+  <symbol id="i-rec" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3.5" y="5" width="17" height="14" rx="3"/><circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none"/></g></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13.5 14-14-.5 9-6 14-14 14Z"/><path d="M5 19l7-7"/></g></symbol>
+  <symbol id="i-ai" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9.5 3v3M14.5 3v3M9.5 18v3M14.5 18v3M3 9.5h3M3 14.5h3M18 9.5h3M18 14.5h3"/></g></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h8l4 4V20.5H6Z"/><path d="M14 3.5v4h4"/></g></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3.5 9.5a12 12 0 0 1 17 0"/><path d="M6.5 12.7a7.6 7.6 0 0 1 11 0"/><path d="M9.5 15.8a3.3 3.3 0 0 1 5 0"/><circle cx="12" cy="18.6" r=".8" fill="currentColor"/></g></symbol>
+  <symbol id="i-tool" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5a4 4 0 0 0 5 5L13 18a2.1 2.1 0 1 1-3-3l6.5-6.5Z"/><path d="M4 20l5-5"/></g></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6-1.3A4.7 4.7 0 0 0 7 18.5Z"/></g></symbol>
+  <symbol id="i-nozzle" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M9 4h6v5l-3 3-3-3Z"/><path d="M8 16l-2 4M12 15v5M16 16l2 4"/></g></symbol>
+</svg>
+
+<main class="page">
+
+<header class="intro">
+  <div>
+    <div class="eyebrow">OWL app, standalone and networked | Design review | 12 Oct 2026</div>
+    <h1>One job per screen, readable from the cab</h1>
+    <p class="lede">One design for the app, the standalone dashboard and the networked controller. The screens are cut back to what a farmer does with the tractor running: check the camera, spray, record, change settings and get the data off. New in this version: AI models and Hailo, Noktura in the app, tablet layouts and the networked controller.</p>
+  </div>
+  <ol class="rules">
+    <li><b>1</b><span>The camera is the first thing you see. Spraying is one big switch, not one of four equal toggles.</span></li>
+    <li><b>2</b><span>Tabs have words under them. A farmer shouldn't have to guess what an icon means.</span></li>
+    <li><b>3</b><span>Settings is a short list you tap into, not one long scrolling page.</span></li>
+    <li><b>4</b><span>When something can't work, the screen says why and how to fix it. AI mode never quietly falls back to colour.</span></li>
+    <li><b>5</b><span>Every target is at least 44 px, main actions are 54 px or more, and the colours are tuned for direct sun.</span></li>
+  </ol>
+</header>
+
+<section>
+  <div class="section-head">
+    <h2>Phone app</h2>
+    <p>Scroll sideways. Each screen is the new design. What it changes is written underneath.</p>
+  </div>
+  <div class="strip">
+
+    <!-- 1 HOME -->
+    <figure class="shot">
+      <div class="phone"><div class="screen">
+        <div class="s-status on-navy"><span>9:41</span><span>OWL-1</span></div>
+        <div class="hero">
+          <svg class="logo" viewBox="0 0 20.449883 14.861092"><use href="#owl-face"/></svg>
+          <div><div class="wm">OpenWeedLocator</div><div class="by">by <svg class="nk" viewBox="0 0 84.528175 16.289963"><use href="#noktura-wordmark"/></svg></div></div>
+          <span class="gear"><svg width="24" height="24"><use href="#i-gear"/></svg></span>
+        </div>
+        <div class="body" style="gap:14px;padding-top:16px">
+          <div class="panel">
+            <div class="panel-head">My OWLs</div>
+            <div class="owl-item">
+              <div style="flex:1;min-width:0"><div class="n">OWL-1</div><div class="m">Ready<i class="sep"></i>62 °C</div></div>
+              <span class="okpill"><span class="dot"></span>Online</span>
+              <svg class="chev" width="20" height="20"><use href="#i-chev"/></svg>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="nk-card">
+              <span class="nk-mark"><svg viewBox="0 0 84.528175 16.289963"><use href="#noktura-wordmark"/></svg></span>
+              <div style="min-width:0"><div style="font-weight:700;font-size:15.5px">Noktura</div><div class="m" style="font-size:12.5px;color:var(--a-mute)">Openag farm</div></div>
+              <svg class="chev" width="20" height="20"><use href="#i-chev"/></svg>
+            </div>
+            <div class="nk-stats">
+              <div><span class="val">1</span><span>OWL linked</span></div>
+              <div><span class="val">2</span><span>Runs to review</span></div>
+              <div><span class="val">1</span><span>Model sent</span></div>
+            </div>
+          </div>
+          <div class="tile-row">
+            <div class="tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg><b>Docs</b><span>Setup guides</span></div>
+            <div class="tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H4l2.2-3.3A8 8 0 1 1 21 12z"/></svg><b>Community</b><span>Ask and share</span></div>
+          </div>
+        </div>
+      </div></div>
+      <figcaption><strong>Home: adds a Noktura card</strong><span>Signed in, linked OWLs and runs to review at a glance. Signed out and offline states are further down.</span></figcaption>
+    </figure>
+
+    <!-- 2 FIELD -->
+    <figure class="shot">
+      <div class="phone"><div class="screen">
+        <div class="s-status on-navy"><span>9:41</span><span></span></div>
+        <div class="bar">
+          <span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span>
+          <div style="min-width:0"><div class="t">OWL-1</div><div class="sub">GENERAL_CONFIG</div></div>
+          <span class="state"><span class="dot rec"></span>Recording</span>
+        </div>
+        <div class="body">
+          <div class="live">
+            <span class="chip"><span class="dot rec"></span>Live</span>
+            <span class="box" style="left:20%;top:50%;width:21%;height:22%"></span>
+            <span class="box" style="left:63%;top:25%;width:14%;height:17%"></span>
+            <span class="box" style="left:77%;top:66%;width:10%;height:15%"></span>
+            <span class="count">3 weeds</span>
+          </div>
+          <div class="card prime go">
+            <div class="txt"><span class="val">Spraying</span><span class="hint">Colour detection<i class="sep"></i>4 nozzles</span></div>
+            <span class="sw on"></span>
+          </div>
+          <div class="card prime">
+            <div class="txt"><span class="val" style="font-size:17px">Recording</span><span class="hintrow"><span class="hint">214 photos</span><span class="mini-labs"><span class="lab">Wheat</span><span class="lab">Dry</span></span></span></div>
+            <span class="sw on rec"></span>
+          </div>
+          <div class="group">
+            <span class="label">Detect with</span>
+            <div class="seg"><button class="on">Colour</button><button class="blocked">AI</button><button class="blocked">Hybrid</button><button>Painted</button></div>
+          </div>
+          <div class="group">
+            <span class="label">Sensitivity</span>
+            <div class="seg"><button>Low</button><button class="on">Medium</button><button>High</button></div>
+          </div>
+          <div class="stats"><div class="ok"><span>Status</span><b>Healthy</b></div><div><span>Free</span><b>9.6 GB</b></div><div><span>GPS</span><b>9.8 km/h</b></div></div>
+        </div>
+        <div class="tabs">
+          <span class="tab on"><svg><use href="#t-field"/></svg>Field</span>
+          <span class="tab"><svg><use href="#t-data"/></svg>Data</span>
+          <span class="tab"><svg><use href="#t-map"/></svg>Map</span>
+          <span class="tab"><svg><use href="#t-set"/></svg>Settings</span>
+        </div>
+      </div></div>
+      <figcaption><strong>Field: camera first, one main switch</strong><span>Spraying is the big navy switch. Gauges become four stat cells. Amber dot on AI and Hybrid when they can't run. Test nozzles moves to Settings.</span></figcaption>
+    </figure>
+
+    <!-- 3 AI BLOCKED -->
+    <figure class="shot">
+      <div class="phone"><div class="screen">
+        <div class="s-status on-navy"><span>9:41</span><span></span></div>
+        <div class="bar">
+          <span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span>
+          <div style="min-width:0"><div class="t">OWL-1</div><div class="sub">GENERAL_CONFIG</div></div>
+          <span class="state"><span class="dot idle"></span>Ready</span>
+        </div>
+        <div class="body">
+          <div class="live">
+            <span class="chip"><span class="dot rec"></span>Live</span>
+            <span class="box" style="left:20%;top:50%;width:21%;height:22%"></span>
+            <span class="count">Colour detection</span>
+          </div>
+          <div class="group">
+            <span class="label">Detect with</span>
+            <div class="seg"><button class="on">Colour</button><button class="blocked" style="color:var(--a-navy);background:#fff;box-shadow:0 0 0 2px #E6A23C inset">AI</button><button class="blocked">Hybrid</button><button>Painted</button></div>
+          </div>
+          <div class="notice">
+            <svg width="20" height="20" style="color:var(--a-warn)"><use href="#i-warn"/></svg>
+            <div><b>AI isn't installed on this OWL.</b> Colour detection stays on. <a>Install AI ›</a></div>
+          </div>
+          <div class="card prime">
+            <div class="txt"><span class="val">Spraying</span><span class="hint">Off</span></div>
+            <span class="sw"></span>
+          </div>
+        </div>
+        <div class="tabs">
+          <span class="tab on"><svg><use href="#t-field"/></svg>Field</span>
+          <span class="tab"><svg><use href="#t-data"/></svg>Data</span>
+          <span class="tab"><svg><use href="#t-map"/></svg>Map</span>
+          <span class="tab"><svg><use href="#t-set"/></svg>Settings</span>
+        </div>
+      </div></div>
+      <figcaption><strong>Tapping AI explains itself</strong><span>Today the journal logs "ultralytics is required…" and the app shows nothing. The selection stays on Colour, so the screen can't claim AI is running, and the message says why in plain words and links to the fix.</span></figcaption>
+    </figure>
+
+    <!-- 4 RECORD SHEET -->
+    <figure class="shot">
+      <div class="phone"><div class="screen">
+        <div class="s-status on-navy"><span>9:41</span><span></span></div>
+        <div class="bar">
+          <span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span>
+          <div style="min-width:0"><div class="t">OWL-1</div><div class="sub">GENERAL_CONFIG</div></div>
+          <span class="state"><span class="dot"></span>Spraying</span>
+        </div>
+        <div class="body"><div class="live"></div></div>
+        <div class="scrim"></div>
+        <div class="sheet">
+          <span class="grab"></span>
+          <h3>What are you recording?</h3>
+          <div class="sub">Saved with every photo and sent to Noktura with the run.</div>
+          <div class="pick"><span class="label">Crop</span>
+            <div class="pills"><span class="pill on">Wheat</span><span class="pill">Barley</span><span class="pill">Canola</span><span class="pill">Oats</span><span class="pill">Faba beans</span><span class="pill">Fallow</span><span class="pill more">More…</span></div></div>
+          <div class="pick"><span class="label">Season</span><div class="pills"><span class="pill on">Winter</span><span class="pill">Spring</span></div></div>
+          <div class="pick"><span class="label">Weather</span><div class="pills"><span class="pill on">Dry</span><span class="pill">Dew</span><span class="pill">Wet</span><span class="pill">Windy</span></div></div>
+          <div class="pick"><span class="label">Light</span><div class="pills"><span class="pill on">Sunny</span><span class="pill">Partly cloudy</span><span class="pill">Overcast</span></div></div>
+          <div class="pick"><span class="label">Purpose</span><div class="pills"><span class="pill on">Herbicide</span><span class="pill">Survey</span><span class="pill more">More…</span></div></div>
+          <div class="input">Notes (optional)</div>
+          <button class="btn navy"><svg width="20" height="20"><use href="#i-rec"/></svg>Start recording</button>
+        </div>
+      </div></div>
+      <figcaption><strong>Record: tap, don't type</strong><span>This replaces four free-text boxes that Noktura mostly threw away. The choices come from the OWL, the same list the networked Collect screen uses, and your last picks are pre-selected so starting a run takes one tap.</span></figcaption>
+    </figure>
+
+    <!-- 5 DATA -->
+    <figure class="shot">
+      <div class="phone"><div class="screen">
+        <div class="s-status on-navy"><span>9:41</span><span></span></div>
+        <div class="bar">
+          <span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span>
+          <div style="min-width:0"><div class="t">Data</div><div class="sub">OWL-1</div></div>
+          <span></span>
+        </div>
+        <div class="body">
+          <div class="card pad storage">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="val" style="font-size:17px">9.6 GB free</span><span class="label">7.8 of 12 GB used</span></div>
+            <div class="meter"><i></i></div>
+          </div>
+          <div class="sess open">
+            <div class="sess-row"><span class="thumb"></span><div style="flex:1;min-width:0"><div class="when">Today, 19:14</div><div class="what">214 photos<i class="sep"></i>900 MB<i class="sep"></i>37 s</div></div></div>
+            <div class="labels"><span class="lab">Wheat</span><span class="lab">Dry</span><span class="lab">Sunny</span><span class="lab">Herbicide</span></div>
+            <div class="sess-actions">
+              <button class="btn slim"><svg width="18" height="18"><use href="#i-down"/></svg>Download</button>
+              <button class="btn slim ghost"><svg width="18" height="18"><use href="#i-tag"/></svg>Details</button>
+              <button class="iconbtn" aria-label="Delete"><svg width="20" height="20"><use href="#i-bin"/></svg></button>
+            </div>
+          </div>
+          <div class="sess">
+            <div class="sess-row"><span class="thumb b"></span><div style="flex:1;min-width:0"><div class="when">14 Aug, 16:40</div><div class="what">1,204 photos<i class="sep"></i>4.7 GB</div></div></div>
+            <div class="prog">
+              <div class="meter"><i></i></div>
+              <div class="prog-line"><span><b>46%</b><i class="sep"></i>2.1 of 4.7 GB<i class="sep"></i>3 min left</span><span style="color:var(--a-blue);font-weight:700">Cancel</span></div>
+            </div>
+          </div>
+          <div class="sess">
+            <div class="sess-row"><span class="thumb"></span><div style="flex:1;min-width:0"><div class="when">14 Aug, 09:03</div><div class="what">412 photos<i class="sep"></i>1.9 GB</div></div><svg class="chev" width="18" height="18"><use href="#i-chev"/></svg></div>
+            <div class="labels"><span class="lab add">+ Add details</span></div>
+          </div>
+        </div>
+        <div class="tabs">
+          <span class="tab"><svg><use href="#t-field"/></svg>Field</span>
+          <span class="tab on"><svg><use href="#t-data"/></svg>Data</span>
+          <span class="tab"><svg><use href="#t-map"/></svg>Map</span>
+          <span class="tab"><svg><use href="#t-set"/></svg>Settings</span>
+        </div>
+      </div></div>
+      <figcaption><strong>Data: progress you can trust</strong><span>The download bar moves because the app now listens to its own downloads (the 0% bug). Each run shows its details as labels, and "Add details" fixes one recorded without them. Delete is a separate icon, away from Download.</span></figcaption>
+    </figure>
+
+    <!-- 6 SETTINGS -->
+    <figure class="shot">
+      <div class="phone"><div class="screen">
+        <div class="s-status on-navy"><span>9:41</span><span></span></div>
+        <div class="bar">
+          <span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span>
+          <div style="min-width:0"><div class="t">Settings</div><div class="sub">OWL-1</div></div>
+          <span></span>
+        </div>
+        <div class="body" style="gap:8px">
+          <span class="list-head">Detection</span>
+          <div class="list">
+            <div class="row"><span class="ic"><svg width="19" height="19"><use href="#i-leaf"/></svg></span><div class="main"><span class="name">Colour tuning</span><span class="meta">Green 25–200<i class="sep"></i>Hue 39–83</span></div><svg class="chev" width="18" height="18"><use href="#i-chev"/></svg></div>
+            <div class="row"><span class="ic amber"><svg width="19" height="19"><use href="#i-ai"/></svg></span><div class="main"><span class="name">AI models</span><span class="meta">1 model waiting</span></div><span class="right amber">Not installed</span><svg class="chev" width="18" height="18"><use href="#i-chev"/></svg></div>
+          </div>
+          <span class="list-head" style="margin-top:6px">Capture</span>
+          <div class="list">
+            <div class="row"><span class="ic"><svg width="19" height="19"><use href="#i-cam"/></svg></span><div class="main"><span class="name">Camera</span><span class="meta">Colour locked<i class="sep"></i>Brightness −2</span></div><svg class="chev" width="18" height="18"><use href="#i-chev"/></svg></div>
+            <div class="row"><span class="ic"><svg width="19" height="19"><use href="#i-rec"/></svg></span><div class="main"><span class="name">Data collection</span><span class="meta">Every 1 m<i class="sep"></i>Best quality</span></div><svg class="chev" width="18" height="18"><use href="#i-chev"/></svg></div>
+          </div>
+          <span class="list-head" style="margin-top:6px">This OWL</span>
+          <div class="list">
+            <div class="row"><span class="ic"><svg width="19" height="19"><use href="#i-file"/></svg></span><div class="main"><span class="name">Profiles</span></div><span class="right">GENERAL_CONFIG</span><svg class="chev" width="18" height="18"><use href="#i-chev"/></svg></div>
+            <div class="row"><span class="ic"><svg width="19" height="19"><use href="#i-nozzle"/></svg></span><div class="main"><span class="name">Test nozzles</span></div><svg class="chev" width="18" height="18"><use href="#i-chev"/></svg></div>
+            <div class="row"><span class="ic"><svg width="19" height="19"><use href="#i-tool"/></svg></span><div class="main"><span class="name">Maintenance and network</span></div><svg class="chev" width="18" height="18"><use href="#i-chev"/></svg></div>
+          </div>
+        </div>
+        <div class="tabs">
+          <span class="tab"><svg><use href="#t-field"/></svg>Field</span>
+          <span class="tab"><svg><use href="#t-data"/></svg>Data</span>
+          <span class="tab"><svg><use href="#t-map"/></svg>Map</span>
+          <span class="tab on"><svg><use href="#t-set"/></svg>Settings</span>
+        </div>
+      </div></div>
+      <figcaption><strong>Settings: a short list, not a long page</strong><span>Today's Config tab pins a feed, a profile card, three chips and a long scroll on one screen. Now each row shows its current value and opens its own page. Problems show on the row itself, like the amber "Not installed" on AI models.</span></figcaption>
+    </figure>
+
+    <!-- 7 DATA COLLECTION -->
+    <figure class="shot">
+      <div class="phone"><div class="screen">
+        <div class="s-status"><span>9:41</span><span></span></div>
+        <div class="subbar"><span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span><span class="t"></span><span></span></div>
+        <div class="body" style="gap:10px;padding-top:2px">
+          <div class="big-title">Data collection</div>
+          <span class="list-head">What to save</span>
+          <div class="list">
+            <div class="field"><div class="fl"><span>Save</span></div><div class="mini-seg"><button class="on">Photos</button><button>Video</button></div></div>
+            <div class="field"><div class="fl"><span>Photo every</span><span>Uses GPS speed</span></div><div class="stepper"><button>−</button><span class="v">1.0<small>m</small></span><button>+</button></div></div>
+            <div class="field"><div class="fl"><span>No GPS: every</span></div><div class="stepper"><button>−</button><span class="v">2.0<small>s</small></span><button>+</button></div></div><div class="field"><div class="fl"><span>Pause below</span><span>0 never pauses</span></div><div class="stepper"><button>−</button><span class="v">1.0<small>km/h</small></span><button>+</button></div></div>
+            <div class="field"><div class="fl"><span>Quality</span></div><div class="mini-seg"><button>Good</button><button class="on">Best</button></div></div>
+          </div>
+          <span class="list-head">Sharp photos</span>
+          <div class="list">
+            <div class="field"><div class="fl"><span>Blur limit</span><span>Lower is sharper</span></div><div class="stepper"><button>−</button><span class="v">2.0<small>mm</small></span><button>+</button></div></div>
+            <div class="field"><div class="fl"><span>Gain limit</span></div><div class="mini-seg"><button class="on">Auto</button><button>8×</button><button>16×</button></div></div>
+          </div>
+          <div class="note">Changes apply straight away. Storage is under Maintenance.</div>
+        </div>
+      </div></div>
+      <figcaption><strong>Data collection: Collect settings on the phone</strong><span>The same settings as the networked Collect screen, sent through the same API, and they apply live. Plain words: "Take a photo every" instead of sample_distance_m. The rare settings (frames mode, quota) stay under Advanced.</span></figcaption>
+    </figure>
+
+    <!-- 8 CAMERA -->
+    <figure class="shot">
+      <div class="phone"><div class="screen">
+        <div class="s-status"><span>9:41</span><span></span></div>
+        <div class="subbar"><span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span><span class="t"></span><span></span></div>
+        <div class="body" style="gap:10px;padding-top:2px">
+          <div class="big-title">Camera</div>
+          <div class="live" style="aspect-ratio:16/6"><span class="chip"><span class="dot rec"></span>Live</span></div>
+          <span class="list-head">Colour</span>
+          <div class="list">
+            <div class="field"><div class="fl"><span>White balance</span></div><div class="mini-seg"><button>Auto</button><button>Sun</button><button class="on">Locked</button></div></div>
+            <div class="stack">
+              <div class="fl" style="display:flex;flex-direction:column"><span>Lock colour to this light</span><span>Point the camera at the crop, then tap.</span></div>
+              <button class="btn navy slim">Calibrate white balance</button>
+              <div class="readout"><span class="sw-chip"></span>Locked 19:14<i class="sep"></i>About 5,400 K</div>
+            </div>
+            <div class="field"><div class="fl"><span>Brightness</span></div><div class="stepper"><button>−</button><span class="v">−2</span><button>+</button></div></div>
+          </div>
+          <span class="list-head">Picture <span class="tag">Restarts the OWL</span></span>
+          <div class="list">
+            <div class="field"><div class="fl"><span>Size</span></div><div class="mini-seg"><button class="on">728×544</button><button>1456×1088</button></div></div>
+            <div class="field"><div class="fl"><span>Rotate</span></div><div class="mini-seg"><button class="on">Auto</button><button>0°</button><button>180°</button></div></div>
+          </div>
+        </div>
+      </div></div>
+      <figcaption><strong>Camera: the white balance overlap fixed</strong><span>"Lock colour" gets its own block: the label, a full-width button, then what was locked and when. The manual red and blue gains move into the readout. Settings that restart the OWL sit together under one warning tag.</span></figcaption>
+    </figure>
+
+  </div>
+</section>
+
+
+<section>
+  <div class="section-head">
+    <h2>AI models and Hailo</h2>
+    <p>One page, four states. It always says what runs the AI, and never hides a model.</p>
+  </div>
+  <div class="strip"><figure class="shot"><div class="phone"><div class="screen"><div class="s-status"><span>9:41</span><span></span></div><div class="subbar"><span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span><span class="t"></span><span></span></div><div class="body" style="gap:10px;padding-top:2px"><div class="big-title">AI models</div><div class="card cap"><div class="cap-head"><span class="chip-ic "><svg width="20" height="20"><use href="#i-ai"/></svg></span><div style="flex:1;min-width:0"><div class="t1">Hailo-8</div><div class="t2">AI accelerator ready</div></div></div><div class="stats"><div><span>Speed</span><b>30 fps</b></div><div><span>Per frame</span><b>8 ms</b></div><div><span>Temp</span><b>54 °C</b></div></div></div><span class="list-head">On this OWL</span><div class="list"><div class="row model-row"><span class="radio on"></span><div class="main"><span class="name">weeds-wheat-v3</span><span class="meta">From Noktura<i class="sep"></i>11 Oct</span></div><span class="run h">Hailo</span></div><div class="runon"><span>Run on</span><div class="mini-seg"><button class="on">Hailo</button><button>CPU</button></div></div><div class="row model-row"><span class="radio"></span><div class="main"><span class="name">weeds-barley-v1</span><span class="meta">Downloading</span></div><span class="run c">64%</span></div><div class="row sub"><div class="meter"><i style="width:64%"></i></div></div><div class="row model-row"><span class="radio"></span><div class="main"><span class="name">weeds-canola-v2</span><span class="meta">Compiling for Hailo in Noktura</span></div><span class="run w">Compiling</span></div></div><span class="list-head">Spray on</span><div class="list"><div class="classes"><span class="cls act on"><i></i>Ryegrass</span><span class="cls act on"><i></i>Wild radish</span><span class="cls act"><i></i>Wheat</span><span class="cls act on"><i></i>Brome</span></div></div></div></div></div><figcaption><strong>AI models: Hailo-8 ready</strong><span>The top card says what runs the AI and how fast. Each model shows where it runs. Run on lets you push one to the CPU, for testing a .pt file.</span></figcaption></figure><figure class="shot"><div class="phone"><div class="screen"><div class="s-status"><span>9:41</span><span></span></div><div class="subbar"><span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span><span class="t"></span><span></span></div><div class="body" style="gap:10px;padding-top:2px"><div class="big-title">AI models</div><div class="card cap"><div class="cap-head"><span class="chip-ic grey"><svg width="20" height="20"><use href="#i-ai"/></svg></span><div style="flex:1;min-width:0"><div class="t1">CPU only</div><div class="t2">No AI accelerator fitted</div></div></div><div class="stats"><div><span>Speed</span><b>7 fps</b></div><div><span>Per frame</span><b>140 ms</b></div><div><span>CPU</span><b>71 °C</b></div></div></div><div class="notice info"><svg width="20" height="20"><use href="#i-warn"/></svg><div><b>Slower than Hailo.</b> Fine for testing. Drive slower when spraying with AI.</div></div><span class="list-head">On this OWL</span><div class="list"><div class="row model-row"><span class="radio on"></span><div class="main"><span class="name">weeds-wheat-v3</span><span class="meta">From Noktura<i class="sep"></i>11 Oct</span></div><span class="run c">CPU</span></div><div class="row model-row"><span class="radio"></span><div class="main"><span class="name">weeds-canola-ncnn</span><span class="meta">File check failed</span></div><span class="run bad">Retry</span></div></div><span class="list-head">Spray on</span><div class="list"><div class="classes"><span class="cls act on"><i></i>Ryegrass</span><span class="cls act on"><i></i>Wild radish</span><span class="cls act"><i></i>Wheat</span><span class="cls act on"><i></i>Brome</span></div></div></div></div></div><figcaption><strong>AI models: CPU only</strong><span>Works without the add-on, and says plainly that it's slower.</span></figcaption></figure><figure class="shot"><div class="phone"><div class="screen"><div class="s-status"><span>9:41</span><span></span></div><div class="subbar"><span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span><span class="t"></span><span></span></div><div class="body" style="gap:10px;padding-top:2px"><div class="big-title">AI models</div><div class="card cap"><div class="cap-head"><span class="chip-ic amber"><svg width="20" height="20"><use href="#i-ai"/></svg></span><div style="flex:1;min-width:0"><div class="t1">AI isn't installed</div><div class="t2">This OWL was set up without AI</div></div></div></div><div class="card"><div class="inst"><div class="inst-line"><b>Installing AI</b><span>38%</span></div><div class="meter"><i></i></div><div class="inst-line"><span>Downloading packages</span><span>About 12 min left</span></div></div></div><div class="note">Uses about 2 GB of data. Use Wi-Fi or a phone hotspot, not the router SIM. Spraying keeps working on colour detection.</div><span class="list-head">On this OWL</span><div class="list"><div class="row model-row"><span class="radio"></span><div class="main"><span class="name">weeds-wheat-v3</span><span class="meta">From Noktura<i class="sep"></i>11 Oct</span></div><span class="run w">Needs AI</span></div></div></div></div></div><figcaption><strong>AI models: installing</strong><span>Install AI runs the update with the AI packages, with progress and rollback. Models that arrived early wait with "Needs AI".</span></figcaption></figure><figure class="shot"><div class="phone"><div class="screen"><div class="s-status"><span>9:41</span><span></span></div><div class="subbar"><span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span><span class="t"></span><span></span></div><div class="body" style="gap:10px;padding-top:2px"><div class="big-title">AI models</div><div class="card cap"><div class="cap-head"><span class="chip-ic amber"><svg width="20" height="20"><use href="#i-ai"/></svg></span><div style="flex:1;min-width:0"><div class="t1">Hailo-8 found</div><div class="t2">Not set up yet</div></div></div></div><div class="notice bad"><svg width="20" height="20"><use href="#i-warn"/></svg><div><b>The Hailo card isn't ready.</b> AI runs on the CPU until it is set up. Set-up restarts the OWL and takes about 15 minutes.</div></div><button class="btn navy slim">Set up Hailo</button><span class="list-head">On this OWL</span><div class="list"><div class="row model-row"><span class="radio on"></span><div class="main"><span class="name">weeds-wheat-v3</span><span class="meta">From Noktura<i class="sep"></i>11 Oct</span></div><span class="run c">CPU</span></div></div><div class="note">If set-up fails twice, contact support with the code from Maintenance.</div></div></div></div><figcaption><strong>AI models: Hailo found, not set up</strong><span>A paid add-on that isn't working is shown in red with one fix. AI still runs, on the CPU, so the unit isn't stranded.</span></figcaption></figure></div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>Noktura in the app</h2>
+    <p>A Home card in three states, and a page behind it.</p>
+  </div>
+  <div class="strip"><figure class="shot"><div class="phone"><div class="screen"><div class="s-status on-navy"><span>9:41</span><span></span></div><div class="hero"><svg class="logo" viewBox="0 0 20.449883 14.861092"><use href="#owl-face"/></svg><div><div class="wm">OpenWeedLocator</div><div class="by">by <svg class="nk" viewBox="0 0 84.528175 16.289963"><use href="#noktura-wordmark"/></svg></div></div><span class="gear"><svg width="24" height="24"><use href="#i-gear"/></svg></span></div><div class="body" style="gap:14px;padding-top:16px"><div class="panel"><div class="panel-head">My OWLs</div><div class="owl-item"><div style="flex:1;min-width:0"><div class="n">OWL-1</div><div class="m">Ready<i class="sep"></i>62 °C</div></div><span class="okpill"><span class="dot"></span>Online</span><svg class="chev" width="20" height="20"><use href="#i-chev"/></svg></div></div><div class="panel"><div class="nk-card"><span class="nk-mark"><svg viewBox="0 0 84.528175 16.289963"><use href="#noktura-wordmark"/></svg></span><div style="min-width:0"><div style="font-weight:700;font-size:15.5px">Noktura</div><div style="font-size:12.5px;color:var(--a-mute)">Not signed in</div></div><span></span></div><div class="nk-big" style="padding-top:0"><p>See your runs, send models and back up data.</p><button class="btn navy slim">Sign in to Noktura</button></div></div></div></div></div><figcaption><strong>Home: signed out</strong><span>The card stays. It says what Noktura is for in one line and offers one action.</span></figcaption></figure><figure class="shot"><div class="phone"><div class="screen"><div class="s-status on-navy"><span>9:41</span><span></span></div><div class="hero"><svg class="logo" viewBox="0 0 20.449883 14.861092"><use href="#owl-face"/></svg><div><div class="wm">OpenWeedLocator</div><div class="by">by <svg class="nk" viewBox="0 0 84.528175 16.289963"><use href="#noktura-wordmark"/></svg></div></div><span class="gear"><svg width="24" height="24"><use href="#i-gear"/></svg></span></div><div class="body" style="gap:14px;padding-top:16px"><div class="panel"><div class="panel-head">My OWLs</div><div class="owl-item"><div style="flex:1;min-width:0"><div class="n">OWL-1</div><div class="m">Ready<i class="sep"></i>62 °C</div></div><span class="okpill"><span class="dot"></span>Online</span><svg class="chev" width="20" height="20"><use href="#i-chev"/></svg></div></div><div class="panel"><div class="nk-card"><span class="nk-mark"><svg viewBox="0 0 84.528175 16.289963"><use href="#noktura-wordmark"/></svg></span><div style="min-width:0"><div style="font-weight:700;font-size:15.5px">Noktura</div><div style="font-size:12.5px;color:var(--a-mute)">Openag farm</div></div><span class="offline"><span class="dot"></span>Offline</span></div><div class="stats"><div><span>OWLs linked</span><b>1</b></div><div><span>To review</span><b>2</b></div><div><span>Models</span><b>3</b></div></div><div class="note" style="padding:8px 16px 12px">Updated 10:02. Connect to the internet to refresh.</div></div></div></div></div><figcaption><strong>Home: offline</strong><span>On the OWL's Wi-Fi the phone has no internet, so the card keeps the last numbers and says when they're from.</span></figcaption></figure><figure class="shot"><div class="phone"><div class="screen"><div class="s-status on-navy"><span>9:41</span><span></span></div><div class="bar"><span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span><div style="min-width:0"><div class="t">Noktura</div><div class="sub">Openag farm</div></div><span></span></div><div class="body" style="gap:8px"><span class="list-head">Your OWLs</span><div class="list"><div class="row"><div class="main"><span class="name">OWL-1</span><span class="meta">v3.25.0<i class="sep"></i>Hailo-8</span></div><span class="okpill"><span class="dot"></span>Online</span></div><div class="row"><div class="main"><span class="name">OWL-2</span><span class="meta">v3.25.0<i class="sep"></i>CPU</span></div><span class="right">Seen 2 h ago</span></div></div><span class="list-head" style="margin-top:6px">Runs to review</span><div class="list"><div class="row"><span class="thumb" style="width:44px;height:34px"></span><div class="main"><span class="name">Today, 19:14</span><span class="meta">OWL-1<i class="sep"></i>214 photos</span></div><span class="right" style="color:var(--a-blue);font-weight:700">Review</span></div></div><span class="list-head" style="margin-top:6px">Models sent</span><div class="list"><div class="row"><div class="main"><span class="name">weeds-wheat-v3</span><span class="meta">OWL-1</span></div><span class="run h">Running</span></div><div class="row"><div class="main"><span class="name">weeds-barley-v1</span><span class="meta">OWL-2</span></div><span class="run c">64%</span></div><div class="row"><div class="main"><span class="name">weeds-canola-v2</span><span class="meta">OWL-1</span></div><span class="run w">Compiling</span></div></div><button class="btn ghost slim" style="margin-top:4px">Open Noktura</button></div></div></div><figcaption><strong>Noktura page</strong><span>Opens from the Home card. Where every model went and what it's doing. Review opens the run in Noktura.</span></figcaption></figure></div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>App on a tablet, or a phone turned sideways</h2>
+    <p>The app switches layout by itself when the screen is 840 px or wider. Rotating keeps the same tab open.</p>
+  </div>
+  <div class="kiosk-set">
+    <div><div class="kiosk-wrap"><div class="tablet"><div class="screen"><div class="w-top"><span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span><div class="ttl"><b>OWL-1</b><span>GENERAL_CONFIG</span></div><div class="w-tabs"><span class="on"><svg><use href="#t-field"/></svg>Field</span><span class=""><svg><use href="#t-data"/></svg>Data</span><span class=""><svg><use href="#t-map"/></svg>Map</span><span class=""><svg><use href="#t-set"/></svg>Settings</span></div><span class="state"><span class="dot rec"></span>Recording</span><span class="pwr"><svg width="22" height="22"><use href="#i-power"/></svg></span></div><div class="w-body w-field"><div class="w-col"><div class="live"><span class="chip"><span class="dot rec"></span>Live</span><span class="box" style="left:20%;top:50%;width:21%;height:22%"></span><span class="box" style="left:63%;top:25%;width:14%;height:17%"></span><span class="box" style="left:77%;top:66%;width:10%;height:15%"></span><span class="count">3 weeds</span></div></div><div class="w-col"><div class="card prime go"><div class="txt"><span class="val">Spraying</span><span class="hint">Colour detection<i class="sep"></i>4 nozzles</span></div><span class="sw on"></span></div><div class="card prime"><div class="txt"><span class="val">Recording</span><span class="hint">214 photos</span><span class="mini-labs"><span class="lab">Wheat</span><span class="lab">Dry</span><span class="lab">Sunny</span></span></div><span class="sw on rec"></span></div><div class="group"><span class="label">Detect with</span><div class="seg"><button class="on">Colour</button><button>AI</button><button>Hybrid</button><button>Painted</button></div></div><div class="group"><span class="label">Sensitivity</span><div class="seg"><button>Low</button><button class="on">Medium</button><button>High</button></div></div><div style="margin-top:auto"><div class="stats"><div class="ok"><span>Status</span><b>Healthy</b></div><div><span>CPU</span><b>62 °C</b></div><div><span>Free</span><b>9.6 GB</b></div><div><span>GPS</span><b>9.8 km/h</b></div></div></div></div></div></div></div></div><div class="kiosk-cap"><strong>Tablet, Field (1280 × 800)</strong><span>Tabs move into the top bar. The camera fills the left, controls on the right.</span></div></div>
+    <div><div class="kiosk-wrap"><div class="landscape"><div class="screen"><div class="w-top"><span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span><div class="ttl"><b>OWL-1</b><span>GENERAL_CONFIG</span></div><div class="w-tabs"><span class="on"><svg><use href="#t-field"/></svg>Field</span><span class=""><svg><use href="#t-data"/></svg>Data</span><span class=""><svg><use href="#t-map"/></svg>Map</span><span class=""><svg><use href="#t-set"/></svg>Settings</span></div><span class="state"><span class="dot rec"></span>Recording</span><span class="pwr"><svg width="22" height="22"><use href="#i-power"/></svg></span></div><div class="w-body w-field"><div class="w-col"><div class="live"><span class="chip"><span class="dot rec"></span>Live</span><span class="box" style="left:20%;top:50%;width:21%;height:22%"></span><span class="box" style="left:63%;top:25%;width:14%;height:17%"></span><span class="box" style="left:77%;top:66%;width:10%;height:15%"></span><span class="count">3 weeds</span></div></div><div class="w-col"><div class="card prime go"><div class="txt"><span class="val">Spraying</span><span class="hint">Colour detection<i class="sep"></i>4 nozzles</span></div><span class="sw on"></span></div><div class="card prime"><div class="txt"><span class="val">Recording</span><span class="hint">214 photos</span><span class="mini-labs"><span class="lab">Wheat</span><span class="lab">Dry</span><span class="lab">Sunny</span></span></div><span class="sw on rec"></span></div><div class="group"><span class="label">Detect with</span><div class="seg"><button class="on">Colour</button><button>AI</button><button>Hybrid</button><button>Painted</button></div></div><div class="group"><span class="label">Sensitivity</span><div class="seg"><button>Low</button><button class="on">Medium</button><button>High</button></div></div></div></div></div></div></div><div class="kiosk-cap"><strong>Phone sideways, Field (915 × 412)</strong><span>Same two columns. The right column scrolls when it runs out of height.</span></div></div>
+    <div><div class="kiosk-wrap"><div class="tablet"><div class="screen"><div class="w-top"><span class="back"><svg width="22" height="22"><use href="#i-back"/></svg></span><div class="ttl"><b>OWL-1</b><span>GENERAL_CONFIG</span></div><div class="w-tabs"><span class=""><svg><use href="#t-field"/></svg>Field</span><span class=""><svg><use href="#t-data"/></svg>Data</span><span class=""><svg><use href="#t-map"/></svg>Map</span><span class="on"><svg><use href="#t-set"/></svg>Settings</span></div><span class="state"><span class="dot"></span>Spraying</span><span class="pwr"><svg width="22" height="22"><use href="#i-power"/></svg></span></div><div class="w-body w-set"><div class="k-side"><span><span class="ic-s"><svg><use href="#i-leaf"/></svg>Colour tuning</span></span><span class="on"><span class="ic-s"><svg><use href="#i-ai"/></svg>AI models</span></span><span><span class="ic-s"><svg><use href="#i-cam"/></svg>Camera</span></span><span><span class="ic-s"><svg><use href="#i-rec"/></svg>Data collection</span></span><span><span class="ic-s"><svg><use href="#i-file"/></svg>Profiles</span></span><span><span class="ic-s"><svg><use href="#i-nozzle"/></svg>Test nozzles</span></span><span><span class="ic-s"><svg><use href="#i-tool"/></svg>Maintenance</span></span><span><span class="ic-s"><svg><use href="#i-cloud"/></svg>Noktura</span></span></div><div class="k-panel"><h3>AI models <small>Hailo-8</small></h3><div class="w-ai"><div style="display:flex;flex-direction:column;gap:12px"><div class="card cap"><div class="cap-head"><span class="chip-ic "><svg width="20" height="20"><use href="#i-ai"/></svg></span><div style="flex:1;min-width:0"><div class="t1">Hailo-8</div><div class="t2">AI accelerator ready</div></div></div><div class="stats"><div><span>Speed</span><b>30 fps</b></div><div><span>Per frame</span><b>8 ms</b></div><div><span>Temp</span><b>54 °C</b></div></div></div><span class="list-head">Spray on</span><div class="list"><div class="classes"><span class="cls act on"><i></i>Ryegrass</span><span class="cls act on"><i></i>Wild radish</span><span class="cls act"><i></i>Wheat</span><span class="cls act on"><i></i>Brome</span></div></div></div><div style="display:flex;flex-direction:column;gap:8px"><span class="list-head">On this OWL</span><div class="list"><div class="row model-row"><span class="radio on"></span><div class="main"><span class="name">weeds-wheat-v3</span><span class="meta">From Noktura<i class="sep"></i>11 Oct</span></div><span class="run h">Hailo</span></div><div class="runon"><span>Run on</span><div class="mini-seg"><button class="on">Hailo</button><button>CPU</button></div></div><div class="row model-row"><span class="radio"></span><div class="main"><span class="name">weeds-barley-v1</span><span class="meta">Downloading</span></div><span class="run c">64%</span></div><div class="row sub"><div class="meter"><i style="width:64%"></i></div></div><div class="row model-row"><span class="radio"></span><div class="main"><span class="name">weeds-canola-v2</span><span class="meta">Compiling for Hailo in Noktura</span></div><span class="run w">Compiling</span></div><div class="row model-row"><span class="radio"></span><div class="main"><span class="name">test-yolo11n.pt</span><span class="meta">Copied by hand</span></div><span class="run c">CPU</span></div></div></div></div></div></div></div></div></div><div class="kiosk-cap"><strong>Tablet, Settings with AI models open</strong><span>The list stays on the left and the page opens beside it, like the standalone kiosk.</span></div></div>
+  </div>
+</section>
+<section>
+  <div class="section-head">
+    <h2>Standalone dashboard (1024 × 600)</h2>
+    <p>The same pieces at kiosk size. Settings uses the networked Collect layout (side list and panel), so the two dashboards look like one product.</p>
+  </div>
+  <div class="kiosk-set">
+    <div>
+      <div class="kiosk-wrap"><div class="kiosk"><div class="screen">
+        <div class="k-top">
+          <svg class="logo" viewBox="0 0 20.449883 14.861092"><use href="#owl-face"/></svg><span class="name">OWL-1</span>
+          <div class="k-nav"><span class="on">Field</span><span>Data</span><span>Settings</span></div>
+          <span class="state"><span class="dot"></span>Spraying</span><span class="pwr"><svg width="22" height="22"><use href="#i-power"/></svg></span>
+        </div>
+        <div class="k-body k-dash">
+          <div class="k-col">
+            <div class="live">
+              <span class="chip"><span class="dot rec"></span>Live</span>
+              <span class="box" style="left:20%;top:50%;width:21%;height:22%"></span>
+              <span class="box" style="left:63%;top:25%;width:14%;height:17%"></span>
+              <span class="count">2 weeds</span>
+            </div>
+          </div>
+          <div class="k-col">
+            <div class="card prime go" style="min-height:92px"><div class="txt"><span class="val" style="font-size:22px">Spraying</span><span class="hint">Colour detection<i class="sep"></i>4 nozzles</span></div><span class="sw on"></span></div>
+            <div class="card prime" style="min-height:84px"><div class="txt"><span class="val">Recording</span><span class="hint">Tap to choose crop and conditions</span></div><span class="sw"></span></div>
+            <div class="group"><span class="label">Detect with</span><div class="seg"><button class="on" style="min-height:52px">Colour</button><button class="blocked" style="min-height:52px">AI</button><button class="blocked" style="min-height:52px">Hybrid</button><button style="min-height:52px">Painted</button></div></div>
+            <div class="group"><span class="label">Sensitivity</span><div class="seg"><button style="min-height:52px">Low</button><button class="on" style="min-height:52px">Medium</button><button style="min-height:52px">High</button></div></div>
+            <div class="stats" style="margin-top:auto"><div class="ok"><span>Status</span><b>Healthy</b></div><div><span>CPU</span><b>62 °C</b></div><div><span>Free</span><b>9.6 GB</b></div><div><span>GPS</span><b>9.8 km/h</b></div></div>
+          </div>
+        </div>
+        <div class="scrim"></div>
+        <div class="k-modal">
+          <h3>What are you recording?</h3>
+          <div class="k-mrow"><span>Crop</span><div class="pills"><span class="pill on">Wheat</span><span class="pill">Barley</span><span class="pill">Canola</span><span class="pill">Rye</span><span class="pill">Oats</span><span class="pill">Maize</span><span class="pill">Peas</span><span class="pill">Faba beans</span><span class="pill">Fallow</span><span class="pill more">Other…</span></div></div>
+          <div class="k-mrow"><span>Season</span><div class="pills"><span class="pill on">Winter</span><span class="pill">Spring</span></div></div>
+          <div class="k-mrow"><span>Weather</span><div class="pills"><span class="pill on">Dry</span><span class="pill">Dew</span><span class="pill">Wet</span><span class="pill">Windy</span></div></div>
+          <div class="k-mrow"><span>Light</span><div class="pills"><span class="pill on">Sunny</span><span class="pill">Partly cloudy</span><span class="pill">Overcast</span></div></div>
+          <div class="k-mrow"><span>Purpose</span><div class="pills"><span class="pill on">Herbicide</span><span class="pill">Fungicide</span><span class="pill">Insecticide</span><span class="pill">Survey</span></div></div>
+          <div class="k-foot"><button class="btn ghost">Cancel</button><button class="btn navy"><svg width="20" height="20"><use href="#i-rec"/></svg>Start recording</button></div>
+        </div>
+      </div></div></div>
+      <div class="kiosk-cap"><strong>Field, with the record form open</strong><span>The current dashboard stacks Detection, Tracking, Recording, All nozzles and a hidden Session info form. This replaces the stack with the live view on the left and the controls on the right. Pressing Recording opens the same form as the phone and the networked Collect screen, from the shared collect_form.js.</span></div>
+    </div>
+
+    <div>
+      <div class="kiosk-wrap"><div class="kiosk"><div class="screen">
+        <div class="k-top">
+          <svg class="logo" viewBox="0 0 20.449883 14.861092"><use href="#owl-face"/></svg><span class="name">OWL-1</span>
+          <div class="k-nav"><span>Field</span><span>Data</span><span class="on">Settings</span></div>
+          <span class="state"><span class="dot idle"></span>Ready</span>
+        </div>
+        <div class="k-body k-set">
+          <div class="k-side">
+            <span>Colour tuning</span>
+            <span>AI models <small>Not installed</small></span>
+            <span>Camera</span>
+            <span class="on">Data collection</span>
+            <span>Profiles</span>
+            <span>Test nozzles</span>
+            <span>Noktura</span>
+            <span>Advanced</span>
+          </div>
+          <div class="k-panel">
+            <h3>Data collection <small>Saved to GENERAL_CONFIG</small></h3>
+            <div class="k-grid">
+              <div class="k-f"><span>Save</span><div class="k-seg"><button class="on">Photos</button><button>Video</button></div></div>
+              <div class="k-f"><span>Space photos by</span><div class="k-seg"><button class="on">Distance</button><button>Time</button></div></div>
+              <div class="k-f"><span>Take a photo every</span><div class="k-step"><button>−</button><span>1.0 <small>m</small></span><button>+</button></div></div>
+              <div class="k-f"><span>Without GPS, every</span><div class="k-step"><button>−</button><span>2.0 <small>s</small></span><button>+</button></div></div>
+              <div class="k-f"><span>Blur limit</span><div class="k-step"><button>−</button><span>2.0 <small>mm</small></span><button>+</button></div></div>
+              <div class="k-f"><span>Pause below</span><div class="k-step"><button>−</button><span>1.0 <small>km/h</small></span><button>+</button></div></div><div class="k-f"><span>Gain limit</span><div class="k-seg"><button class="on">Auto</button><button>8×</button><button>16×</button></div></div>
+              <div class="k-f"><span>Quality</span><div class="k-seg"><button>Good</button><button class="on">Best</button></div></div>
+              
+            </div>
+          </div>
+        </div>
+      </div></div></div>
+      <div class="kiosk-cap"><strong>Settings, Data collection</strong><span>Two columns of large controls that fit on a 600 px screen without scrolling. Nothing is hidden behind the INI editor, which stays under Advanced for people who need it.</span></div>
+    </div>
+  </div>
+</section>
+
+
+<section>
+  <div class="section-head">
+    <h2>Networked controller (1024 × 600)</h2>
+    <p>The standalone layout with the OWLs down the left. Pick one OWL, or All OWLs, and the rest of the screen follows it.</p>
+  </div>
+  <div class="kiosk-set">
+    <div><div class="kiosk-wrap"><div class="kiosk"><div class="screen"><div class="k-top"><svg class="logo" viewBox="0 0 20.449883 14.861092"><use href="#owl-face"/></svg><span class="name">OWL Controller</span><div class="k-nav"><span class="on">Field</span><span class="">Data</span><span class="">Settings</span></div><span class="state"><span class="dot"></span>Spraying</span><span class="pwr"><svg width="22" height="22"><use href="#i-power"/></svg></span></div><div class="n-body"><div class="n-rail"><div class="n-owl on"><div class="nm">All OWLs</div><div class="st">2 of 3 spraying</div></div><div class="n-owl"><div class="nm">OWL-1<span class="okpill" style="padding:1px 8px"><span class="dot"></span>On</span></div><div class="st">412 photos<i class="sep"></i>9.8 km/h</div></div><div class="n-owl"><div class="nm">OWL-2<span class="okpill" style="padding:1px 8px"><span class="dot"></span>On</span></div><div class="st">409 photos<i class="sep"></i>9.8 km/h</div></div><div class="n-owl off"><div class="nm">OWL-3<span class="offline" style="padding:1px 8px">Off</span></div><div class="st">Seen 4 min ago</div></div></div><div class="k-col"><div class="live"><span class="chip"><span class="dot rec"></span>Live</span><span class="box" style="left:20%;top:50%;width:21%;height:22%"></span><span class="box" style="left:63%;top:25%;width:14%;height:17%"></span><span class="box" style="left:77%;top:66%;width:10%;height:15%"></span><span class="count">Showing OWL-1</span></div></div><div class="k-col"><div class="card prime go" style="min-height:76px"><div class="txt"><span class="val">Spraying</span><span class="hint">All OWLs</span></div><span class="sw on"></span></div><div class="card prime"><div class="txt"><span class="val">Recording</span><span class="hint">Off</span></div><span class="sw"></span></div><div class="group"><span class="label">Detect with</span><div class="seg"><button class="on">Colour</button><button>AI</button><button>Hybrid</button><button>Painted</button></div></div><div class="group"><span class="label">Sensitivity</span><div class="seg"><button>Low</button><button class="on">Medium</button><button>High</button></div></div><div class="stats" style="margin-top:auto"><div class="ok"><span>Status</span><b>Healthy</b></div><div><span>GPS</span><b>9.8 km/h</b></div><div><span>Free</span><b>40 GB</b></div></div></div></div></div></div></div><div class="kiosk-cap"><strong>Field</strong><span>All OWLs is selected, so the switches act on every OWL. Tap an OWL to see its camera and control it alone.</span></div></div>
+    <div><div class="kiosk-wrap"><div class="kiosk"><div class="screen"><div class="k-top"><svg class="logo" viewBox="0 0 20.449883 14.861092"><use href="#owl-face"/></svg><span class="name">OWL Controller</span><div class="k-nav"><span class="">Field</span><span class="">Data</span><span class="on">Settings</span></div><span class="state"><span class="dot idle"></span>Ready</span><span class="pwr"><svg width="22" height="22"><use href="#i-power"/></svg></span></div><div class="n-body n-set"><div class="n-rail"><div class="n-owl on"><div class="nm">All OWLs</div><div class="st">2 of 3 spraying</div></div><div class="n-owl"><div class="nm">OWL-1<span class="okpill" style="padding:1px 8px"><span class="dot"></span>On</span></div><div class="st">412 photos<i class="sep"></i>9.8 km/h</div></div><div class="n-owl"><div class="nm">OWL-2<span class="okpill" style="padding:1px 8px"><span class="dot"></span>On</span></div><div class="st">409 photos<i class="sep"></i>9.8 km/h</div></div><div class="n-owl off"><div class="nm">OWL-3<span class="offline" style="padding:1px 8px">Off</span></div><div class="st">Seen 4 min ago</div></div></div><div class="k-side"><span>Colour tuning</span><span class="on">AI models</span><span>Camera</span><span>Data collection</span><span>Profiles</span><span>Test nozzles</span><span>Noktura</span></div><div class="k-panel"><h3>AI models <small>All OWLs</small></h3><div class="list"><div class="row"><div class="main"><span class="name">OWL-1</span><span class="meta">weeds-wheat-v3</span></div><span class="run h">Hailo</span></div><div class="row"><div class="main"><span class="name">OWL-2</span><span class="meta">weeds-wheat-v3</span></div><span class="run c">CPU</span></div><div class="row"><div class="main"><span class="name">OWL-3</span><span class="meta">Offline</span></div><span class="run w">Needs AI</span></div></div><button class="btn navy slim">Send model to all OWLs</button></div></div></div></div></div><div class="kiosk-cap"><strong>Settings, AI models</strong><span>One row per OWL with where its AI runs. An offline OWL keeps its row.</span></div></div>
+  </div>
+</section>
+</main>
+<script>
+document.querySelectorAll('.seg, .mini-seg, .k-seg').forEach(function (g) {
+  g.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b || b.classList.contains('blocked')) return;
+    g.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); });
+    b.classList.add('on');
+  });
+});
+document.querySelectorAll('.pills').forEach(function (g) {
+  g.addEventListener('click', function (e) {
+    var p = e.target.closest('.pill');
+    if (!p || p.classList.contains('more')) return;
+    g.querySelectorAll('.pill').forEach(function (x) { x.classList.remove('on'); });
+    p.classList.add('on');
+  });
+});
+document.querySelectorAll('.sw').forEach(function (s) {
+  s.addEventListener('click', function () { s.classList.toggle('on'); });
+});
+</script>
+
+</body></html>
