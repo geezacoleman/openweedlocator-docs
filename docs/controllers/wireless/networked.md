@@ -750,7 +750,18 @@ You can also delete sessions directly from the OWL's USB drive using the "Delete
 
 Choose **Data collection** at setup (or set `ui = collect` under `[WebDashboard]` in `config/CONTROLLER.ini` and restart `owl-controller`) for a rig that records images for training data rather than spraying. The screen is built for gloved hands on a 7" EDATEC (1024x600) or the 10" HMI3010, with English and Danish (EN/DK in the top bar).
 
-**Record tab.** One large button starts and stops recording on every OWL. Tapping it opens a short form with big buttons: crop (with winter or spring for wheat, barley, oilseed rape, rye and triticale), weather, light, purpose (herbicide, fungicide, insecticide or survey) and optional notes. These go into every image's EXIF and into `session_metadata.json` in each session folder. Beside the button, a row per OWL shows images saved, speed, shutter time and gain, and free storage, and below it the latest saved image from each OWL refreshes every couple of seconds.
+**Record tab.** One large button starts and stops recording on every OWL. Tapping it opens a short form with big buttons:
+
+- **Crop**, in three lists: *Your crops*, *Arable* and *Vegetables* (cabbage, cauliflower, broccoli, kale, Brussels sprouts, lettuce, spinach, onion, leek, carrot, parsnip, beetroot, celery, pumpkin). **+ Add crop** types a new one and saves it on the controller straight away (`custom_crops` under `[Collect]` in `config/CONTROLLER.ini`); **Edit my crops** removes ones you added. Winter or spring is asked for wheat, barley, oilseed rape, rye and triticale.
+- **Weather**, **Light** (natural, artificial for an enclosed hood with its own lights, or mixed) and **Sky** (sunny, partly cloudy, overcast, night), so a sunny day under a hood is recorded as both.
+- **Soil cover** (bare soil, stubble, living crop and so on), **Soil** (dry, moist, wet) and **Recent water** (none, rain, irrigation). Recording irrigation explains wet soil on a dry day.
+- **Purpose** (herbicide, fungicide, insecticide or survey) and optional notes.
+
+These go into every image's EXIF and into `session_metadata.json` in each session folder. Beside the button, a row per OWL shows images saved, speed, shutter time and gain, and free storage, and below it the latest saved image from each OWL refreshes every couple of seconds.
+
+**Pause.** While recording, **Pause** stops saving on every OWL without ending the run, for turning at the end of a row. **Resume** carries on in the same session folder. Video clips end at a pause and a new clip starts on resume.
+
+**Session names.** Each recording goes in `YYYYMMDD/sHHMMSS_<owl>_<code>`, for example `20261015/s164025_owl-1_a3f9`: the time the OWL started recording (its own clock), the OWL's name and the last four characters of its Raspberry Pi serial number, so two OWLs started together never share a name. Older recordings keep their `session_HHMMSS` names.
 
 **Quality warnings** appear in plain language, naming the OWL and what to do:
 
@@ -766,7 +777,7 @@ Choose **Data collection** at setup (or set `ui = collect` under `[WebDashboard]
 
 **Settings tab.**
 
-- *Sessions and upload*: the sessions on each OWL with size; tick and tap **Upload selected** to send them to Noktura. Uploads use the router's mobile data, so nothing is ever uploaded automatically. **Delete selected** removes the ticked sessions from the OWLs after a confirmation, usually once they are uploaded. A session that is still recording, uploading or waiting for Noktura is never deleted.
+- *Sessions and upload*: the sessions on each OWL with size and the number of photos and video clips; tick and tap **Upload selected** to send them to Noktura. Uploads use the router's mobile data, so nothing is ever uploaded automatically. Noktura sends one session at a time per rig and each row shows where it is: *Waiting (2 of 5)*, the percentage sent, *Signal dropped, carrying on*, *Sent*, or *Not sent after 3 tries* (tap to try again). Uploads go in small pieces, so a dropped mobile connection only re-sends the piece it was on. Video clips are kept in Noktura as files to download (about 150 MB per minute of video). **Delete selected** removes the ticked sessions from the OWLs after a confirmation, usually once they are uploaded. A session that is still recording, uploading or waiting for Noktura is never deleted.
 - *Capture*: still images or video clips (up to 60 s), spacing by distance (every X m from GPS speed, every Y s without GPS, nothing while parked) or by time, JPEG quality, the blur limit, and **Limit shutter time for speed**, which shortens the shutter as you drive faster and raises the gain instead. It switches itself off whenever GPS speed is missing. Saved as `[Collect]` keys in `CONTROLLER.ini` and pushed to every OWL.
 - *Camera* (all OWLs at once): resolution, brightness, white balance with **Calibrate white balance**, gain limit and rotation. Resolution and rotation restart the OWLs.
 - *Noktura*: connection status and **Connect** (below).
