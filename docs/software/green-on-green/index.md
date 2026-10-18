@@ -44,7 +44,8 @@ installed, and `null` when the unit has no AI. While it is `null`, the dashboard
 with a plain reason instead of selecting a mode the OWL cannot run.
 
 **Install AI from the dashboard or phone app.** `POST /api/ai/install` runs a normal software update at the
-branch the OWL is on and also installs `requirements-gog.txt`. It needs an internet connection (a phone hotspot
+branch the OWL is on and also installs `requirements-gog.txt`, which takes CPU-only PyTorch from the PyTorch CPU
+index (the PyPI build for 64-bit ARM brings the full NVIDIA CUDA stack, several GB the Pi cannot use). It needs an internet connection (a phone hotspot
 works) and about 3 GB of free space, and can take 20 minutes or more on a Pi. Progress is the ordinary update
 progress (`GET /api/settings/update/status` on a standalone OWL, `GET /api/update/status` on the networked
 controller). On the networked controller the same route takes `{"device_ids": ["owl-1"]}` or `"all"`. If the
