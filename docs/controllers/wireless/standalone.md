@@ -249,7 +249,9 @@ non-interactively for a production unit (standalone mode, hotspot `OWL-XXXX`
 derived from the Pi serial, on-board nRF9151 GPS, first-boot armed). It
 refuses to start unless the unit already has its hardware identity
 (`sudo bash owl_identity.sh --otp`). It is for units leaving the factory:
-building your own OWL, run `bash owl_setup.sh` with no options. The old
+building your own OWL, run `bash owl_setup.sh` with no options. Add
+`--country CC` (for example `--country AU`) to set the Wi-Fi country; factory
+units without it use the world setting. The old
 `--ship` and `--ship-gps` flags were removed in v3.19.0. `setup.sh` also accepts flags for scripted
 installs: `--mode standalone --owl-id N --ssid SSID --password PSK
 [--arm-firstboot] [--yes]`.
