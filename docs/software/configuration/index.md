@@ -268,6 +268,10 @@ speed_avg_window = 2.0
 # section restores legacy behaviour; re-running first-boot setup mints
 # a fresh token.
 device_token = <minted-at-provisioning>
+
+[Support]
+# Where Save logs addresses its email (optional; default support@noktura.tech)
+email = support@noktura.tech
 ```
 
 ## Parameter Reference — GENERAL_CONFIG.ini
@@ -558,6 +562,14 @@ preview and delete recorded sessions, update the software to a release tag (`vX.
 branch), download and select a detection model, restart the OWL service and reboot. Nothing else
 from the cloud runs: no detection toggles, no configuration edits, no branch installs. The local broker itself listens on
 loopback only (v3.18+): the phone app and kiosk reach the OWL through HTTPS, never MQTT.
+
+### Support
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `email` | `support@noktura.tech` | Where the phone app's **Save logs** addresses its email (the farmer can still send it anywhere). A dealer can set their own address. Optional; kept when `controller/shared/setup.sh` is re-run. |
+
+Save logs never includes `[Security]`, `[Farm]` or the Cloud credentials: `CONTROLLER.ini` goes into the bundle by section allowlist (MQTT, WebDashboard, Network, GPS, Actuation, Coverage, Collect, Fleet, Support, and `[Cloud]` `enable` / `broker_host` only).
 
 ---
 

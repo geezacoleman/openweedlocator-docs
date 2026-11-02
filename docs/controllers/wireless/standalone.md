@@ -81,6 +81,8 @@ Confirm and save this password? (y/n): y
 | Hotspot SSID | OWL-XXXX | WiFi network name others will see. The default is derived from the Pi's hardware serial (last 4 characters), so every unit gets a unique name — two OWLs broadcasting the same SSID cannot be told apart by the phone app |
 | Hotspot Password | (none) | Minimum 8 characters |
 
+The hotspot always uses WPA2 on 2.4 GHz channel 6, with Wi-Fi power saving off. Channel 6 is allowed in every country. WPA3 is switched off on purpose, because the Raspberry Pi's Wi-Fi chip cannot run a WPA3 hotspot reliably and phones would fail to join. OWLs set up with an older version get the same settings automatically the next time the dashboard starts, and they take effect after the next reboot. To use a different channel, set it by hand (`sudo nmcli con modify OWL-XXXX 802-11-wireless.channel 1`) and the OWL will keep it.
+
 ### Review and confirm
 
 Check the configuration summary and confirm:
@@ -202,6 +204,13 @@ units — the script is idempotent. Units without them return
 `503 Device settings permissions not installed` from those routes (the time
 sync route returns 503 with a re-run-setup hint).
 
+The same step installs `/etc/sudoers.d/95-owl-nmcli-quiet`
+(`Defaults!/usr/bin/nmcli !log_allowed`): sudo logs every command line it runs,
+and `nmcli` gets Wi-Fi and hotspot passwords as arguments, so without it the
+passwords end up in the journal. The file is checked with `visudo -c` first; a
+sudo too old for the option skips it with a warning. Save logs redacts these
+lines either way.
+
 v3.15 adds a software-update step: `/etc/sudoers.d/96-owl-update` lets the
 dashboard launch `owl_update.sh` in a transient `systemd-run` unit, and the
 service-control alias gains `systemctl restart owl-dash.service` so the
@@ -319,7 +328,7 @@ The **power button** offers **Shut down**, **Restart** and **Stop detection** (o
 | Profiles | The running profile, switch profile, save as a new profile, reload, reset to default |
 | Test nozzles | **Hold to spray** (every nozzle while you hold, stops after 10 s) and **Blanket spray**, plus the spray timing readout |
 | Noktura | The cloud link status, the Noktura address and a QR code |
-| Maintenance | Software update, fan (Auto or full speed), the cab switch setting for a UTE controller, messages, restart detection, download logs, USB drives and the file browser, reset network setup |
+| Maintenance | Software update, fan (Auto or full speed), the cab switch setting for a UTE controller, messages, restart detection, save logs (a support bundle with passwords, keys and GPS positions removed), USB drives and the file browser, reset network setup |
 | Advanced | The full INI editor and the AI assistant |
 
 On a phone, Settings is a list; tap a row to open its page and **Settings** at the top to go back.

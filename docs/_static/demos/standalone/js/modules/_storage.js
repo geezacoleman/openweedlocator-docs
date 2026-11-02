@@ -246,17 +246,9 @@ function downloadFile(filePath) {
 }
 
 /**
- * Download logs
+ * Save logs (demo: the real OWL builds a redacted support bundle)
  */
 function downloadLogs() {
-    showNotification('Info', 'Downloading logs...', 'info');
-
-    const link = document.createElement('a');
-    link.href = '/api/download_logs';
-    link.download = `owl_logs_${new Date().toISOString().split('T')[0]}.zip`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showNotification('Success', 'Log download started', 'success');
+    showNotification('Info', 'On a real OWL, Save logs downloads a support bundle '
+        + 'with passwords, keys and GPS positions removed.', 'info');
 }

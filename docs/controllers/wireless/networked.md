@@ -49,7 +49,7 @@ Faults, speed warnings, a refused recording, a cab switch on an OWL or a needed 
 | Spraying | Speed-adaptive timing: speed, frame rate and spray-time gauges, spray length, crop buffer and AI confidence, and the computed spray time and delay |
 | Test nozzles | **Hold to spray** (stops after 10 s) and **Blanket spray** |
 | Noktura | The cloud link status and how to connect |
-| Maintenance | Each OWL's version, temperature and load with **Restart**, **Update OWLs**, fix screen, restart controller and the model library |
+| Maintenance | Each OWL's version, temperature and load with **Restart**, **Update OWLs**, fix screen, restart controller and the model library. Controller logs for support are saved from the phone app: open the rig, then **Save controller logs** |
 | Advanced | The per-OWL INI editor and the AI assistant |
 
 The **power button** turns off every OWL and the controller after a confirmation with a 3 second countdown. Wait 30 seconds after the screen goes dark before you switch off the power.
@@ -633,7 +633,9 @@ same sudoers alias so the app can correct the clock on RTC-less units
 app's Maintenance card uses to update the OWL and bring the new dashboard
 up. Re-running `controller/shared/setup.sh` on an
 already-deployed OWL is the supported way to add these to older units — the
-script is idempotent.
+script is idempotent. It also installs `/etc/sudoers.d/95-owl-nmcli-quiet`
+(`Defaults!/usr/bin/nmcli !log_allowed`), which keeps the Wi-Fi passwords
+`nmcli` is given out of the journal (checked with `visudo -c` first).
 
 </details>
 
