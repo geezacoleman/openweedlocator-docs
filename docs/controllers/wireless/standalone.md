@@ -83,6 +83,24 @@ Confirm and save this password? (y/n): y
 
 The hotspot always uses WPA2 on 2.4 GHz channel 6, with Wi-Fi power saving off. Channel 6 is allowed in every country. WPA3 is switched off on purpose, because the Raspberry Pi's Wi-Fi chip cannot run a WPA3 hotspot reliably and phones would fail to join. OWLs set up with an older version get the same settings automatically the next time the dashboard starts, and they take effect after the next reboot. To use a different channel, set it by hand (`sudo nmcli con modify OWL-XXXX 802-11-wireless.channel 1`) and the OWL will keep it.
 
+The hotspot also has autoconnect priority 10. That puts it ahead of Wi-Fi entered in Raspberry Pi Imager when the OWL boots, and behind networks you join from the OWL app.
+
+### Wi-Fi fallback
+
+An OWL must never end up with no network and no way to reach it. Whenever it is joined to another network (your phone's hotspot for a software update, farm Wi-Fi, or a rig) and that network goes away, it brings its own hotspot back:
+
+- **After about 30 seconds** without a network, the OWL hotspot comes back up.
+- **Saved networks are tried again.** While nobody is connected to the OWL hotspot, every 2 to 3 minutes the OWL tries the farm or rig network it was joined to. If it is not there, the hotspot comes straight back. A phone connected to the hotspot pauses these tries.
+- **Your phone's hotspot is never rejoined.** "Internet via phone" sessions are one-off; start a new one from the app.
+
+This runs as its own service (`owl-net-watchdog`), so it works even if the dashboard has stopped. The setup script installs it on every standalone OWL (`[OK] Wi-Fi fallback installed`). OWLs installed before v3.26.1 need it installed once:
+
+```bash
+sudo bash ~/owl/controller/setup/install_firstboot.sh --net-watchdog
+```
+
+To see what it is doing, run `journalctl -u owl-net-watchdog -f`. To pause it while you change networks by hand, run `sudo systemctl stop owl-net-watchdog`; it starts again on the next boot.
+
 ### Review and confirm
 
 Check the configuration summary and confirm:
@@ -429,7 +447,10 @@ nmcli con show --active
 sudo nmcli con up "OWL-4B7D"
 
 # Check all services are running
-sudo systemctl status owl-dash nginx mosquitto
+sudo systemctl status owl-dash nginx mosquitto owl-net-watchdog
+
+# Why did the hotspot come back (or not)?
+journalctl -u owl-net-watchdog -n 50
 
 # Restart everything
 sudo systemctl restart NetworkManager
@@ -478,6 +499,7 @@ The setup script writes these automatically — you should not need to edit them
 | `owl-dash` | Dashboard web application |
 | `mosquitto` | MQTT message broker |
 | `nginx` | Web server (SSL, video proxy) |
+| `owl-net-watchdog` | Wi-Fi fallback: brings the hotspot back when the OWL has no network |
 
 Common commands:
 

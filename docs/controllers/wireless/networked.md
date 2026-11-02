@@ -544,6 +544,10 @@ Select connection type (1 or 2, default: 1): 1
 **WiFi vs Ethernet:** Most setups use WiFi. Choose Ethernet if you've run a network cable directly to the OWL — this skips the WiFi credentials and uses the wired connection instead.
 ```
 
+```{note}
+**Wi-Fi fallback:** OWLs set up here in networked mode have no hotspot of their own, so if the rig network drops they wait for it to come back. OWLs set up as standalone and then joined to the rig from the OWL app keep their hotspot: when the rig network goes away (controller switched off) they bring their hotspot back after about 30 seconds, and rejoin the rig network within 2 to 3 minutes of it returning. See [Wi-Fi fallback](standalone.md#wi-fi-fallback).
+```
+
 ### Enter network settings
 
 Enter the details for this OWL. Use the IP addresses you planned earlier.
@@ -840,6 +844,9 @@ sudo nmcli con up "FarmNetwork"
 
 # Restart the network service
 sudo systemctl restart NetworkManager
+
+# App-joined OWLs: why the hotspot came back instead of the rig network
+journalctl -u owl-net-watchdog -n 50
 ```
 
 If the OWL has the wrong IP address, re-run the network setup:
