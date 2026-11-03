@@ -846,7 +846,7 @@ sudo nmcli con up "FarmNetwork"
 sudo systemctl restart NetworkManager
 
 # App-joined OWLs: why the hotspot came back instead of the rig network
-journalctl -u owl-net-watchdog -n 50
+journalctl -u owl.service | grep -i "hotspot\|saved network"
 ```
 
 If the OWL has the wrong IP address, re-run the network setup:

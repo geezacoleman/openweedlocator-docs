@@ -93,13 +93,9 @@ An OWL must never end up with no network and no way to reach it. Whenever it is 
 - **Saved networks are tried again.** While nobody is connected to the OWL hotspot, every 2 to 3 minutes the OWL tries the farm or rig network it was joined to. If it is not there, the hotspot comes straight back. A phone connected to the hotspot pauses these tries.
 - **Your phone's hotspot is never rejoined.** "Internet via phone" sessions are one-off; start a new one from the app.
 
-This runs as its own service (`owl-net-watchdog`), so it works even if the dashboard has stopped. The setup script installs it on every standalone OWL (`[OK] Wi-Fi fallback installed`). OWLs installed before v3.26.1 need it installed once:
+This runs inside the detection service (`owl.service`), not the dashboard, so it works even if the dashboard has stopped. It arrives with a normal software update from the OWL app (v3.26.3 and later); there is nothing to install. Stopping `owl.service` stops it too.
 
-```bash
-sudo bash ~/owl/controller/setup/install_firstboot.sh --net-watchdog
-```
-
-To see what it is doing, run `journalctl -u owl-net-watchdog -f`. To pause it while you change networks by hand, run `sudo systemctl stop owl-net-watchdog`; it starts again on the next boot.
+To see what it is doing, run `journalctl -u owl.service | grep -i hotspot`.
 
 ### Review and confirm
 
@@ -447,10 +443,10 @@ nmcli con show --active
 sudo nmcli con up "OWL-4B7D"
 
 # Check all services are running
-sudo systemctl status owl-dash nginx mosquitto owl-net-watchdog
+sudo systemctl status owl-dash nginx mosquitto
 
 # Why did the hotspot come back (or not)?
-journalctl -u owl-net-watchdog -n 50
+journalctl -u owl.service | grep -i "hotspot\|no network"
 
 # Restart everything
 sudo systemctl restart NetworkManager
@@ -495,11 +491,10 @@ The setup script writes these automatically — you should not need to edit them
 
 | Service | Purpose |
 |---------|---------|
-| `owl.service` | Weed detection and camera |
+| `owl.service` | Weed detection and camera; also brings the hotspot back when the OWL has no network |
 | `owl-dash` | Dashboard web application |
 | `mosquitto` | MQTT message broker |
 | `nginx` | Web server (SSL, video proxy) |
-| `owl-net-watchdog` | Wi-Fi fallback: brings the hotspot back when the OWL has no network |
 
 Common commands:
 
