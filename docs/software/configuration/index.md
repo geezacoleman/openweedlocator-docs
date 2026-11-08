@@ -288,7 +288,11 @@ email = support@noktura.tech
 | `actuation_top` | `0.0` | Top of the **actuation band** as a fraction of the cropped height (`0.0` = top of crop). A weed fires its relay only while its centre is inside the band. Raise this to ignore weeds too far ahead. |
 | `actuation_bottom` | `1.0` | Bottom of the actuation band as a fraction of the cropped height (`1.0` = bottom of crop). Lower this to ignore weeds too close (where the solenoid can't react in time). |
 | `actuation_zone` | `100` | **Legacy** bottom-anchored zone (% from bottom). Used only if `actuation_top`/`actuation_bottom` are absent (then `actuation_top = 1 - actuation_zone/100`, `actuation_bottom = 1.0`). Prefer the band keys above. |
-| `on_error` | `off` | What the nozzles do on a spraying fault: the camera stops sending frames, dashboard and switch control stops updating, or a relay is stuck on. `off` turns detection off and all nozzles off. `on` blanket sprays while spraying is switched on, if detection can no longer run (camera lost); otherwise spot spraying continues. Either way the fault shows on the dashboard, the phone app and the status LED. |
+| `on_error` | `off` | What the nozzles do on a spraying fault: the camera stops sending frames for more than 1 s, dashboard and switch control or the detection loop stops responding, or a relay is stuck on. `off` turns all nozzles off. `on` blanket sprays while spraying is switched on, if detection can no longer run (camera lost); otherwise spot spraying continues. Either way the fault shows on the dashboard, the phone app and the status LED, and spraying never restarts by itself afterwards: press Start (or switch on again). A lost camera is re-opened every 5 s; with `off`, the OWL restarts itself after 3 failed attempts. On a networked OWL that loses its controller for 5 s, spot spraying always continues; blanket spraying stops with `off` and keeps going with `on`. |
+
+The full rules, and why the OWL does not simply turn everything off, are in [How the OWL decides to spray](../spray-behaviour.md).
+
+**Hardware switch and the dashboard.** A Ute or Advanced spray switch set to off always wins, including over blanket spraying chosen on the dashboard. While it is on, the dashboard can choose spot, blanket or off. Hold to spray and the nozzle test still work with the switch off: each is limited to 10 s, and hold to spray stops by itself 1.5 s after the screen stops renewing it, so a phone that walks out of range cannot leave the nozzles on.
 
 **Status LED fault codes.** The status LED flashes a code, repeated, while a fault or error is active:
 
@@ -301,6 +305,8 @@ email = support@noktura.tech
 | 5 | Storage full or storage error |
 | 6 | No USB drive for recording, or the drive was removed |
 | 7 | A relay is stuck on (spraying fault) |
+| 8 | Networked OWL lost contact with its controller |
+| 9 | Spraying was stopped (setup finished, a fault cleared, contact lost) and the spray switch is still on: switch it off and on again to spray |
 
 ### Controller
 

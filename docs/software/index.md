@@ -9,6 +9,7 @@
 two-step-install
 detailed-install
 configuration/index
+spray-behaviour
 image-metadata
 green-on-green/index
 agent/index

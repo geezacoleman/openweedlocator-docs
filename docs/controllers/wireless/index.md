@@ -47,7 +47,11 @@ Wireless control can be used alongside [wired controllers](../wired/index.md).
 ```{important}
 **Hardware takes precedence.**
 
-When both wired and wireless controllers are active, physical switch inputs from wired controllers override wireless/dashboard commands. This ensures reliable operation if network connectivity is lost.
+When both wired and wireless controllers are active, a spray switch set to off always wins: no dashboard command can spray, blanket spraying included. Switching it on starts spot spraying, and while it is on the dashboard can choose spot, blanket or off. Hold to spray and the nozzle test still work with the switch off (each is limited to 10 s).
+```
+
+```{note}
+**Spraying never restarts by itself.** See [How the OWL decides to spray](../../software/spray-behaviour.md) for the full rules. When the OWL stops spraying because of setup, a switch set to off, a fault with `on_error = off`, or (networked) a lost controller during blanket spraying, it forgets the request. The dashboard and the app say why, for example "Spraying stopped: camera fault. Press Start to spray again."
 ```
 
 ### Example: Standalone + Ute Controller
@@ -99,6 +103,8 @@ Both standalone and networked modes use MQTT for communication between the OWL a
 | `owl/cloud/{device_id}/commands` | Networked: commands from Noktura for one OWL, delivered through the controller's cloud bridge. Only an allowlist is acted on (list, upload, preview and delete sessions, update to a release tag, download and select a model, restart, reboot). Kept separate from `owl/{device_id}/commands` so the cloud never gets full control |
 | `owl/cloud_commands` | Standalone: the same inbound cloud commands and allowlist, through the OWL's own bridge |
 | `owl/cloud/policy` | Retained, from the controller: the Noktura upload host networked OWLs pin uploads to |
+
+**Spray commands and state (v3.27).** On `owl/{device_id}/commands`: `set_detection_enable` (spot on or off), `set_detection_mode` (0 spot, 1 off, 2 blanket), `test_nozzles` and `hold_spray` (`value`: a lease in ms up to 1500; the OWL turns every nozzle off by itself 1.5 s after the last renew, 0 releases). The OWL decides and reports on `owl/{device_id}/state`: `spray` (`request`, `source`, `requested_at`, `effective`, `reason`, `reason_text`, `since`) and `faults` (every active fault, most urgent first). `detection_enable`, `detection_mode` and `fault` are kept for older dashboards.
 
 ### Testing MQTT
 

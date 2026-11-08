@@ -936,6 +936,8 @@ Each OWL publishes to device-specific topics. Replace `{id}` with the device ID 
 | `owl/cloud/{id}/commands` | Commands from Noktura for one OWL, delivered through the controller's cloud bridge. The OWL only acts on an allowlist (list, upload, preview and delete sessions, update to a release tag, download and select a model, restart, reboot); they never reach `owl/{id}/commands` |
 | `owl/cloud/owl-controller/commands` | Noktura's replies to upload requests (`upload_request_ack`), delivered through the cloud bridge |
 
+**Spraying on a rig (v3.27).** Every OWL follows what the controller screen shows. The controller re-sends an OWL's spray state at most every 4 s when it reports something else (a command lost on a weak link, an OWL that rebooted), and marks it "Not responding to commands" after 3 tries. When an OWL stops spraying by itself (setup, its own switch off, a fault, losing the controller during blanket spraying) the screen follows the OWL and shows why, so spraying never restarts without someone pressing Start. Stop all also clears any per-OWL choice, including for OWLs that are offline at the time. Hold to spray uses the `hold_spray` command, renewed every second; OWLs older than 3.27 get blanket on and off instead. An OWL that hears nothing from the controller for 5 s raises a `link_lost` fault (LED code 8): spot spraying continues, blanket spraying stops with `on_error = off`.
+
 The controller also exposes these HTTP endpoints for the dashboard:
 
 | Endpoint | Returns |
