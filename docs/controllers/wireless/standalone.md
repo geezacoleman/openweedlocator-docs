@@ -340,7 +340,7 @@ The **power button** offers **Shut down**, **Restart** and **Stop detection** (o
 | Camera | White balance (Auto, Sun, Locked by calibration), brightness, crop and spray zone, picture size and rotation (these two restart the OWL program) |
 | Data collection | The capture settings described below, and tagging photos with the screen's location |
 | Profiles | The running profile, switch profile, save as a new profile, reload, reset to default |
-| Test nozzles | **Hold to spray** (every nozzle while you hold, stops after 10 s) and **Blanket spray**, plus the spray timing readout |
+| Test nozzles | **Hold to spray** (every nozzle while you hold) and **Blanket spray**, plus the spray timing readout |
 | Noktura | The cloud link status, the Noktura address and a QR code |
 | Maintenance | Software update, fan (Auto or full speed), the cab switch setting for a UTE controller, messages, restart detection, save logs (a support bundle with passwords, keys and GPS positions removed), USB drives and the file browser, reset network setup |
 | Advanced | The full INI editor and the AI assistant |

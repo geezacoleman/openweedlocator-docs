@@ -47,7 +47,7 @@ Faults, speed warnings, a refused recording, a cab switch on an OWL or a needed 
 | Data collection | The capture settings of the Collect screen |
 | Profiles | Saved profiles: load on the OWLs, use on startup, delete, save as new |
 | Spraying | Speed-adaptive timing: speed, frame rate and spray-time gauges, spray length, crop buffer and AI confidence, and the computed spray time and delay |
-| Test nozzles | **Hold to spray** (stops after 10 s) and **Blanket spray** |
+| Test nozzles | **Hold to spray** (every nozzle while you hold) and **Blanket spray** |
 | Noktura | The cloud link status and how to connect |
 | Maintenance | Each OWL's version, temperature and load with **Restart**, **Update OWLs**, fix screen, restart controller and the model library. Controller logs for support are saved from the phone app: open the rig, then **Save controller logs** |
 | Advanced | The per-OWL INI editor and the AI assistant |

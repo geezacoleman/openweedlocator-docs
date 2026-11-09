@@ -292,7 +292,7 @@ email = support@noktura.tech
 
 The full rules, and why the OWL does not simply turn everything off, are in [How the OWL decides to spray](../spray-behaviour.md).
 
-**Hardware switch and the dashboard.** A Ute or Advanced spray switch set to off always wins, including over blanket spraying chosen on the dashboard. While it is on, the dashboard can choose spot, blanket or off. Hold to spray and the nozzle test still work with the switch off: each is limited to 10 s, and hold to spray stops by itself 1.5 s after the screen stops renewing it, so a phone that walks out of range cannot leave the nozzles on.
+**Hardware switch and the dashboard.** A Ute or Advanced spray switch set to off always wins, including over blanket spraying chosen on the dashboard. While it is on, the dashboard can choose spot, blanket or off. Hold to spray and the nozzle test still work with the switch off. Hold to spray lasts as long as it is held and stops by itself 1.5 s after the screen stops renewing it, so a phone that walks out of range cannot leave the nozzles on.
 
 **Status LED fault codes.** The status LED flashes a code, repeated, while a fault or error is active:
 

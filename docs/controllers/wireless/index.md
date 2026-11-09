@@ -47,7 +47,7 @@ Wireless control can be used alongside [wired controllers](../wired/index.md).
 ```{important}
 **Hardware takes precedence.**
 
-When both wired and wireless controllers are active, a spray switch set to off always wins: no dashboard command can spray, blanket spraying included. Switching it on starts spot spraying, and while it is on the dashboard can choose spot, blanket or off. Hold to spray and the nozzle test still work with the switch off (each is limited to 10 s).
+When both wired and wireless controllers are active, a spray switch set to off always wins: no dashboard command can spray, blanket spraying included. Switching it on starts spot spraying, and while it is on the dashboard can choose spot, blanket or off. Hold to spray and the nozzle test still work with the switch off. Hold to spray lasts as long as it is held; a nozzle test is limited to 10 s.
 ```
 
 ```{note}

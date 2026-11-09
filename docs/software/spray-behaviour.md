@@ -24,13 +24,13 @@ The fault always shows on the status LED, the dashboards and the phone app, whic
 - A Ute or Advanced spray switch set to **off** always wins. No dashboard, app or controller command can spray, and that includes blanket spraying.
 - Switching it **on** starts spot spraying. While it is on, the dashboard or app can choose spot, blanket or off.
 - A Ute switch that is on at power-up sprays.
-- **Hold to spray** and the **nozzle test** still work with the switch off. Each is limited to 10 s.
+- **Hold to spray** and the **nozzle test** still work with the switch off. Hold to spray sprays for as long as it is held; a nozzle test runs for the time it asks for (10 s at most).
 
 ### 3. A standalone OWL and its phone
 
 The phone or tablet is a remote, not a lifeline. If it leaves, goes to sleep or switches to another app, nothing changes: the OWL carries on with what it was doing.
 
-The one exception is hold to spray. It is a lease held by the OWL. The screen renews it every second, and the OWL turns the nozzles off by itself 1.5 s after the last renew, and after 10 s at most. A phone that walks out of range in the middle of a hold cannot leave the nozzles on.
+The one exception is hold to spray. It is a lease held by the OWL. The screen renews it every second, and the OWL turns the nozzles off by itself 1.5 s after the last renew. There is no time limit while it is held. A phone that walks out of range in the middle of a hold cannot leave the nozzles on.
 
 ### 4. A networked OWL and its controller
 
@@ -52,7 +52,11 @@ The OWL forgets a spray request whenever something stops spraying:
 
 A person has to press Start, or flip the switch, to spray again. The dashboards and the app say why spraying stopped, for example "Spraying stopped: camera fault. Press Start to spray again." In a cab with no screen, a Ute or Advanced status LED flashes code 9 while the spray switch is still on after such a stop: switch it off and on again to spray. A fault's own code flashes first. A request made during first-boot setup is refused, not saved for later.
 
-### 6. Shutdown and crashes
+### 6. No maximum on-time
+
+A nozzle that is spraying stays on for as long as the reason to spray lasts: a run of dense weeds holds a spot nozzle open, blanket spraying runs until someone stops it, and hold to spray lasts as long as it is held. Nothing switches a nozzle off just because it has been on for a while: in the field a limit like that showed up as nozzles cutting out at set intervals. Only a nozzle test, which asks for a set time, has a limit (10 s).
+
+### 7. Shutdown and crashes
 
 - On a normal stop the nozzles go off first, before anything slow.
 - After any exit (including a crash or `kill -9`), `owl.service` drives the relay pins it used low (`ExecStopPost`, `tools/relays_off.py`). Units installed before 3.27 get this the next time `owl_setup.sh` runs.
@@ -68,7 +72,7 @@ When several things apply at once, the first one in this list decides:
 5. A fault that stops detection, with `on_error = on`, while spraying is asked for: blanket
 6. Otherwise: what the operator asked for (off, spot or blanket)
 
-Hold to spray and the nozzle test are not in this list. They are time-limited tests that run on top of it, and they stop for first-boot and for faults while `on_error = off`.
+Hold to spray and the nozzle test are not in this list. They run on top of it (hold to spray while held, a nozzle test for its set time), and they stop for first-boot and for faults while `on_error = off`.
 
 ## For developers
 
