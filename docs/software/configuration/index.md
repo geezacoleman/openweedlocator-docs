@@ -354,6 +354,12 @@ changes a unit's geometry, and geometry is never copied into named configs. Set
 it with the dashboard's **Adjust geometry** editor (which writes `GEOMETRY.ini`)
 or by editing `GEOMETRY.ini` by hand. The keys are documented in the `[Camera]`
 and `[System]` tables for reference.
+
+Factory-built units (`owl_setup.sh --factory`) start with their own
+`GEOMETRY.ini` at a 10% crop on every edge (`0.1`, from
+`GEOMETRY_TEMPLATE.ini`), which trims the edge artefacts and vignetting of the
+2.8 mm lens. An OWL with no `GEOMETRY.ini` keeps the `0.02` in the active
+config, so an update never moves the crop of a unit already in the field.
 ```
 
 #### Setting the resolution
