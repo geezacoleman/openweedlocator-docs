@@ -19,7 +19,7 @@ The OWL runs YOLO inference natively on the Raspberry Pi via NCNN. The Google Co
 documentation referenced is no longer recommended — it has been superseded by the Raspberry Pi AI Hat+, which is the
 current recommended accelerator for in-field Green-on-Green deployments.
 
-**Recommended:** Raspberry Pi AI Hat+. The Waveshare variant is widely available — [Waveshare AI Hat+](https://www.waveshare.com/raspberry-pi-ai-hat-plus.htm?sku=29050) — and other Hailo-based AI Hat+ variants from different vendors work the same way. Higher-compute variants cost more but let you run larger inference image sizes, which is worth it if you need higher accuracy on smaller targets.
+**Recommended:** a Hailo AI accelerator on a Raspberry Pi 5 or Compute Module 5. The OWL runs AI on the Hailo-8 (26 TOPS: AI HAT+ 26T, M.2 modules, OWL CM5 units) and the Hailo-8L (13 TOPS: Raspberry Pi AI Kit, AI HAT+ 13T). The Waveshare variant of the AI HAT+ is widely available — [Waveshare AI Hat+](https://www.waveshare.com/raspberry-pi-ai-hat-plus.htm?sku=29050) — and other Hailo-8/8L boards work the same way. The Hailo-8 runs larger models faster. The Hailo-10H (AI HAT+ 2) is not supported yet: it needs a different runtime, and AI runs on the CPU instead. See [Hailo AI accelerators](#hailo-ai-accelerators).
 
 **Without an accelerator:** the Pi can run smaller NCNN models on CPU only. That works for testing and low-resolution
 inference, but the AI Hat+ is what unlocks larger image sizes and the frame rates needed for boom-speed operation.
@@ -39,8 +39,8 @@ Every OWL reports what AI it can run in its state and in the standalone `/api/sy
 }
 ```
 
-`accelerator` is `hailo8` when a Hailo-8 card and its runtime are both present, `cpu` when only ultralytics is
-installed, and `null` when the unit has no AI. While it is `null`, the dashboards refuse the AI and Hybrid modes
+`accelerator` is `hailo8` or `hailo8l` when that Hailo card, its runtime and ultralytics are all present, `cpu`
+when only ultralytics is installed, and `null` when the unit has no AI. While it is `null`, the dashboards refuse the AI and Hybrid modes
 with a plain reason instead of selecting a mode the OWL cannot run.
 
 **Install AI from the dashboard or phone app.** `POST /api/ai/install` runs a normal software update at the
@@ -61,9 +61,13 @@ bash ~/owl/owl_update.sh --with-ai
 
 Choosing AI is only saved once the OWL reports the model running. If it cannot load (no AI installed, no model,
 a damaged model), the OWL keeps detecting with its previous mode, and `algorithm_error` in the state says why.
-An OWL that starts up with `algorithm = gog` or `gog-hybrid` in its config and cannot load the model falls back
-to `exhsv` colour detection, so a unit is never left without detection after a restart. The config file is not
-changed, so the unit runs AI again once the problem is fixed.
+
+**AI never falls back to colour detection.** Colour detection only finds green, so in a crop it would spray the
+crop. An OWL that starts up with `algorithm = gog` or `gog-hybrid` and cannot load any version of its model raises
+the `ai_unavailable` spraying fault. If AI stops while running, the OWL retries a Hailo, then runs the model's CPU
+version if it has one, and otherwise raises `ai_lost`. Both faults follow your `on_error` setting: see
+[How the OWL decides to spray](../spray-behaviour.md). The config file is not changed, so the unit runs AI again
+once the problem is fixed.
 
 ## Detection Modes
 
@@ -89,12 +93,36 @@ Set the mode with the `actuation_mode` key in `[GreenOnGreen]`.
 
 ## Model Management
 
+### How the models folder works
+
+Everything in `~/owl/models/` that shares a base name is one model. Each file or folder is one version (a
+"build") of it, and the OWL picks the build to run:
+
+```
+models/
+  weeds-v3.pt                  CPU version (PyTorch)
+  weeds-v3_ncnn_model/         CPU version (NCNN: .param + .bin)
+  weeds-v3_h8_hailo_model/     Hailo-8 version (an Ultralytics Hailo export: .hef + metadata.yaml)
+  weeds-v3_h8l_hailo_model/    Hailo-8L version
+  weeds-v3.json                optional: {"classes": ["ryegrass", "wheat"], "run_on": "auto"}
+```
+
+- The dashboards show one entry, `weeds-v3`, with where it runs.
+- On a Hailo-8 the Hailo-8 version runs. A Hailo-8L version also runs there. On a Hailo-8L only the Hailo-8L version
+  runs. Anything else runs on the CPU (NCNN first, then `.pt`).
+- The OWL reads which chip a Hailo file was built for from the file itself, not from its name.
+- A bare `.hef` (from your own Hailo compiler or the Hailo Model Zoo) works too. The OWL moves it into a
+  `<name>_hailo_model/` folder with the class names it finds: the `.json`, then a same-named NCNN or `.pt` version.
+  With none, it uses `class 0`, `class 1`... and every class is sprayed until you add the `.json`.
+- `run_on` (`auto`, `hailo` or `cpu`) can be set per model in its `.json`, or for all models under `[GreenOnGreen]`.
+
 ### Placing models manually
 
 Copy model files to `~/owl/models/` on the Raspberry Pi:
 
 - **NCNN**: A directory containing a `.param` and `.bin` file pair
 - **PyTorch**: A single `.pt` file
+- **Hailo**: an Ultralytics `<name>_hailo_model/` folder, or a `.hef` file
 
 ```bash
 # Example: copy an NCNN model
@@ -106,14 +134,20 @@ scp -r my_model_ncnn/ owl@owl.local:~/owl/models/
 The networked controller includes a model management page for uploading and deploying models wirelessly:
 
 1. Open the controller's `/models` page from a laptop browser
-2. Upload a `.pt` file or `.zip` containing NCNN `.param` + `.bin` files
-3. Select target OWL devices
-4. Click Deploy — the model is transferred to each OWL over the network
+2. Upload a `.pt` file, a `.zip` of an NCNN or Hailo model folder, a `.hef`, or a `.json` of class names.
+   Files with the same base name group into one model.
+3. Click Deploy and select the OWLs. Each one shows what it will get, for example "Hailo-8 version + CPU version",
+   "CPU version" or "not enough space".
+4. Click Deploy. Each OWL gets the Hailo version for its chip, plus the CPU version as a fallback, in one download.
 
 Each OWL checks the download's SHA-256 before it touches the model it already has. For an NCNN zip it checks
 the zip file first (the hash Noktura sends), then the extracted files (the hash the controller sends). A zip
 whose files sit in one top-level folder is unpacked without that folder. If the check or the unpacking fails,
 the previous model stays in place and `model_download` in the state reports the error.
+
+A standalone OWL (and the phone app) has **Add a model** on the AI models page for the same files. A Hailo version
+that the OWL's chip can't run is refused. Models may use up to `model_storage_gb` (3 GB by default). A download or
+upload over that, or one that would eat into the recording space (`min_free_gb`), is refused before it starts.
 
 ### Hot-swap via AI tab
 
@@ -123,6 +157,58 @@ The dashboard AI tab lets you switch between models without restarting:
 2. Select a model from the dropdown — shows model type (detection/segmentation), format, and size
 3. Filter which classes to detect using the class button grid
 4. Click **Apply** to hot-swap the model
+
+## Hailo AI accelerators
+
+**Setting one up.** `owl_setup.sh` sets up a Hailo by itself when it finds one on PCIe. That covers a CM5 carrier,
+or a Pi 5 HAT that has an EEPROM such as the AI Kit or the AI HAT+. A Pi 5 M.2 HAT without an EEPROM needs
+`--hailo`. On an OWL that is already set up, use **Set up Hailo** on the AI models page, or run
+`bash ~/owl/owl_update.sh --with-hailo`.
+
+The set-up:
+
+- switches PCIe on, staying at Gen 2
+- adds `pcie_aspm=off`
+- installs `hailo-all`
+- patches and rebuilds the Hailo 4.23 driver: it fails every streaming transfer on kernel 6.18
+- holds the Hailo packages so an upgrade can't undo the patch
+- installs Ultralytics
+- reboots
+
+After the reboot, `sudo bash ~/owl/tools/hailo_setup.sh --check` proves the unit. It checks the card, the driver,
+the firmware, and runs the benchmark three times.
+
+**Rules for every build:**
+
+- **Heatsink.** A heatsink on the Hailo is required.
+- **PCIe speed.** Gen 2 is the default. Try Gen 3 only once the check passes at Gen 2, and run the check again after.
+- **Hailo-10H.** It needs HailoRT 5.x, which can't share an image with the 4.x runtime the 8 and 8L use, so it isn't
+  set up.
+
+**Making a Hailo version of a model.** Export your trained YOLO model with Ultralytics on an x86 Linux PC with
+Hailo's Dataflow Compiler installed:
+
+```bash
+yolo export model=best.pt format=hailo name=hailo8l imgsz=640 data=my_dataset.yaml conf=0.1
+```
+
+- **`name=hailo8l`** runs on both the Hailo-8 and the Hailo-8L. **`name=hailo8`** runs faster on a Hailo-8, but not
+  at all on an 8L.
+- **`data=`** should point at images from your own fields: the compiler uses them to calibrate the model.
+- **`conf=`** is the confidence cut-off built into the chip's box filter. Detections below it never reach the OWL, so the
+  OWL's confidence setting can only raise it. Set it low (0.1); the default is 0.25.
+- **On the PC:** Linux x86-64 with Hailo's Dataflow Compiler 3.x (a free Hailo Developer Zone account). Version 3.33
+  matches the OWL's HailoRT 4.23. Ultralytics Platform also offers a hosted Hailo export.
+- **Output.** The export is a `best_hailo_model/` folder. Rename it to `<model name>_hailo_model` (or zip it and
+  upload it), and put it next to the model's `.pt` or NCNN version so the OWL has a CPU fallback.
+
+**If the Hailo stops** in the field (a driver fault, a loose card, overheating):
+
+1. The OWL re-opens it 3 times.
+2. If that fails, it runs the same model on the CPU with an amber warning and **Try the Hailo again**.
+3. With no CPU version, it raises the `ai_lost` fault.
+
+See [If AI cannot load](#if-ai-cannot-load).
 
 ## Weed Tracking
 

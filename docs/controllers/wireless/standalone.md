@@ -234,6 +234,14 @@ reset network setup, factory reset of detection settings). Without the rule,
 `POST /api/settings/update/start` returns
 `503 Software update permissions not installed`.
 
+v3.29 adds a Set up Hailo step: a root-owned copy of the Hailo set-up script in
+`/usr/local/lib/owl/` and `/etc/sudoers.d/94-owl-hailo`, which allows only
+that copy, with no arguments. **Set up Hailo** on the AI models page
+(`POST /api/ai/setup_hailo`) runs `owl_update.sh --with-hailo`: the update, AI,
+the Hailo driver and runtime, then a reboot. `owl_setup.sh` sets up a Hailo by
+itself when it finds one on PCIe (`--no-hailo` skips it, `--hailo` forces it for
+a Pi 5 M.2 HAT without an EEPROM).
+
 </details>
 
 In standalone mode the script then installs the Noktura cloud helper, so the

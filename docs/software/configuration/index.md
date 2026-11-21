@@ -136,6 +136,8 @@ actuation_mode = centre
 min_detection_pixels = 50
 inference_resolution = 320
 crop_buffer_px = 20
+run_on = auto
+model_storage_gb = 3
 
 [GreenOnBrown]
 exg_min = 25
@@ -307,6 +309,7 @@ The full rules, and why the OWL does not simply turn everything off, are in [How
 | 7 | A relay is stuck on (spraying fault) |
 | 8 | Networked OWL lost contact with its controller |
 | 9 | Spraying was stopped (setup finished, a fault cleared, contact lost) and the spray switch is still on: switch it off and on again to spray |
+| 10 | AI detection stopped or could not start (spraying fault), or AI is running on the CPU because the Hailo stopped (a warning) |
 
 ### Controller
 
@@ -398,13 +401,15 @@ The Pi 5 is not affected by the clamp.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `model_path` | `models` | Directory containing YOLO model files (NCNN or PyTorch). |
+| `model_path` | `models` | The folder of AI models, or one model by name (`models/weeds-v3`). With the folder, a model with a Hailo version for this OWL's Hailo starts first, otherwise the first NCNN, then the first `.pt` by name. See [Hailo accelerators](../green-on-green/index.md#hailo-ai-accelerators). |
 | `confidence` | `0.5` | Minimum confidence threshold for detections (0.0-1.0). |
 | `detect_classes` | *(empty)* | Comma-separated class IDs to detect. Empty means all classes. |
 | `actuation_mode` | `centre` | How detections map to relays: `centre` (bounding box centre) or `zone` (segmentation mask pixel count, requires seg model). |
 | `min_detection_pixels` | `50` | Minimum pixel count for valid segmentation detections (zone mode). |
 | `inference_resolution` | `320` | Input image size for YOLO inference. Smaller is faster, larger is more accurate. |
 | `crop_buffer_px` | `20` | Pixel buffer added around crop mask regions (gog-hybrid mode). |
+| `run_on` | `auto` | Where AI runs: `auto` (a Hailo version on the Hailo, otherwise the CPU version), `hailo` or `cpu`. A model's own `models/<name>.json` `run_on` wins over this. |
+| `model_storage_gb` | `3` | Space `models/` may use, in GB. A download or upload over it is refused. Raise it on a unit with a large SD card or USB drive. |
 
 ### GreenOnBrown
 

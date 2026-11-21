@@ -640,6 +640,13 @@ already-deployed OWL is the supported way to add these to older units — the
 script is idempotent. It also installs `/etc/sudoers.d/95-owl-nmcli-quiet`
 (`Defaults!/usr/bin/nmcli !log_allowed`), which keeps the Wi-Fi passwords
 `nmcli` is given out of the journal (checked with `visudo -c` first).
+v3.29 adds Set up Hailo: a root-owned copy of `tools/hailo_setup.sh` and
+`tools/patch_hailo_dkms.sh` in `/usr/local/lib/owl/`, and
+`/etc/sudoers.d/94-owl-hailo`, which allows exactly
+`/usr/local/lib/owl/hailo_setup.sh` with no arguments. sudo never runs the
+repo copy, which the OWL user can write. `owl_update.sh --with-hailo` (the
+dashboard's and app's Set up Hailo) runs it, then reboots. Re-run this script
+to refresh the copy after the Hailo set-up changes.
 
 </details>
 

@@ -10,14 +10,27 @@ From version 3.27 the OWL decides what its nozzles do in one place, using fixed 
 
 ### 1. Faults follow `on_error`
 
-`[System] on_error` in the configuration is the farmer's choice. It applies to every spraying fault: the camera stops sending frames for more than 1 s, dashboard and switch control or the detection loop stops responding, or a relay is stuck on.
+`[System] on_error` in the configuration is the farmer's choice. It applies to every spraying fault:
 
-| `on_error` | Detection can still run (for example a stuck relay) | Detection cannot run (camera lost) |
+- the camera stops sending frames for more than 1 s
+- dashboard and switch control, or the detection loop, stops responding
+- a relay is stuck on
+- AI detection stops or can't start (see below)
+
+| `on_error` | Detection can still run (for example a stuck relay) | Detection cannot run (camera lost, AI stopped) |
 |------------|------------------------------------------------------|------------------------------------|
 | `off` (default) | All nozzles off | All nozzles off |
 | `on` | Spot spraying continues | Blanket spray while spraying is switched on |
 
 The fault always shows on the status LED, the dashboards and the phone app, whichever value is chosen. A lost camera is re-opened every 5 s. With `on`, spot spraying returns by itself when frames come back. With `off`, the OWL restarts itself after 3 failed attempts.
+
+**AI never falls back to colour detection.** Colour detection only finds green, so in a crop it would spray the crop. When AI detection (`gog` or `gog-hybrid`) can't run, the OWL tries the following, in order:
+
+1. **Retry the Hailo.** If the model runs on a Hailo accelerator, the OWL re-opens it 3 times, 2 s apart. Spraying carries on with no new detections meanwhile.
+2. **Use the CPU version.** If the same model also has a CPU version (`.pt` or NCNN), it runs on the CPU. This is slower, so drive slower. The dashboards and the app show an amber "AI is running on the CPU" warning with **Try the Hailo again**. A Ute or Advanced status LED flashes code 10 and the buzzer beeps 3 times. This is a warning, not a fault: spot spraying continues.
+3. **Fault.** If there is no CPU version, or it won't load either, the OWL raises the `ai_lost` fault. At start-up, when no version of the model loads at all, it raises `ai_unavailable`. Both follow `on_error` like a lost camera, and both flash status LED code 10. The fault clears when AI runs again: try the Hailo again, choose another model, or switch detection mode. Spraying doesn't come back by itself (rule 4).
+
+A painted profile (`lut`) that won't load still falls back to colour detection, as before.
 
 ### 2. The hardware switch against the screen
 
